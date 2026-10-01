@@ -1,0 +1,165 @@
+@use "sass:color";
+@use "variables";
+
+/*-----------------
+	Global design system
+
+	The single token configuration for the whole template. Bootstrap's custom
+	properties are the public API; `utils/_variables.scss` holds the PreSkool
+	brand values that fill them. Nothing is duplicated: every colour below
+	references the brand variable rather than restating a hex, so changing the
+	brand in one place changes Bootstrap, the components and every module.
+
+	No module may declare its own palette. If a genuinely new token is needed,
+	it is added here, generically named, and inherited by everything.
+-----------------*/
+:root {
+	/* brand + status colours — Bootstrap's slots, PreSkool's identity */
+	--bs-primary: #{variables.$primary};
+	--bs-primary-rgb: #{color.channel(variables.$primary, "red")}, #{color.channel(variables.$primary, "green")}, #{color.channel(variables.$primary, "blue")};
+	--bs-secondary: #{variables.$secondary};
+	--bs-secondary-rgb: #{color.channel(variables.$secondary, "red")}, #{color.channel(variables.$secondary, "green")}, #{color.channel(variables.$secondary, "blue")};
+	--bs-success: #{variables.$success};
+	--bs-success-rgb: #{color.channel(variables.$success, "red")}, #{color.channel(variables.$success, "green")}, #{color.channel(variables.$success, "blue")};
+	--bs-warning: #{variables.$warning};
+	--bs-warning-rgb: #{color.channel(variables.$warning, "red")}, #{color.channel(variables.$warning, "green")}, #{color.channel(variables.$warning, "blue")};
+	--bs-danger: #{variables.$danger};
+	--bs-danger-rgb: #{color.channel(variables.$danger, "red")}, #{color.channel(variables.$danger, "green")}, #{color.channel(variables.$danger, "blue")};
+	--bs-info: #{variables.$info};
+	--bs-info-rgb: #{color.channel(variables.$info, "red")}, #{color.channel(variables.$info, "green")}, #{color.channel(variables.$info, "blue")};
+	--bs-light: #{variables.$light};
+	--bs-dark: #{variables.$dark};
+
+	/* surfaces */
+	--bs-body-bg: #{variables.$body-bg};
+	--bs-secondary-bg: #{variables.$light-300};
+	--bs-tertiary-bg: #{variables.$light-500};
+	--bs-card-bg: var(--surface);
+
+	/* ink */
+	--bs-body-color: #{variables.$text-color};
+	--bs-emphasis-color: #{variables.$title-color};
+	--bs-heading-color: var(--bs-emphasis-color);
+	--bs-secondary-color: #{variables.$text-muted};
+	--bs-tertiary-color: #{variables.$gray-500};
+
+	/* borders */
+	--bs-border-color: #{variables.$border-color};
+
+	/* accent tints — one alpha for every family, derived from the brand
+	   colours so a tinted chip always matches its solid counterpart */
+	--tint-primary: #{color.change(variables.$primary, $alpha: 0.12)};
+	--tint-secondary: #{color.change(variables.$secondary, $alpha: 0.12)};
+	--tint-success: #{color.change(variables.$success, $alpha: 0.12)};
+	--tint-warning: #{color.change(variables.$warning, $alpha: 0.12)};
+	--tint-danger: #{color.change(variables.$danger, $alpha: 0.12)};
+	--tint-info: #{color.change(variables.$info, $alpha: 0.12)};
+	--tint-purple: #{color.change(variables.$purple, $alpha: 0.12)};
+	--tint-teal: #{color.change(variables.$teal, $alpha: 0.12)};
+	--tint-pink: #{color.change(variables.$pink, $alpha: 0.12)};
+
+	/* extended accents Bootstrap has no slot for */
+	--accent-purple: #{variables.$purple};
+	--accent-teal: #{variables.$teal};
+	--accent-pink: #{variables.$pink};
+	--accent-indigo: #{variables.$indigo};
+
+	/* per-instance accent, set by the `.accent-*` modifiers */
+	--accent: var(--bs-primary);
+	--accent-soft: var(--tint-primary);
+	--accent-strong: var(--bs-primary);
+
+	/* component radii — Bootstrap's `.rounded-*` scale stays untouched, so
+	   these drive only the template's own components */
+	--radius: 16px;
+	--radius-sm: 12px;
+	--radius-xs: 9px;
+
+	/* promoted from the former _ui-tokens.scss: a stronger border for dashed
+	   drop targets, a neutral track for meters, and the mono stack for keys */
+	--border-strong: #{variables.$light-800};
+	--track: #{variables.$light-700};
+	--font-mono: "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", monospace;
+
+	/* elevation + motion */
+	--shadow: 0 1px 2px rgba(16, 24, 40, .04);
+	--shadow-lift: 0 14px 34px -14px rgba(16, 24, 40, .22);
+	--transition: .2s cubic-bezier(.4, 0, .2, 1);
+
+	/*----- neutral component ramp -----
+
+	  Promoted here from the former dashboard-widgets module, which declared its
+	  own palette against the rule stated above. The values are carried over
+	  unchanged so every consuming component renders exactly as before; only
+	  their ownership moved. In dark mode these already resolve to the same
+	  values as the `--bs-*` surfaces below.
+
+	  These are a cooler, flatter ramp than the brand tokens and read as the
+	  template's "quiet" surface set. Where a value was already identical to a
+	  global token it was dropped rather than restated: the widget radius is
+	  plain `--radius`. */
+	--surface: #ffffff;
+	--surface-soft: #f6f7fb;
+	--border-soft: #e7eaf1;
+	--muted: #6b7280;
+	--heading: #111827;
+	--radius-list: 11px;
+
+	--tone-brand-soft: rgba(61, 94, 225, .10);
+	--tone-success: #16a34a; --tone-success-soft: rgba(22, 163, 74, .12);
+	--tone-warning: #d97706; --tone-warning-soft: rgba(217, 119, 6, .12);
+	--tone-danger: #dc2626; --tone-danger-soft: rgba(220, 38, 38, .12);
+	--tone-info: #0891b2; --tone-info-soft: rgba(8, 145, 178, .12);
+	--tone-purple: #7b61ff; --tone-purple-soft: rgba(123, 97, 255, .12);
+	--tone-pink: #db2777; --tone-pink-soft: rgba(219, 39, 119, .12);
+	--tone-teal: #0d9488; --tone-teal-soft: rgba(13, 148, 136, .12);
+
+	--shadow-card: 0 1px 2px rgba(15, 23, 42, .04), 0 6px 16px -8px rgba(15, 23, 42, .12);
+	--shadow-card-lift: 0 12px 30px -12px rgba(15, 23, 42, .28);
+	--transition-card: .22s cubic-bezier(.4, 0, .2, 1);
+
+	/* component-local track/hover/border defaults — aliased to the tokens
+	   above rather than restating raw values, so gauges, meters, data lists
+	   and activity feeds inherit dark mode instead of staying light-only */
+	--gauge-track: var(--track);
+	--meter-track: var(--track);
+	--data-list-border: var(--border-soft);
+	--data-list-hover: var(--tone-brand-soft);
+	--activity-feed-rail: var(--border-soft);
+	--activity-feed-hover: var(--tone-brand-soft);
+	--dt-surface-alt: var(--surface-soft);
+}
+
+[data-bs-theme="dark"],
+[data-theme="dark"] {
+	--bs-body-bg: #1a1d29;
+	--bs-secondary-bg: #171a24;
+	--bs-tertiary-bg: #1c1e25;
+	--bs-emphasis-color: #f1f5f9;
+	--bs-secondary-color: #94a3b8;
+	--bs-tertiary-color: #6b7280;
+	--bs-border-color: #2a2f3e;
+	--bs-primary-bg-subtle: var(--tone-brand-soft);
+
+	/* Bootstrap's rgba()-built utilities (.bg-body-tertiary, .bg-body-secondary,
+	   .text-bg-*, etc.) read the *-rgb channel twin of each token above, not
+	   the hex itself. Bootstrap ships its own dark values for these but keys
+	   them to [data-bs-theme=dark], which this project never sets — so
+	   without this block they silently stay pinned to the light channels. */
+	--bs-body-bg-rgb: #{color.channel(#1a1d29, "red")}, #{color.channel(#1a1d29, "green")}, #{color.channel(#1a1d29, "blue")};
+	--bs-secondary-bg-rgb: #{color.channel(#171a24, "red")}, #{color.channel(#171a24, "green")}, #{color.channel(#171a24, "blue")};
+	--bs-tertiary-bg-rgb: #{color.channel(#1c1e25, "red")}, #{color.channel(#1c1e25, "green")}, #{color.channel(#1c1e25, "blue")};
+	--bs-emphasis-color-rgb: #{color.channel(#f1f5f9, "red")}, #{color.channel(#f1f5f9, "green")}, #{color.channel(#f1f5f9, "blue")};
+	--shadow: 0 1px 2px rgba(0, 0, 0, .3);
+	--shadow-lift: 0 14px 34px rgba(0, 0, 0, .4);
+	--border-strong: rgba(255, 255, 255, .2);
+	--track: rgba(255, 255, 255, .1);
+
+	/* the neutral ramp's dark values — identical to the `--bs-*` surfaces above,
+	   which is why the two sets can finally share one definition */
+	--surface: #1a1d29;
+	--surface-soft: #171a24;
+	--border-soft: #2a2f3e;
+	--muted: #94a3b8;
+	--heading: #f1f5f9;
+}

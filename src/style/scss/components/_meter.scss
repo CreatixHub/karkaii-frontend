@@ -1,0 +1,103 @@
+@use "../utils/variables";
+
+/*-----------------
+    Meter
+
+    A slim proportion bar. Bootstrap's `.progress` expects a `.progress-bar`
+    child and carries chart-sized defaults; `.meter` is the hairline version
+    used inside list rows and ranking tables, and it accepts either one fill
+    or several segments.
+
+        <div class="meter">
+            <span class="bg-primary" style="width:72%"></span>
+        </div>
+
+        <div class="meter meter-lg meter-segmented">
+            <span class="bg-success" style="width:56%"></span>
+            <span class="bg-warning" style="width:24%"></span>
+        </div>
+-----------------*/
+.meter {
+    display: flex;
+    height: var(--meter-height, 0.375rem);
+    border-radius: 50rem;
+    background: var(--meter-track, #{variables.$light});
+    overflow: hidden;
+
+    > span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--meter-fill, #{variables.$primary});
+        transition: width 0.3s ease;
+    }
+
+    /*----- heights -----*/
+    &.meter-xs { --meter-height: 0.25rem; }
+
+    &.meter-lg { --meter-height: 0.625rem; }
+
+    &.meter-xl { --meter-height: 0.5rem; }
+
+    /*----- butted segments rather than one rounded fill -----*/
+    &.meter-segmented {
+        border-radius: variables.$border-radius-lg;
+
+        > span { border-radius: 0; }
+    }
+
+    /*----- a projected / not-yet-real value: striped fill at reduced opacity
+            so a forecast reads differently from a recorded figure -----*/
+    &.meter-dashed > span {
+        opacity: 0.55;
+        background-image: linear-gradient(
+            45deg,
+            rgba(255, 255, 255, 0.45) 25%, transparent 25%,
+            transparent 50%, rgba(255, 255, 255, 0.45) 50%,
+            rgba(255, 255, 255, 0.45) 75%, transparent 75%, transparent
+        );
+        background-size: 0.5rem 0.5rem;
+    }
+}
+
+/*-----------------
+    Benchmark marker
+
+    A hairline dropped onto the track at a reference value — a class average, a
+    target, last period's figure — so a row shows both where it stands and what
+    it is being measured against.
+
+        <div class="meter meter-success">
+            <span style="width:94%"></span>
+            <i class="meter-marker" style="left:82%"></i>
+        </div>
+
+    The meter becomes the marker's containing block, so `left` is a plain
+    percentage of the track.
+-----------------*/
+.meter {
+    position: relative;
+
+    .meter-marker {
+        position: absolute;
+        top: -2px;
+        bottom: -2px;
+        width: 2px;
+        border-radius: 1px;
+        background: var(--meter-marker, #{variables.$gray-700});
+        transition: left 0.3s ease;
+    }
+}
+
+/*-----------------
+    Meter tones — the fill colour, applied to the track rather than each span
+-----------------*/
+.meter-primary { --meter-fill: #{variables.$primary}; }
+.meter-secondary { --meter-fill: #{variables.$secondary}; }
+.meter-success { --meter-fill: #{variables.$success}; }
+.meter-info { --meter-fill: #{variables.$info}; }
+.meter-warning { --meter-fill: #{variables.$warning}; }
+.meter-danger { --meter-fill: #{variables.$danger}; }
+.meter-purple { --meter-fill: #{variables.$purple}; }
+.meter-pink { --meter-fill: #{variables.$pink}; }
+.meter-dark { --meter-fill: #{variables.$dark}; }

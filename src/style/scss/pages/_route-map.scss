@@ -1,0 +1,120 @@
+@use "../utils/variables";
+
+/*-----------------
+    Route map
+
+    A schematic live-tracking map: a street grid, the planned route, the
+    portion already covered, the stops along it, and a vehicle that animates
+    from one end to the other. Drawn entirely in SVG so it needs no map tiles
+    and no plugin.
+
+        <div class="route-map">
+            <svg class="route-map-canvas" viewBox="0 0 640 240">
+                <g class="route-map-grid">…</g>
+                <path id="busPath" class="route-map-line" d="…"></path>
+                <path class="route-map-line is-covered" d="…"></path>
+                <g class="route-map-stop is-done"><circle …><text …></g>
+                <g class="route-map-vehicle">…</g>
+            </svg>
+            <span class="route-map-badge">…</span>
+        </div>
+
+    Stops take `.is-done` for ones already served and `.is-next` for the one
+    being approached; everything else reads as still ahead.
+-----------------*/
+.route-map {
+    position: relative;
+    border: 1px solid variables.$light-900;
+    border-radius: variables.$border-radius-xl;
+    background: var(--route-map-surface, #{variables.$light});
+    overflow: hidden;
+}
+
+.route-map-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/*----- the street grid the route is laid over -----*/
+.route-map-grid path {
+    fill: none;
+    stroke: var(--route-map-grid, rgba(61, 94, 225, 0.14));
+    stroke-width: 1;
+}
+
+/*----- the route itself, and the stretch already covered -----*/
+.route-map-line {
+    fill: none;
+    stroke: var(--route-map-track, #{variables.$light-900});
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+
+    &.is-covered {
+        stroke: var(--route-map-covered, #{variables.$success});
+    }
+}
+
+/*-----------------
+    Stops
+
+    A circle on the line with its name set beneath. The three states are told
+    apart by fill rather than by size, so the line keeps an even rhythm.
+-----------------*/
+.route-map-stop {
+    circle {
+        fill: variables.$white;
+        stroke: var(--route-map-track, #{variables.$light-900});
+        stroke-width: 3;
+    }
+
+    text {
+        fill: variables.$gray-600;
+        font-size: 12px;
+        font-weight: variables.$font-weight-semibold;
+        text-anchor: middle;
+    }
+
+    &.is-done circle {
+        fill: variables.$success;
+        stroke: variables.$success;
+    }
+
+    &.is-next circle {
+        fill: variables.$primary;
+        stroke: variables.$primary;
+    }
+
+    &.is-next text {
+        fill: variables.$primary;
+    }
+}
+
+/*----- the vehicle riding the route -----*/
+.route-map-vehicle {
+    circle {
+        fill: variables.$primary;
+    }
+
+    text {
+        font-size: 15px;
+        text-anchor: middle;
+    }
+}
+
+/*----- "live · updated just now", pinned to a corner of the map -----*/
+.route-map-badge {
+    position: absolute;
+    inset-block-start: 0.625rem;
+    inset-inline-end: 0.625rem;
+}
+
+[data-theme="dark"] .route-map,
+[data-bs-theme="dark"] .route-map {
+    --route-map-surface: #{variables.$dark};
+    --route-map-grid: rgba(255, 255, 255, 0.08);
+    --route-map-track: var(--border-strong);
+
+    .route-map-stop circle { fill: variables.$dark; }
+}

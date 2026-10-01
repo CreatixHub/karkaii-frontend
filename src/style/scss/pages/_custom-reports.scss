@@ -1,0 +1,86 @@
+@use "../utils/variables";
+
+/*-----------------
+    Custom Reports — builder workspace
+
+    Only what the shared shared workspace and data-table components cannot already express:
+    the skeleton's column track (it has to line up with this table's twelve
+    columns) and the density steps for `.data-table`, which the base component
+    defines for `table.record-grid-table` alone.
+
+    Everything else on the page — toolbar, summary strip, pills, context menu,
+    empty state, shimmer — comes from the shared components untouched.
+-----------------*/
+.crw {
+
+	/* The shared component only ever turns the live view ON
+	   (`.is-loaded .live-content { display: block }`); it never turns it off, and
+	   `.live-content` is a plain div, so without this it paints before the reveal
+	   and the skeleton stacks under real content. `:not()` un-matches itself
+	   once loaded, so nothing can be left stranded hidden. */
+	&:not(.is-loaded) .live-content { display: none; }
+
+	/*----- skeleton geometry -----*/
+
+	/* Column track follows the live header: chevron, checkbox, report name,
+	   module, category, owner, generated, schedule, format, visibility,
+	   status, actions. Placeholder and loaded rows then occupy the same
+	   width and nothing shifts sideways on reveal. */
+	.skeleton-row {
+		grid-template-columns:
+			34px 30px minmax(200px, 1.6fr) 110px 96px minmax(130px, 1fr)
+			110px 104px 96px 96px 96px 150px;
+		gap: 12px;
+		padding: 10px 12px;
+
+		&:last-child { border-bottom: 0; }
+	}
+
+	/* stands in for the sticky table head: same track, tinted band */
+	.skeleton-thead {
+		padding: 14px 12px;
+		background: var(--dt-surface-alt, #{variables.$light-300});
+	}
+
+	.skeleton-head { height: 9px; width: 68%; border-radius: 4px; }
+	.skeleton-head-end { margin-left: auto; width: 46px; }
+
+	.skeleton-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+	.skeleton-stack { flex: 1; min-width: 0; }
+	.skeleton-stack .skeleton-line + .skeleton-line { margin-top: 5px; }
+
+	.skeleton-chev { width: 24px; height: 24px; border-radius: 7px; }
+	.skeleton-check { width: 18px; height: 18px; border-radius: 5px; }
+	.skeleton-avatar { width: 38px; height: 38px; border-radius: 10px; }
+	.skeleton-circle { width: 26px; height: 26px; }
+	.skeleton-line { height: 10px; }
+	.skeleton-thin { height: 8px; width: 65%; }
+	.skeleton-pill { height: 20px; width: 66px; }
+
+	/* stands in for the summary strip above the grid */
+	.skeleton-sum { height: 58px; border-radius: 10px; }
+
+	/* stands in for the pagination footer: info left, rows select and pager right */
+	.skeleton-foot {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 10px;
+		padding: 12px 16px;
+	}
+
+	.skeleton-foot-info { width: 220px; height: 10px; }
+	.skeleton-foot-size { width: 84px; height: 30px; border-radius: 8px; margin-left: auto; }
+	.skeleton-pager { display: flex; gap: 3px; }
+	.skeleton-page { width: 30px; height: 30px; border-radius: 8px; }
+
+	/*----- density -----*/
+
+	/* The base component sizes `table.record-grid-table`; this grid is a `.data-table`,
+	   so the three steps are restated against its own cell padding. */
+	&[data-density="compact"] .data-table > table > tbody > tr > td { padding: 6px 12px; }
+	&[data-density="comfortable"] .data-table > table > tbody > tr > td { padding: 16px 12px; }
+
+	/* the detail panel supplies its own padding, so density must not add to it */
+	.data-table > table > tbody > tr.dt-detail > td { padding: 0 !important; }
+}

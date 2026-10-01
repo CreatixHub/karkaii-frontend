@@ -1,0 +1,25 @@
+/*-----------------
+    Dashboard Classcard
+
+    The "My Classes" widget: a grid of class cards, each with a tinted
+    gradient header, a three-up stats row and an action bar. Reads the
+    `--dash-*` tokens from the `.dashboard` root; the accent utilities
+    (`.accent-*`) drive the per-card tint through the shell's bridge.
+-----------------*/
+
+/*----- my classes -----*/
+.classcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.classcard { border: 1px solid var(--bs-border-color); border-radius: var(--radius); background: var(--bs-body-bg); overflow: hidden; transition: transform var(--transition), box-shadow var(--transition); }
+.classcard:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+.classcard-top { display: flex; align-items: center; gap: 11px; padding: 14px; background: linear-gradient(120deg, var(--tint-primary), transparent); }
+.classcard-top b { display: block; font-size: 14px; color: var(--bs-emphasis-color); }
+.classcard-top span { font-size: 11px; color: var(--bs-secondary-color); }
+.classcard-badge { margin-left: auto; align-self: flex-start; }
+.classcard-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 14px; }
+.classcard-stat b { display: block; font-size: 15px; font-weight: 800; color: var(--bs-emphasis-color); }
+.classcard-stat span { font-size: 10px; color: var(--bs-secondary-color); }
+.classcard-actions { display: flex; gap: 6px; padding: 0 14px 14px; }
+.classcard-actions .btn { flex: 1; }
+
+@media (max-width: 1199px) { .classcards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 767px) { .classcards { grid-template-columns: 1fr; } }

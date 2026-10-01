@@ -1,0 +1,11 @@
+/*-----------------
+	Percentage width helpers
+
+	Fill widths for meters, coverage bars and progress rails. One shared set
+	replaces the three identical per-family loops that used to generate
+	`alx-w-*`, `cmx-w-*` and `cfx-w-*`. Named `width-*` rather than `w-*` so
+	they cannot collide with Bootstrap's own `.w-25/50/75/100`.
+-----------------*/
+@each $step in (4, 8, 12, 16, 18, 20, 24, 28, 30, 32, 36, 38, 40, 44, 48, 52, 56, 58, 60, 64, 68, 72, 76, 78, 80, 84, 86, 88, 92, 96, 100) {
+	.width-#{$step} { width: #{$step}#{"%"}; }
+}

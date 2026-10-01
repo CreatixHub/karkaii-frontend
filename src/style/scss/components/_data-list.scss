@@ -1,0 +1,322 @@
+@use "../utils/variables";
+
+/*-----------------
+    Data list
+
+    The repeating row that makes up most dashboard panels: an avatar or icon
+    tile, a body that flexes, and a trailing value or badge.
+
+        <div class="data-list-item">
+            <span class="avatar avatar-icon avatar-md bg-primary-transparent">…</span>
+            <div class="data-list-body">
+                <div class="data-list-title">Route 01 · North</div>
+                <div class="data-list-subtitle">Downtown Ave · 34 km/h</div>
+            </div>
+            <span class="badge badge-soft-success">On route</span>
+        </div>
+
+    Rows divide themselves, so they need no wrapper. Add `.data-list` to a
+    surrounding element only when you want the whole list to share a density,
+    a hover state, or the boxed-card treatment.
+-----------------*/
+.data-list-item {
+    display: flex;
+    align-items: center;
+    gap: var(--data-list-gap, 0.6rem);
+    padding: var(--data-list-padding-y, 0.5rem) var(--data-list-padding-x, 0);
+    position: relative;
+    transition: background 0.15s ease;
+
+    + .data-list-item {
+        border-top: 1px solid var(--data-list-border, #{variables.$border-color});
+    }
+
+    /*----- rows whose content stacks rather than centring -----*/
+    &.data-list-item-top { align-items: flex-start; }
+
+    /*----- unread / attention state, marked with an edge rule -----*/
+    &.is-unread {
+        background: var(--data-list-hover, #{variables.$primary-transparent});
+
+        &::before {
+            content: "";
+            position: absolute;
+            inset-inline-start: 0;
+            inset-block: 0;
+            width: 3px;
+            background: variables.$primary;
+        }
+    }
+}
+
+/*----- the parts of a row -----*/
+.data-list-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.data-list-title {
+    font-size: 0.8125rem;
+    font-weight: variables.$font-weight-semibold;
+    color: variables.$gray-900;
+    line-height: 1.3;
+    margin: 0;
+
+    // a title that opens with an icon spaces itself, so the markup never has
+    // to carry a margin utility on the icon
+    &:has(> i:first-child) {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+}
+
+.data-list-subtitle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: variables.$gray-600;
+    margin: 0;
+}
+
+.data-list-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.2rem;
+}
+
+.data-list-end {
+    flex-shrink: 0;
+    text-align: end;
+    min-width: 0;
+
+    // a meter in the trailing column tracks the figure above it rather than
+    // stretching to whatever width the column happens to have
+    .meter {
+        width: var(--data-list-meter-width, 4.125rem);
+        margin-inline-start: auto;
+        margin-block-start: 0.3125rem;
+    }
+}
+
+/*-----------------
+    List header and footer
+
+    A summary or link row that closes a list. It reads the list's own
+    horizontal padding, so it always lines up with the rows above it rather
+    than guessing at a matching `px-*` utility.
+-----------------*/
+.data-list-header,
+.data-list-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem var(--data-list-padding-x, 0);
+}
+
+.data-list-footer { border-top: 1px solid var(--data-list-border, #{variables.$border-color}); }
+
+.data-list-header { border-bottom: 1px solid var(--data-list-border, #{variables.$border-color}); }
+
+/*-----------------
+    List-level options
+-----------------*/
+.data-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    /*----- row density -----*/
+    &.data-list-sm { --data-list-padding-y: 0.28rem; --data-list-gap: 0.5rem; }
+
+    &.data-list-lg { --data-list-padding-y: 0.7rem; --data-list-gap: 0.7rem; }
+
+    /*----- rows that span the full width of a card with no body padding -----*/
+    &.data-list-inset {
+        --data-list-padding-x: 1.35rem;
+        --data-list-padding-y: 0.7rem;
+    }
+
+    /*----- dashed rather than solid dividers -----*/
+    &.data-list-dashed .data-list-item + .data-list-item {
+        border-top-style: dashed;
+    }
+
+    /*----- highlight the row under the pointer -----*/
+    &.data-list-hover .data-list-item:hover {
+        background: var(--data-list-hover, #{variables.$primary-transparent});
+    }
+
+    /*----- separate bordered cards instead of divided rows -----*/
+    &.data-list-cards {
+        .data-list-item {
+            padding: 0.6rem 0.7rem;
+            border: 1px solid var(--data-list-border, #{variables.$border-color});
+            border-radius: variables.$border-radius-xl;
+
+            + .data-list-item { margin-top: 0.55rem; }
+        }
+
+        /* accent rule down the leading edge, coloured by the same token the
+           row's icon tile uses so the two always agree */
+        &.data-list-cards-accent .data-list-item {
+            border-inline-start: 3px solid var(--avatar-accent, #{variables.$primary});
+        }
+
+        &.data-list-hover .data-list-item:hover {
+            background: transparent;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.07);
+        }
+    }
+}
+
+/*-----------------
+    Ranking index — the position number that opens a leaderboard row
+-----------------*/
+.data-list-index {
+    flex-shrink: 0;
+    width: 1.25rem;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: variables.$gray-500;
+
+    // the leading places are picked out in the accent colour
+    .data-list-item.is-top & { color: variables.$primary; }
+
+}
+
+/*-----------------
+    Hover actions
+
+    Row controls that stay out of the way until the row is pointed at. They
+    remain visible to keyboard users and on touch, where there is no hover.
+-----------------*/
+.data-list-item .hover-actions {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.data-list-item:hover .hover-actions,
+.data-list-item:focus-within .hover-actions {
+    opacity: 1;
+}
+
+@media (hover: none) {
+    .data-list-item .hover-actions { opacity: 1; }
+}
+
+
+/*-----------------
+	Dashboard widgets — merged in from the former
+	components/_ui-dashboard-widgets.scss. These are generic, reusable
+	components; they live with their own kind rather than in a page-shaped file.
+-----------------*/
+/* ---------- TIMETABLE ---------- */
+.lesson-list { gap: 10px; }
+.lesson-item { display: grid; grid-template-columns: 78px 1fr auto; gap: 12px; padding: 12px; border: 1px solid var(--border-soft); border-radius: var(--radius-list); background: var(--surface); border-left-width: 3px; transition: transform var(--transition-card), box-shadow var(--transition-card); }
+.lesson-item:hover { transform: translateX(3px); box-shadow: var(--shadow-card); }
+/* .lesson-time — all declarations now Bootstrap utilities in the markup */
+.lesson-time b { display: block; font-size: 13px; font-weight: 800; color: var(--heading); }
+.lesson-time span { font-size: 10px; color: var(--muted); }
+.lesson-body b { font-size: 13.5px; color: var(--heading); }
+.lesson-tags { gap: 5px; margin-top: 4px; }
+.lesson-tag { font-size: 10.5px; color: var(--muted); gap: 3px; }
+.lesson-tag i { font-size: 12px; }
+.lesson-actions { gap: 6px; }
+@media (max-width: 575px) {
+	.lesson-item { grid-template-columns: 60px 1fr; }
+	.lesson-actions { grid-column: 1 / -1; }
+}
+/* list rows (assignments, insights, messages, notifications, activity) */
+.info-list { gap: 9px; }
+.info-list-item { gap: 11px; padding: 11px 12px; border: 1px solid var(--border-soft); border-radius: var(--radius-list); background: var(--surface); transition: transform var(--transition-card), box-shadow var(--transition-card); }
+.info-list-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+.info-list-icon { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-size: 18px; }
+.info-list-item-sm { padding: 9px; }
+.info-list-item-sm .info-list-icon { width: 30px; height: 30px; border-radius: 9px; font-size: 15px; }
+.info-list-avatar { width: 38px; height: 38px; border-radius: 11px; }
+.info-list-body { flex: 1; min-width: 0; }
+.info-list-body b { display: block; font-size: 13px; color: var(--heading); }
+.info-list-body span { font-size: 11.5px; color: var(--muted); }
+.info-list-body .un { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.info-list-end { font-size: 11px; color: var(--muted); gap: 4px; }
+.insight-badge { gap: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--tone-purple); background: var(--tone-purple-soft); padding: 3px 9px; border-radius: 999px; }
+.insight-score { gap: 14px; padding: 14px; border-radius: var(--radius-list); background: var(--surface); border: 1px solid var(--border-soft); margin-bottom: 12px; }
+.insight-score .tx b { font-size: 15px; color: var(--heading); }
+.insight-score .tx p { margin: 2px 0 0; font-size: 11.5px; color: var(--muted); }
+.insight-item { gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
+.insight-item:last-child { border-bottom: 0; }
+.insight-item .ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-size: 15px; flex-shrink: 0; }
+.insight-item .tx b { display: block; font-size: 12.5px; color: var(--heading); }
+.insight-item .tx span { font-size: 11px; color: var(--muted); }
+/* ---------- TERM LADDER ---------- */
+.term-list { gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-soft); }
+.term-item { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; padding: 7px 10px; border-radius: 9px; border: 1px solid var(--border-soft); border-left-width: 3px; background: var(--surface); }
+.term-item .t { font-size: 11.5px; font-weight: 600; color: var(--heading); }
+.term-item .v { font-size: 14px; font-weight: 800; letter-spacing: -.02em; color: var(--heading); font-variant-numeric: tabular-nums; }
+/* ---------- SUBJECT ROWS ---------- */
+.subject-list { gap: 8px; }
+.subject-item { display: grid; grid-template-columns: 34px 1fr auto; gap: 11px; padding: 9px 11px; border: 1px solid var(--border-soft); border-left-width: 3px; border-radius: 10px; background: var(--surface); transition: transform var(--transition-card), box-shadow var(--transition-card); }
+.subject-item:hover { transform: translateY(-1px); box-shadow: var(--shadow-card); }
+.subject-item > .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-size: 17px; }
+.subject-item .mid { min-width: 0; }
+.subject-item .top { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.subject-item .top b { font-size: 12.5px; font-weight: 650; color: var(--heading); white-space: nowrap; }
+.subject-item .top span { font-size: 10.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.subject-item .end { display: flex; align-items: center; gap: 7px; }
+.subject-item .pc { font-size: 14px; font-weight: 800; letter-spacing: -.02em; color: var(--heading); font-variant-numeric: tabular-nums; }
+.subject-item .pc small { font-size: 10px; font-weight: 700; color: var(--muted); }
+.subject-item .gr { min-width: 30px; text-align: center; font-size: 10.5px; font-weight: 800; padding: 3px 5px; border-radius: 6px; }
+.subject-item .dl { display: inline-flex; align-items: center; gap: 2px; font-size: 10.5px; font-weight: 700; }
+.subject-item .dl i { font-size: 12px; }
+/* the class-average marker sits on top of the track, so the track cannot clip
+   it the way `.progress` does by default; `left` is set inline */
+.subject-item .progress { position: relative; overflow: visible; }
+.subject-item .progress-bar { border-radius: inherit; }
+.subject-item .progress .avg { position: absolute; top: -3px; width: 2px; height: 14px; border-radius: 2px; background: var(--heading); opacity: .55; }
+.subject-legend { gap: 6px; font-size: 10.5px; color: var(--muted); }
+.subject-legend .mk { width: 2px; height: 12px; border-radius: 2px; background: var(--heading); opacity: .55; }
+/* compact variant: name, track, value, tag on a single line */
+.subject-item-compact { display: grid; grid-template-columns: 92px 1fr 38px 50px; gap: 10px; padding: 0; border: 0; background: none; }
+.subject-item-compact:hover { transform: none; box-shadow: none; }
+.subject-item-compact .nm { font-size: 12px; font-weight: 600; color: var(--heading); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.subject-item-compact .pc { font-size: 11.5px; font-weight: 700; text-align: right; }
+.subject-item-compact .gr { font-size: 10px; }
+/* ---------- NOTE CALLOUT ---------- */
+/* tinted advisory line; the tint comes from a bg-*-transparent utility */
+.insight-note { gap: 8px; padding: 10px 12px; border-radius: 10px; font-size: 11.5px; line-height: 1.5; }
+.insight-note i { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.insight-note b { color: var(--heading); }
+/* ---------- HIGHLIGHT ROWS ---------- */
+.highlight-list { gap: 8px; margin-top: 14px; }
+.highlight-item { gap: 10px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border-soft); border-left-width: 3px; background: var(--surface); }
+.highlight-item .ic { width: 30px; height: 30px; flex-shrink: 0; border-radius: 9px; display: grid; place-items: center; font-size: 16px; }
+.highlight-item .tx { flex: 1; min-width: 0; }
+.highlight-item .tx b { display: block; font-size: 12px; font-weight: 650; color: var(--heading); line-height: 1.2; }
+.highlight-item .tx span { display: block; font-size: 10.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ---------- DETAIL TILES ---------- */
+.detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.detail-tile { gap: 9px; padding: 11px; border: 1px solid var(--border-soft); border-radius: var(--radius-list); background: var(--surface); transition: transform var(--transition-card), box-shadow var(--transition-card); }
+.detail-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+.detail-tile .ic { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; font-size: 16px; flex-shrink: 0; }
+.detail-tile b { display: block; font-size: 13px; color: var(--heading); }
+.detail-tile span { font-size: 10.5px; color: var(--muted); }
+/* ---------- AVATAR STATUS ---------- */
+/* .info-list-avatar-wrap — all declarations now Bootstrap utilities in the markup */
+.info-list-avatar-wrap .dot { position: absolute; right: -2px; bottom: -2px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--surface); background: var(--tone-success); }
+.info-list-avatar-wrap .dot.off { background: #9aa6c2; }
+@media (max-width: 1399px) {
+	.subject-item .top span { display: none; }
+}
+@media (max-width: 575px) {
+	.subject-item { grid-template-columns: 1fr auto; }
+	.subject-item > .ic { display: none; }
+	.subject-item-compact { grid-template-columns: 78px 1fr 34px 30px; gap: 7px; }
+	.detail-grid { grid-template-columns: 1fr; }
+}

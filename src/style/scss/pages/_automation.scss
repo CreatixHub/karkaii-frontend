@@ -1,0 +1,1190 @@
+@use "sass:color";
+@use "../utils/variables";
+
+/*-----------------
+	Automation — workflow rule components
+
+	A shared vocabulary for the Workflow Rules Center: the rules
+	themselves, the modules they belong to, the trigger that starts
+	them, the conditions that gate them and the actions they run.
+	Class prefix `wfx-`.
+
+	The visual language is a rule engine, not a flowchart editor. A
+	workflow is drawn as the sentence it actually is — WHEN something
+	happens, IF these conditions hold, THEN run these actions — with
+	the three clauses set apart from each other and the action chain
+	numbered in the order it executes. Conditions carry their boolean
+	operator on the connector between them rather than inside a form
+	control, because AND and OR are the part people misread.
+
+	Contents
+	  1. Tokens + shared pieces
+	  2. Workflow rule cards
+	  3. Trigger / condition / action clauses
+	  4. Action chain
+	  5. Category cards
+	  6. Template cards
+	  7. Conditions builder
+	  8. Quick actions
+	  9. Offcanvas, panels and modals
+-----------------*/
+
+/* ============================================================
+   1. TOKENS + SHARED PIECES
+   ============================================================ */
+:root {
+
+	/* A deep engineered blue-grey, mixed rather than taken straight, so
+	   the automation console reads as machinery rather than as another
+	   communication surface. */
+	--rule-accent: #{color.mix(variables.$info, variables.$dark, 58%)};
+	--rule-accent-line: #{color.mix(variables.$info, #ffffff, 32%)};
+
+	/* The three clauses each keep their own colour throughout the page. */
+	--rule-when: #{variables.$purple};
+	--rule-when-soft: #{color.mix(variables.$purple, #ffffff, 9%)};
+	--rule-if: #{variables.$warning};
+	--rule-if-soft: #{variables.$warning-transparent};
+	--rule-then: #{variables.$success};
+	--rule-then-soft: #{variables.$success-transparent};
+
+	--rule-on: #{variables.$success};
+	--rule-on-soft: #{variables.$success-transparent};
+	--rule-stop: #{variables.$danger};
+	--rule-stop-soft: #{variables.$danger-transparent};
+}
+
+[data-bs-theme="dark"] {
+	--rule-accent-line: rgba(15, 101, 205, .4);
+	--rule-when-soft: rgba(74, 0, 229, .18);
+}
+
+.rule-metric-label {
+	display: block;
+	font-size: 11px;
+	font-weight: variables.$font-weight-semibold;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+	color: var(--bs-secondary-color);
+	margin-bottom: 4px;
+}
+
+.rule-section-header {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 14px;
+	flex-wrap: wrap;
+	margin-bottom: 16px;
+
+	h2 {
+		font-size: 20px;
+		font-weight: variables.$font-weight-bold;
+		color: var(--bs-emphasis-color);
+		margin-bottom: 3px;
+	}
+
+	p {
+		font-size: 13px;
+		color: var(--bs-secondary-color);
+		margin-bottom: 0;
+		max-width: 74ch;
+	}
+}
+
+.rule-status-badge {
+	/* geometry, typography and surface come from the shared badge component */
+	i {
+		font-size: 12px;
+	}
+
+	&.is-on {
+		background: var(--rule-on-soft);
+		color: var(--rule-on);
+		border-color: transparent;
+	}
+
+	&.is-off {
+		border-style: dashed;
+	}
+
+	&.is-draft {
+		background: var(--rule-when-soft);
+		color: var(--rule-when);
+		border-color: transparent;
+	}
+
+	&.is-warn {
+		background: var(--rule-if-soft);
+		color: #{color.adjust(variables.$warning, $lightness: -12%)};
+		border-color: transparent;
+	}
+
+	&.is-stop {
+		background: var(--rule-stop-soft);
+		color: var(--rule-stop);
+		border-color: transparent;
+	}
+
+	&.is-accent {
+		background: var(--tint-primary);
+		color: var(--bs-primary);
+		border-color: transparent;
+	}
+}
+
+/* A field or variable, always monospace and always selectable. */
+.key {
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	color: var(--bs-emphasis-color);
+	background: var(--bs-secondary-bg);
+	border: 1px solid var(--bs-border-color);
+	border-radius: 5px;
+	padding: 1px 6px;
+	display: inline-block;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	vertical-align: middle;
+}
+
+/* Priority marker — three stacked bars, filled to the level set. */
+.priority {
+	display: inline-flex;
+	align-items: flex-end;
+	gap: 2px;
+	height: 12px;
+	vertical-align: middle;
+
+	span {
+		width: 3px;
+		border-radius: 1px;
+		background: var(--track);
+
+		&:nth-child(1) { height: 5px; }
+		&:nth-child(2) { height: 8px; }
+		&:nth-child(3) { height: 12px; }
+
+		&.is-lit { background: var(--bs-primary); }
+	}
+
+	&.is-high span.is-lit { background: var(--rule-if); }
+	&.is-critical span.is-lit { background: var(--rule-stop); }
+}
+
+.rule-info-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 9px 0;
+	border-bottom: 1px dashed var(--bs-border-color);
+
+	&:last-child {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	&:first-child {
+		padding-top: 0;
+	}
+
+	.rule-row-key {
+		flex: 1 1 auto;
+		font-size: 13px;
+		font-weight: variables.$font-weight-medium;
+		color: var(--bs-emphasis-color);
+
+		small {
+			display: block;
+			font-size: 11.5px;
+			font-weight: variables.$font-weight-normal;
+			color: var(--bs-secondary-color);
+			margin-top: 1px;
+		}
+	}
+
+	.rule-row-value {
+		flex: 0 0 auto;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		color: var(--bs-emphasis-color);
+	}
+}
+
+/* ============================================================
+   2. WORKFLOW RULE CARDS
+   ============================================================ */
+.rule {
+	position: relative;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--rule-accent-line);
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+	}
+
+	/* Live rail. A disabled rule loses it entirely rather than changing
+	   colour — the absence is what should register. */
+	&::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 3px;
+		background: var(--rule-on);
+		z-index: 2;
+	}
+
+	&.is-off {
+		background: var(--bs-secondary-bg);
+
+		&::before {
+			background: transparent;
+		}
+	}
+
+	&.is-draft {
+		border-style: dashed;
+
+		&::before {
+			background: var(--rule-when);
+		}
+	}
+
+	&.is-error::before {
+		background: var(--rule-stop);
+	}
+
+	.rule-header {
+		display: flex;
+		align-items: flex-start;
+		gap: 11px;
+		padding: 14px 15px 10px;
+
+		.rule-icon {
+			width: 36px;
+			height: 36px;
+			flex-shrink: 0;
+			border-radius: var(--radius-sm);
+			background: var(--tint-primary);
+			color: var(--bs-primary);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 18px;
+		}
+
+		.rule-name {
+			font-size: 14.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			line-height: 1.35;
+			margin-bottom: 3px;
+
+			a {
+				color: inherit;
+			}
+		}
+
+		.rule-description {
+			font-size: 12px;
+			color: var(--bs-secondary-color);
+			margin-bottom: 0;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+	}
+
+	.rule-clauses {
+		padding: 0 15px;
+	}
+
+	.rule-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 14px;
+		padding: 12px 15px 0;
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+
+		span {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+		}
+
+		b {
+			color: var(--bs-emphasis-color);
+			font-weight: variables.$font-weight-semibold;
+		}
+	}
+
+	.rule-by {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		margin: 12px 15px 0;
+		padding-top: 11px;
+		border-top: 1px dashed var(--bs-border-color);
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+
+		img {
+			width: 22px;
+			height: 22px;
+			border-radius: 50%;
+			object-fit: cover;
+		}
+
+		b {
+			color: var(--bs-emphasis-color);
+			font-weight: variables.$font-weight-semibold;
+		}
+	}
+
+	.rule-footer {
+		margin-top: auto;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		flex-wrap: wrap;
+		padding: 11px 15px;
+		margin-top: 12px;
+		border-top: 1px solid var(--bs-border-color);
+		background: var(--bs-secondary-bg);
+	}
+}
+
+/* ============================================================
+   3. TRIGGER / CONDITION / ACTION CLAUSES
+
+   The rule read as a sentence. The keyword sits in the gutter so the
+   three clauses line up down the left edge of every card on the page.
+   ============================================================ */
+.clause {
+	position: relative;
+	padding: 7px 10px 7px 54px;
+	border-radius: var(--radius-sm);
+	background: var(--bs-secondary-bg);
+	font-size: 12.5px;
+	line-height: 1.5;
+	color: var(--bs-emphasis-color);
+
+	+ .clause {
+		margin-top: 5px;
+	}
+
+	&::before {
+		content: attr(data-kw);
+		position: absolute;
+		left: 10px;
+		top: 8px;
+		font-family: var(--font-mono);
+		font-size: 10px;
+		font-weight: variables.$font-weight-bold;
+		letter-spacing: .06em;
+		color: var(--bs-primary);
+	}
+
+	&.is-when {
+		background: var(--rule-when-soft);
+
+		&::before { color: var(--rule-when); }
+	}
+
+	&.is-if {
+		background: var(--rule-if-soft);
+
+		&::before { color: #{color.adjust(variables.$warning, $lightness: -14%)}; }
+	}
+
+	&.is-then {
+		background: var(--rule-then-soft);
+
+		&::before { color: var(--rule-then); }
+	}
+
+	code {
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		color: var(--bs-emphasis-color);
+		background: var(--bs-body-bg);
+		border: 1px solid var(--bs-border-color);
+		border-radius: 5px;
+		padding: 0 4px;
+	}
+}
+
+/* ============================================================
+   4. ACTION CHAIN
+   ============================================================ */
+.chain {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	counter-reset: wfx-step;
+
+	li {
+		position: relative;
+		counter-increment: wfx-step;
+		display: flex;
+		align-items: flex-start;
+		gap: 11px;
+		padding: 10px 0;
+
+		+ li {
+			border-top: 1px dashed var(--bs-border-color);
+		}
+
+		/* The execution order is the point, so it is numbered rather than
+		   bulleted, and the number is what the eye lands on. */
+		&::before {
+			content: counter(wfx-step);
+			flex: 0 0 auto;
+			width: 24px;
+			height: 24px;
+			border-radius: 50%;
+			background: var(--rule-then-soft);
+			color: var(--rule-then);
+			font-family: var(--font-mono);
+			font-size: 11px;
+			font-weight: variables.$font-weight-bold;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			margin-top: 1px;
+		}
+
+		&.is-skipped {
+			opacity: .6;
+
+			&::before {
+				background: var(--bs-secondary-bg);
+				color: var(--bs-secondary-color);
+			}
+		}
+
+		&.is-failed::before {
+			background: var(--rule-stop-soft);
+			color: var(--rule-stop);
+		}
+	}
+
+	.chain-text {
+		flex: 1 1 auto;
+		min-width: 0;
+
+		b {
+			display: block;
+			font-size: 13px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 2px;
+		}
+
+		small {
+			font-size: 11.5px;
+			color: var(--bs-secondary-color);
+		}
+	}
+}
+
+/* Compact action pip row, used on the rule cards. */
+.actions {
+	display: inline-flex;
+	gap: 4px;
+
+	.rule-action {
+		width: 24px;
+		height: 24px;
+		border-radius: 7px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 13px;
+		background: var(--rule-then-soft);
+		color: var(--rule-then);
+	}
+}
+
+/* ============================================================
+   5. CATEGORY CARDS
+   ============================================================ */
+.rule-category {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	width: 100%;
+	height: 100%;
+	text-align: left;
+	padding: 14px;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	transition: var(--transition);
+
+	i.category-icon {
+		width: 38px;
+		height: 38px;
+		flex-shrink: 0;
+		border-radius: var(--radius-sm);
+		background: var(--tint-primary);
+		color: var(--bs-primary);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 19px;
+		transition: var(--transition);
+	}
+
+	.category-text {
+		flex: 1 1 auto;
+		min-width: 0;
+
+		b {
+			display: block;
+			font-size: 13.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 2px;
+		}
+
+		small {
+			font-size: 11.5px;
+			color: var(--bs-secondary-color);
+		}
+	}
+
+	.category-n {
+		flex: 0 0 auto;
+		font-size: 17px;
+		font-weight: variables.$font-weight-bold;
+		color: var(--bs-emphasis-color);
+	}
+
+	&:hover {
+		border-color: var(--rule-accent-line);
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+
+		i.category-icon {
+			background: var(--bs-primary);
+			color: #fff;
+		}
+	}
+
+	&.is-empty {
+		border-style: dashed;
+
+		.category-n {
+			color: var(--bs-secondary-color);
+		}
+	}
+}
+
+/* ============================================================
+   6. TEMPLATE CARDS
+   ============================================================ */
+.rule-template {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--rule-accent-line);
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+	}
+
+	.template-header {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 13px 15px;
+		border-bottom: 1px solid var(--bs-border-color);
+
+		.template-icon {
+			width: 34px;
+			height: 34px;
+			flex-shrink: 0;
+			border-radius: var(--radius-sm);
+			background: var(--tint-primary);
+			color: var(--bs-primary);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 17px;
+		}
+
+		.template-name {
+			flex: 1 1 auto;
+			min-width: 0;
+			font-size: 13.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 0;
+		}
+	}
+
+	.rule-template-body {
+		padding: 13px 15px;
+		flex: 1 1 auto;
+
+		p {
+			font-size: 12px;
+			color: var(--bs-secondary-color);
+			margin-bottom: 10px;
+		}
+	}
+
+	.rule-template-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		padding: 11px 15px;
+		border-top: 1px solid var(--bs-border-color);
+		background: var(--bs-secondary-bg);
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* ============================================================
+   7. CONDITIONS BUILDER
+   ============================================================ */
+.builder {
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+
+	.builder-header {
+		display: flex;
+		align-items: center;
+		gap: 11px;
+		padding: 13px 16px;
+		border-bottom: 1px solid var(--bs-border-color);
+
+		.builder-icon {
+			width: 34px;
+			height: 34px;
+			flex-shrink: 0;
+			border-radius: var(--radius-sm);
+			background: var(--rule-if-soft);
+			color: #{color.adjust(variables.$warning, $lightness: -14%)};
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 17px;
+		}
+
+		.builder-title {
+			font-size: 14px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 1px;
+		}
+
+		p {
+			font-size: 12px;
+			color: var(--bs-secondary-color);
+			margin-bottom: 0;
+		}
+	}
+
+	.builder-body {
+		padding: 16px;
+	}
+
+	.builder-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		flex-wrap: wrap;
+		padding: 12px 16px;
+		border-top: 1px solid var(--bs-border-color);
+		background: var(--bs-secondary-bg);
+		font-size: 12px;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* A condition group — an indented block sharing one boolean operator. */
+.group {
+	position: relative;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius-sm);
+	background: var(--bs-secondary-bg);
+	padding: 12px 12px 12px 16px;
+
+	+ .group {
+		margin-top: 26px;
+	}
+
+	/* The bracket down the left edge is what makes the grouping legible
+	   at a glance, which is exactly where nested rules go wrong. */
+	&::before {
+		content: "";
+		position: absolute;
+		left: 6px;
+		top: 12px;
+		bottom: 12px;
+		width: 2px;
+		border-radius: 2px;
+		background: var(--rule-accent-line);
+	}
+}
+
+.condition {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	padding: 8px 10px;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius-sm);
+	background: var(--bs-body-bg);
+	font-size: 12.5px;
+	color: var(--bs-emphasis-color);
+
+	.condition-op {
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+	}
+
+	.form-select-sm,
+	.form-control-sm {
+		width: auto;
+		min-width: 120px;
+		font-size: 12.5px;
+	}
+
+	.condition-x {
+		margin-left: auto;
+		border: 0;
+		background: transparent;
+		color: var(--bs-secondary-color);
+		font-size: 15px;
+		line-height: 1;
+		padding: 2px;
+
+		&:hover {
+			color: var(--rule-stop);
+		}
+	}
+}
+
+/* The boolean connector between two conditions — a pill on the rule
+   line, so AND and OR cannot be skimmed past. */
+.join {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 8px 0;
+
+	&::before,
+	&::after {
+		content: "";
+		flex: 1 1 auto;
+		height: 1px;
+		background: var(--bs-border-color);
+	}
+
+	.join-pill {
+		flex: 0 0 auto;
+		display: inline-flex;
+		border-radius: 999px;
+		border: 1px solid var(--bs-border-color);
+		background: var(--bs-body-bg);
+		padding: 2px;
+		overflow: hidden;
+
+		button {
+			border: 0;
+			background: transparent;
+			border-radius: 999px;
+			padding: 2px 12px;
+			font-family: var(--font-mono);
+			font-size: 10.5px;
+			font-weight: variables.$font-weight-bold;
+			letter-spacing: .06em;
+			color: var(--bs-secondary-color);
+			transition: var(--transition);
+
+			&.is-active {
+				background: var(--bs-primary);
+				color: #fff;
+			}
+		}
+	}
+}
+
+/* A variable chip, insertable into a condition value. */
+.variable {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-family: var(--font-mono);
+	font-size: 11.5px;
+	padding: 3px 9px;
+	border-radius: 6px;
+	background: var(--tint-primary);
+	color: var(--bs-primary);
+	border: 1px solid transparent;
+	transition: var(--transition);
+	white-space: nowrap;
+
+	i {
+		font-size: 12px;
+	}
+
+	&:hover {
+		border-color: var(--bs-primary);
+		background: var(--bs-body-bg);
+	}
+}
+
+.vars {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+/* ============================================================
+   8. QUICK ACTIONS
+   ============================================================ */
+.rule-quick-action {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	height: 100%;
+	text-align: left;
+	padding: 15px;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	transition: var(--transition);
+
+	i.rule-action-icon {
+		width: 40px;
+		height: 40px;
+		flex-shrink: 0;
+		border-radius: var(--radius-sm);
+		background: var(--tint-primary);
+		color: var(--bs-primary);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 20px;
+		transition: var(--transition);
+	}
+
+	.rule-action-text {
+		flex: 1 1 auto;
+		min-width: 0;
+
+		b {
+			display: block;
+			font-size: 13.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 2px;
+		}
+
+		small {
+			font-size: 11.5px;
+			color: var(--bs-secondary-color);
+		}
+	}
+
+	.rule-action-go {
+		flex: 0 0 auto;
+		font-size: 16px;
+		color: var(--bs-secondary-color);
+		transition: var(--transition);
+	}
+
+	&:hover {
+		border-color: var(--rule-accent-line);
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+
+		i.rule-action-icon {
+			background: var(--bs-primary);
+			color: #fff;
+		}
+
+		.rule-action-go {
+			color: var(--bs-primary);
+			transform: translateX(2px);
+		}
+	}
+}
+
+/* ============================================================
+   9. OFFCANVAS, PANELS AND MODALS
+   ============================================================ */
+.rule-detail-panel {
+	width: 88% !important;
+	max-width: 1400px;
+
+	.offcanvas-header {
+		border-bottom: 1px solid var(--bs-border-color);
+		padding: 16px 22px;
+		align-items: flex-start;
+		gap: 14px;
+	}
+
+	.offcanvas-body {
+		padding: 20px 22px 28px;
+		background: var(--bs-secondary-bg);
+	}
+}
+
+@media (max-width: 991.98px) {
+	.rule-detail-panel {
+		width: 100% !important;
+	}
+}
+
+.rule-detail-title {
+	font-size: 20px;
+	font-weight: variables.$font-weight-bold;
+	color: var(--bs-emphasis-color);
+	margin-bottom: 5px;
+	line-height: 1.3;
+}
+
+.rule-panel {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+
+	.rule-panel-header {
+		display: flex;
+		align-items: center;
+		gap: 11px;
+		padding: 13px 16px;
+		border-bottom: 1px solid var(--bs-border-color);
+
+		.rule-panel-icon {
+			width: 32px;
+			height: 32px;
+			flex-shrink: 0;
+			border-radius: var(--radius-sm);
+			background: var(--tint-primary);
+			color: var(--bs-primary);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 16px;
+		}
+
+		.rule-panel-title {
+			font-size: 14px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 0;
+		}
+	}
+
+	.rule-panel-body {
+		padding: 14px 16px;
+		flex: 1 1 auto;
+	}
+
+	.rule-panel-footer {
+		padding: 11px 16px;
+		border-top: 1px solid var(--bs-border-color);
+		background: var(--bs-secondary-bg);
+		border-radius: 0 0 var(--radius) var(--radius);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		flex-wrap: wrap;
+		font-size: 12px;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* An execution-history row: one past run, with its outcome. */
+.run {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	padding: 10px 0;
+	border-bottom: 1px dashed var(--bs-border-color);
+
+	&:last-child {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	> i {
+		width: 28px;
+		height: 28px;
+		flex-shrink: 0;
+		border-radius: 8px;
+		background: var(--rule-on-soft);
+		color: var(--rule-on);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 14px;
+	}
+
+	&.is-failed > i {
+		background: var(--rule-stop-soft);
+		color: var(--rule-stop);
+	}
+
+	&.is-skipped > i {
+		background: var(--bs-secondary-bg);
+		color: var(--bs-secondary-color);
+	}
+
+	.run-text {
+		flex: 1 1 auto;
+		min-width: 0;
+		font-size: 12.5px;
+		color: var(--bs-emphasis-color);
+
+		small {
+			display: block;
+			font-size: 11px;
+			color: var(--bs-secondary-color);
+		}
+	}
+
+	.run-when {
+		flex: 0 0 auto;
+		font-size: 11px;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* A dependency edge — this rule feeds, or is fed by, another. */
+.dependency {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 0;
+	border-bottom: 1px dashed var(--bs-border-color);
+
+	&:last-child {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	> i {
+		font-size: 16px;
+		color: var(--bs-primary);
+		flex-shrink: 0;
+	}
+
+	.dependency-text {
+		flex: 1 1 auto;
+		min-width: 0;
+
+		b {
+			display: block;
+			font-size: 12.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+		}
+
+		small {
+			font-size: 11px;
+			color: var(--bs-secondary-color);
+		}
+	}
+}
+
+.rule-modal-icon {
+	width: 40px;
+	height: 40px;
+	border-radius: var(--radius-sm);
+	background: var(--tint-primary);
+	color: var(--bs-primary);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 20px;
+
+	&.is-stop {
+		background: var(--rule-stop-soft);
+		color: var(--rule-stop);
+	}
+}
+
+.rule-dropzone {
+	border: 1px dashed var(--border-strong);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	padding: 26px 20px;
+	text-align: center;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--bs-primary);
+		background: var(--tint-primary);
+	}
+
+	> i {
+		display: block;
+		font-size: 30px;
+		color: var(--bs-primary);
+		margin-bottom: 8px;
+	}
+
+	b {
+		display: block;
+		font-size: 14px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--bs-emphasis-color);
+		margin-bottom: 3px;
+	}
+
+	p {
+		font-size: 12px;
+		color: var(--bs-secondary-color);
+		margin: 0 auto 12px;
+		max-width: 46ch;
+	}
+}

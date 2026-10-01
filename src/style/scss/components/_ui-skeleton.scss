@@ -1,0 +1,57 @@
+/*-----------------
+	Skeleton loader
+
+	The template's single loading-placeholder system. One shimmer primitive
+	(`.skeleton`) plus shape modifiers, wrapped in `.skeleton-loader`, which
+	scripts hide with `.hidden` once the live content is ready:
+
+		<div class="skeleton-loader" aria-hidden="true">
+			<div class="skeleton skeleton-line"></div>
+			<div class="skeleton skeleton-line skeleton-thin"></div>
+		</div>
+
+	Shapes are deliberately generic — a page that needs a different track or
+	row geometry scopes its own overrides in its page partial rather than
+	introducing a second skeleton implementation.
+-----------------*/
+.skeleton-loader { display: block; }
+.skeleton-loader.hidden { display: none; }
+
+.skeleton {
+	position: relative;
+	overflow: hidden;
+	background: #eceef3;
+	border-radius: 6px;
+}
+
+.skeleton::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	transform: translateX(-100%);
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .65), transparent);
+	animation: skeleton-shimmer 1.3s infinite;
+}
+
+/* shapes */
+.skeleton-line { height: 12px; }
+.skeleton-avatar { width: 46px; height: 46px; border-radius: 12px; }
+.skeleton-circle { width: 34px; height: 34px; border-radius: 50%; }
+.skeleton-pill { height: 22px; width: 74px; border-radius: 999px; }
+.skeleton-card { height: 78px; border-radius: 8px; }
+.skeleton-btn { height: 40px; width: 110px; border-radius: 8px; }
+
+/* stacked lines inside a media-style row */
+.skeleton-stack { flex: 1; min-width: 0; }
+
+@keyframes skeleton-shimmer { 100% { transform: translateX(100%); } }
+
+/* dark tone stays scoped to the workspaces that ship a dark surface, so no
+   page silently changes tone by adopting the shared primitive */
+[data-bs-theme="dark"] .students-workspace .skeleton,
+[data-bs-theme="dark"] .data-workspace .skeleton { background: #2a3042; }
+
+[data-bs-theme="dark"] .students-workspace .skeleton::after,
+[data-bs-theme="dark"] .data-workspace .skeleton::after {
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .08), transparent);
+}

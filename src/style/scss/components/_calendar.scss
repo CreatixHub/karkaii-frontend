@@ -1,0 +1,266 @@
+@use "../utils/mixins";
+@use "../utils/variables";
+
+.calendar-events {
+    border: 1px solid transparent;
+    cursor: move;
+	padding: 10px 15px;
+	&:hover {
+		border-color: variables.$light-900;
+		background-color: variables.$white;
+	}
+}
+.calendar-events i {
+    margin-right: 8px;
+}
+.calendar {
+	float: left;
+	margin-bottom: 0;
+}
+.fc-toolbar.fc-header-toolbar {
+    margin-bottom: 10px;
+	flex-wrap: wrap;
+	.fc-toolbar-chunk {
+		margin-bottom: 10px;
+	}
+	.fc-left, .fc-right {
+		margin-bottom: 10px;
+	}
+}
+.fc-toolbar h2 {
+	font-size: variables.$font-size-18;
+	font-weight: variables.$font-weight-semibold;
+	font-family: variables.$font-family-primary;
+	line-height: 30px;
+	text-transform: uppercase;
+}
+.fc-day-grid-event .fc-time {
+	font-family: variables.$font-family-primary;
+}
+.fc-day {
+	background: variables.$white;
+}
+.fc-toolbar .fc-state-active,
+.fc-toolbar .ui-state-active,
+.fc-toolbar button:focus,
+.fc-toolbar button:hover,
+.fc-toolbar .ui-state-hover {
+	z-index: 0;
+}
+.fc th.fc-widget-header {
+	background: variables.$light-500;
+	font-size: variables.$font-size-14;
+	text-transform: uppercase;
+}
+.fc-unthemed th,
+.fc-unthemed td,
+.fc-unthemed thead,
+.fc-unthemed tbody,
+.fc-unthemed .fc-divider,
+.fc-unthemed .fc-row,
+.fc-unthemed .fc-popover {
+	border-color: variables.$light-900;
+}
+.fc-basic-view .fc-day-number, 
+.fc-basic-view .fc-week-number {
+    padding: 2px 5px;
+}
+.fc-button {
+	background: variables.$light-500;
+	border: none;
+	color: variables.$gray-700;
+	text-transform: capitalize;
+	box-shadow: none !important;
+	border-radius: 5px !important;
+	margin: 0 3px !important;
+	padding: 6px 12px !important;
+	height: auto !important;
+}
+.fc-text-arrow {
+	font-family: inherit;
+	font-size: variables.$font-size-16;
+}
+.fc-state-hover {
+	background: variables.$light-300;
+}
+.fc-state-highlight {
+	background: variables.$light-300;
+}
+.fc-state-down,
+.fc-state-active,
+.fc-state-disabled {
+	background-color: variables.$primary !important;
+	color: variables.$white !important;
+	text-shadow: none !important;
+}
+.fc-cell-overlay {
+	background: variables.$light-300;
+}
+.fc-unthemed .fc-today {
+	background: variables.$white;
+}
+.fc-event {
+	border-radius: 2px;
+	border: none;
+	color: variables.$white !important;
+	cursor: move;
+	font-size: 13px;
+	margin: 1px 7px;
+	padding: 5px 5px;
+	text-align: center;
+}
+.fc-basic-view td.fc-week-number span {
+	padding-right: 8px;
+	font-weight: variables.$font-weight-bold;
+	font-family: variables.$font-family-primary;
+}
+.fc-basic-view td.fc-day-number {
+	padding-right: 8px;
+	font-weight: variables.$font-weight-bold;
+	font-family: variables.$font-family-primary;
+}
+.event-form .input-group .form-control {
+	height: 40px;
+}
+.fc-theme-standard .fc-scrollgrid {
+    border: 1px solid variables.$light-900;
+}
+.fc .fc-col-header-cell-cushion  {
+	color: variables.$gray-900;
+	font-size: variables.$font-size-14;
+	font-weight: variables.$font-weight-bold;
+    padding: 0;
+}
+.fc {
+	th {
+		background: variables.$light-500;
+		border-color: variables.$light-500;
+		height: 40px;
+    	line-height: 40px;
+        &.columnheader {
+            &:last-child {
+                border-right: variables.$light-500;
+            }
+        }
+	}
+	td {
+		border-color: variables.$light-900;
+	}
+	.fc-daygrid-day-number {
+		color: variables.$gray-900;
+		font-size: variables.$font-size-14;
+	}
+	.fc-toolbar-title {
+		font-size: variables.$font-size-18;
+		font-weight: variables.$font-weight-semibold;
+		color: variables.$gray-900;
+	}
+}
+.fc-event {
+	border: 1px solid variables.$white;
+    @include mixins.rounded(5px);
+	background: variables.$white;
+	color: variables.$black;
+	padding: 5px;
+    &.progress-danger {
+        border-color: variables.$danger;
+    }
+    &.progress-info {
+        border-color: variables.$info;
+    }
+    &.progress-pending {
+        border-color: variables.$pending;
+    }
+    &.progress-success {
+        border-color: variables.$success;
+    }
+}
+.fc-event-main {
+	color: variables.$gray-900 !important;
+}
+.fc .fc-button-primary {
+    background-color: variables.$light-500;
+    border-color: variables.$light-500;
+    color: variables.$gray-700;
+	font-size: variables.$font-size-14;
+	height: 26px;
+	border-radius: 5px;
+    padding: 2px 5px !important;
+    text-transform: capitalize;
+	&:hover, &.active, &:active {
+        background-color: variables.$primary;
+        border-color: variables.$primary;
+        color: variables.$white;
+	}
+	&:focus {
+		box-shadow:none;
+	}
+	&.fc-dayGridMonth-button, &:not(:disabled).fc-button-active,
+    &.fc-today-button {
+        background-color: variables.$primary;
+        border-color: variables.$primary;
+		color: variables.$white;
+        font-size: variables.$font-size-14;
+        font-weight: variables.$font-weight-normal;
+        height: 26px;
+		border-radius: 0;
+		border-width: 1px 0;
+		padding: 0;
+		&:hover {
+			background-color: variables.$primary;
+            border-color: variables.$primary;
+            color: variables.$white;
+		}
+		&:focus {
+			box-shadow:none;
+		}
+	}
+    &.fc-custombtn-button {
+        background-color: variables.$primary;
+        border-color: variables.$primary;
+		color: variables.$white;
+        font-size: variables.$font-size-15;
+        font-weight: variables.$font-weight-medium;
+        position: relative; 
+        padding: 7px 20px 7px 40px  !important;
+        &::before {
+	    	position: absolute;
+			top: 50%;
+			left: 20px;
+	    	@include mixins.transform(translateY(-50%));
+	    	font-family: "Fontawesome";
+	 	    content: "\f055";
+	    }
+    }
+}
+.fc .fc-list-event:hover td {
+    background-color: transparent;
+}
+
+/*-----------------
+	Dashboard widgets — merged in from the former
+	components/_ui-dashboard-widgets.scss. These are generic, reusable
+	components; they live with their own kind rather than in a page-shaped file.
+-----------------*/
+/* ---------- CALENDAR / EVENTS ---------- */
+.calendar-event { gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
+.calendar-event:last-child { border-bottom: 0; }
+.calendar-event-date { width: 48px; border-radius: 10px; padding: 6px 0; }
+.calendar-event-date b { display: block; font-size: 17px; font-weight: 800; line-height: 1; }
+.calendar-event-date span { font-size: 9.5px; text-transform: uppercase; }
+.calendar-event-body b { font-size: 12.5px; color: var(--heading); display: block; }
+
+/* Dark Mode — calendar.html's own #calendar mount only. calendar-data.js
+   (shared with events.html/plugins.html/tickets.html) sets each event's
+   background/text as an inline style, so those light pastel hexes can't
+   be edited without changing those other pages; override just the
+   background here and unify the text colour to the theme's readable
+   heading colour, since two of the five category text hues are too dark
+   to read against any dark surface. */
+[data-theme="dark"] #calendar .fc-event,
+[data-bs-theme="dark"] #calendar .fc-event {
+    background-color: var(--tone-brand-soft) !important;
+    border-color: var(--border-strong) !important;
+    color: var(--heading) !important;
+}
+.calendar-event-body span { font-size: 11px; color: var(--muted); }

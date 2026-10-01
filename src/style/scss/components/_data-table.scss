@@ -1,0 +1,951 @@
+@use "../utils/variables";
+
+/*-----------------
+    Data table
+
+    Wrap any plain Bootstrap `<table>` in `.data-table` and it picks up the
+    grid treatment used on the Classes page — sticky uppercase header, quiet
+    row borders, a hover state and a selected state driven by the row's own
+    checkbox.
+
+    Nothing is required on the table itself: no extra classes on `<table>`,
+    `<thead>`, `<tr>` or `<td>`. Everything is reached through element
+    selectors and the Bootstrap classes already in the markup.
+
+        <div class="data-table">
+            <table class="table">…</table>
+        </div>
+-----------------*/
+
+.data-table {
+
+    position: relative;
+    overflow: auto;
+    .dt-detail p {
+        white-space: normal;
+    }
+    /*-----------------
+        Table shell
+    -----------------*/
+    > .table,
+    > .table-responsive > .table {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+
+        /* Bootstrap paints cell backgrounds through this variable; clearing it
+           lets the rules below own the surface and hover colours */
+        --bs-table-bg: transparent;
+        --bs-table-accent-bg: transparent;
+
+        > thead > tr > th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: var(--bs-secondary-bg);
+            color: var(--bs-secondary-color);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--bs-border-color);
+            border-top: 0;
+            white-space: nowrap;
+            user-select: none;
+            vertical-align: middle;
+        }
+
+        > tbody > tr > td,
+        > tbody > tr > th {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--bs-border-color);
+            border-top: 0;
+            vertical-align: middle;
+            font-size: 13px;
+            background: var(--bs-body-bg);
+            transition: background var(--transition);
+        }
+
+        > tbody > tr:hover > td,
+        > tbody > tr:hover > th {
+            background: var(--bs-tertiary-bg);
+        }
+
+        /* a checked row reads as selected without needing a class */
+        > tbody > tr:has(input[type="checkbox"]:checked) > td,
+        > tbody > tr:has(input[type="checkbox"]:checked) > th {
+            background: var(--tint-primary);
+        }
+
+        > tbody > tr:last-child > td,
+        > tbody > tr:last-child > th {
+            border-bottom: 0;
+        }
+    }
+
+    /*-----------------
+        Cell contents
+
+        No sizing is imposed here — avatars, badges and action buttons keep
+        whatever the existing `.avatar`, `.badge` and `.btn` components give
+        them. The table only makes sure they sit on the row's centre line.
+    -----------------*/
+    .table > tbody > tr > td,
+    .table > tbody > tr > th {
+        > .d-flex,
+        > .dropdown {
+            align-items: center;
+        }
+    }
+
+    /*-----------------
+        Responsive — the header stays put and the grid scrolls sideways
+    -----------------*/
+    @media (max-width: 991.98px) {
+        > .table,
+        > .table-responsive > .table {
+            > thead > tr > th {
+                padding: 12px;
+            }
+
+            > tbody > tr > td,
+            > tbody > tr > th {
+                padding: 10px;
+            }
+        }
+    }
+}
+
+/*-----------------
+    Grid extras
+
+    The pieces a data grid needs beyond a plain table: a user cell, status
+    pill, row actions, expander and detail row. They live here so a page only
+    ever reaches for `.data-table` and its `dt-` children, instead of
+    borrowing another page's prefix and then overriding the sizing.
+-----------------*/
+.data-table {
+
+    // two-line entity cell: avatar + name over a quiet sub line
+    .dt-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .dt-avatar {
+            position: relative;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 1px solid var(--bs-border-color);
+            box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06);
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        .dt-name {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--bs-heading-color, #111827);
+            line-height: 1.2;
+            text-decoration: none;
+
+            &:hover {
+                color: var(--bs-primary);
+            }
+        }
+
+        .dt-sub {
+            font-size: 11.5px;
+            color: var(--bs-secondary-color);
+            margin-top: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+
+            .dt-dot {
+                opacity: 0.5;
+            }
+        }
+    }
+
+    // status pill with a leading dot
+    .dt-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 11px;
+        border-radius: 999px;
+        line-height: 1;
+
+        .dt-pill-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        &.is-active { background: rgba(22, 163, 74, 0.12); color: #15803d; }
+        &.is-inactive { background: rgba(107, 114, 128, 0.14); color: #4b5563; }
+        &.is-new { background: rgba(8, 145, 178, 0.12); color: #0e7490; }
+        &.is-archived { background: rgba(123, 97, 255, 0.12); color: #6d28d9; }
+        &.is-pending { background: rgba(245, 158, 11, 0.14); color: #b45309; }
+        &.is-emergency { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
+        &.is-exam { background: rgba(219, 39, 119, 0.12); color: #be185d; }
+    }
+
+    // row actions, tucked to the end of the row
+    .dt-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        justify-content: flex-end;
+    }
+
+    .dt-ib {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 1px solid var(--bs-border-color);
+        background: var(--bs-body-bg);
+        color: var(--bs-secondary-color);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        text-decoration: none;
+        transition: all var(--transition);
+
+        i { font-size: 14px; }
+
+        &:hover {
+            border-color: var(--bs-primary);
+            color: var(--bs-primary);
+        }
+
+        &.success { color: #16a34a; }
+        &.success:hover { border-color: #16a34a; color: #16a34a; background: rgba(22, 163, 74, .08); }
+        &.danger { color: #dc2626; }
+        &.danger:hover { border-color: #dc2626; color: #dc2626; background: rgba(220, 38, 38, .08); }
+    }
+
+    // sortable header + its resize handle
+    .dt-sortable {
+        cursor: pointer;
+        transition: color var(--transition);
+
+        &:hover { color: var(--bs-primary); }
+
+        .dt-sort-ic {
+            font-size: 14px;
+            opacity: 0.5;
+            vertical-align: middle;
+            transition: transform var(--transition), opacity var(--transition);
+        }
+
+        &.dt-sort-asc .dt-sort-ic { opacity: 1; color: var(--bs-primary); }
+        &.dt-sort-desc .dt-sort-ic { opacity: 1; color: var(--bs-primary); transform: rotate(180deg); }
+    }
+
+    .dt-resize {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        cursor: col-resize;
+        opacity: 0;
+    }
+
+    > .table > thead > tr > th:hover .dt-resize {
+        opacity: 1;
+        background: var(--tint-primary);
+    }
+
+    // expander + the row it reveals
+    .dt-expand {
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        border: 1px solid var(--bs-border-color);
+        background: var(--bs-body-bg);
+        color: var(--bs-secondary-color);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition);
+
+        i { transition: transform var(--transition); }
+
+        &[aria-expanded="true"] {
+            background: var(--bs-primary);
+            border-color: var(--bs-primary);
+            color: var(--bs-body-bg);
+
+            i { transform: rotate(90deg); }
+        }
+    }
+
+    > .table > tbody > tr.dt-detail > td {
+        padding: 0 !important;
+        background: var(--bs-secondary-bg) !important;
+        border-bottom: 0;
+    }
+
+    .dt-detail-inner {
+        display: none;
+        padding: 18px 20px;
+    }
+
+    > .table > tbody > tr.dt-detail.open > td { border-bottom: 1px solid var(--bs-border-color); }
+    > .table > tbody > tr.dt-detail.open .dt-detail-inner { display: block; }
+
+    // a row carrying an open detail panel keeps its own divider
+    > .table > tbody > tr:last-child > td,
+    > .table > tbody > tr:last-child > th { border-bottom: 0; }
+}
+
+/*-----------------
+    Selection column
+
+    A checkbox that matches the grid rather than the browser default, plus the
+    sticky first column it usually sits in.
+-----------------*/
+.data-table {
+    .dt-check {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 1.8px solid var(--bs-border-color);
+        border-radius: 5px;
+        background: var(--bs-body-bg);
+        cursor: pointer;
+        position: relative;
+        transition: all var(--transition);
+        vertical-align: middle;
+
+        &:hover { border-color: var(--bs-primary); }
+
+        &:checked,
+        &:indeterminate {
+            background: var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+
+        &:checked::after {
+            content: "";
+            position: absolute;
+            left: 5px;
+            top: 1.5px;
+            width: 5px;
+            height: 9px;
+            border: solid var(--bs-body-bg);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        &:indeterminate::after {
+            content: "";
+            position: absolute;
+            left: 3px;
+            top: 6px;
+            width: 8px;
+            height: 2px;
+            background: var(--bs-body-bg);
+            border-radius: 1px;
+        }
+    }
+
+    > .table > thead > tr > th.dt-pin,
+    > .table > tbody > tr > td.dt-pin {
+        position: sticky;
+        left: 0;
+        z-index: 4;
+        background: var(--bs-body-bg);
+    }
+
+    > .table > thead > tr > th.dt-pin { z-index: 6; background: var(--bs-secondary-bg); }
+}
+
+/* ============================================================
+   Opt-in mobile card mode — add `.dt-cards` to a `.data-table`
+   and below the lg breakpoint its rows become stacked cards
+   with sticky action buttons. Desktop is untouched; pages that
+   don't opt in keep the horizontally-scrolling grid.
+   ============================================================ */
+@media (max-width: 991.98px) {
+    .data-table.dt-cards {
+        overflow: visible;
+
+        > .table { display: block; }
+        > .table > thead { display: none; }
+        > .table > tbody { display: block; }
+
+        > .table > tbody > tr.dt-row {
+            display: block;
+            position: relative;
+            border: 1px solid var(--bs-border-color);
+            border-radius: 12px;
+            margin: 0 12px 12px;
+            padding: 42px 14px 6px;
+            background: var(--bs-body-bg);
+            box-shadow: 0 1px 2px rgba(17, 24, 39, .05);
+        }
+        > .table > tbody > tr.dt-row.dt-selected { box-shadow: 0 0 0 2px var(--bs-primary) inset; }
+
+        > .table > tbody > tr.dt-row > td {
+            display: block;
+            width: auto !important;
+            border: 0 !important;
+            padding: 6px 0;
+        }
+        // checkbox top-left, expand chevron top-right, pinned to the card
+        > .table > tbody > tr.dt-row > td.dt-pin,
+        > .table > tbody > tr.dt-row > td.card-expand-toggle {
+            position: absolute; top: 10px; width: auto !important; padding: 0; background: transparent;
+        }
+        > .table > tbody > tr.dt-row > td.dt-pin { left: 14px; }
+        > .table > tbody > tr.dt-row > td.card-expand-toggle { right: 14px; }
+
+        // sticky action bar at the foot of each card
+        > .table > tbody > tr.dt-row > td:last-child {
+            position: sticky; bottom: 0; z-index: 1;
+            margin-top: 8px; padding: 8px 0 2px;
+            border-top: 1px solid var(--bs-border-color) !important;
+            background: var(--bs-body-bg);
+        }
+        > .table > tbody > tr.dt-row > td:last-child .dt-actions { justify-content: flex-start; flex-wrap: wrap; }
+
+        // detail panel becomes a plain block under the card
+        > .table > tbody > tr.dt-detail { display: block; border: 0; }
+        > .table > tbody > tr.dt-detail > td { display: block; padding: 0 12px; }
+        > .table > tbody > tr.dt-detail:not(.open) { display: none; }
+    }
+}
+
+/* ============================================================
+   CARD TOOLBAR / QUICKBAR / FOOTER
+   Workspace chrome for a `.data-table` card — toolbar, quick
+   filters, filter chips, empty state and pagination footer.
+   Renamed from the sw-* workspace set so the data-table card
+   owns these as self-contained components. Colour tokens come
+   from the `--sw-*` custom properties set on `.data-workspace`
+   with plain fallbacks for standalone use.
+   ============================================================ */
+
+$ct-border: var(--bs-border-color);
+$ct-surface: var(--bs-body-bg);
+// aligned to the same tokens staffs.html's .search-toolbar/.workspace-button
+// already use, so this older .card-toolbar family matches it in dark mode
+// instead of staying pinned to a static light hex
+$ct-surface-soft: var(--bs-secondary-bg);
+$ct-surface-hover: var(--bs-tertiary-bg);
+$ct-muted: var(--bs-secondary-color);
+$ct-primary: var(--bs-primary);
+$ct-primary-soft: rgba(61, 94, 225, .10);
+$ct-radius-sm: 8px;
+$ct-t: var(--transition);
+
+/* ---------- Toolbar ---------- */
+.card-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+
+    .card-search {
+        position: relative;
+        flex: 0 1 250px;
+        min-width: 180px;
+
+        input {
+            width: 100%;
+            height: 34px;
+            border: 1px solid $ct-border;
+            border-radius: $ct-radius-sm;
+            background: $ct-surface-soft;
+            padding: 0 58px 0 32px;
+            font-size: 13px;
+            transition: box-shadow $ct-t, border-color $ct-t, background $ct-t;
+
+            &:focus {
+                outline: none;
+                background: $ct-surface;
+                border-color: $ct-primary;
+                box-shadow: 0 0 0 3px $ct-primary-soft;
+            }
+        }
+
+        .card-search-ic {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: $ct-muted;
+            font-size: 15px;
+            pointer-events: none;
+        }
+
+        .card-search-kbd {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: $ct-muted;
+            border: 1px solid $ct-border;
+            border-radius: 7px;
+            padding: 8px 5px;
+            background: $ct-surface;
+            line-height: 1;
+        }
+    }
+}
+
+/* ---------- Pill button ---------- */
+.card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 34px;
+    padding: 0 11px;
+    border: 1px solid $ct-border;
+    border-radius: $ct-radius-sm;
+    background: $ct-surface;
+    color: var(--bs-body-color, #1f2937);
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: all $ct-t;
+    white-space: nowrap;
+
+    i { font-size: 15px; }
+
+    &:hover {
+        background: $ct-surface-hover;
+        border-color: $ct-primary;
+        color: $ct-primary;
+        transform: translateY(-1px);
+        box-shadow: 0 1px 2px rgba(17, 24, 39, .06);
+    }
+
+    &.card-btn-icon {
+        padding: 0;
+        width: 34px;
+        justify-content: center;
+    }
+
+    &.active,
+    &[aria-pressed="true"] {
+        background: $ct-primary-soft;
+        border-color: $ct-primary;
+        color: $ct-primary;
+    }
+}
+
+/* ---------- Density segmented control ---------- */
+.card-density {
+    display: inline-flex;
+    border: 1px solid $ct-border;
+    border-radius: $ct-radius-sm;
+    overflow: hidden;
+    background: $ct-surface;
+
+    button {
+        border: 0;
+        background: transparent;
+        width: 32px;
+        height: 34px;
+        color: $ct-muted;
+        cursor: pointer;
+        transition: all $ct-t;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        i { font-size: 16px; }
+
+        &.active {
+            background: $ct-primary-soft;
+            color: $ct-primary;
+        }
+    }
+}
+
+/* ---------- Quick filter bar ---------- */
+.card-quickbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+
+    .card-btn { height: 32px; padding: 0 10px; }
+}
+
+.card-quick {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid $ct-border;
+    background: $ct-surface;
+    color: $ct-muted;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all $ct-t;
+
+    i { font-size: 15px; }
+
+    .card-quick-count {
+        background: $ct-surface-soft;
+        border-radius: 999px;
+        padding: 1px 7px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--bs-body-color, #1f2937);
+    }
+
+    &:hover { border-color: $ct-primary; color: $ct-primary; }
+
+    &.active {
+        background: $ct-primary;
+        border-color: $ct-primary;
+        color: var(--bs-body-bg);
+
+        .card-quick-count { background: rgba(255, 255, 255, .25); color: var(--bs-body-bg); }
+    }
+}
+
+/* ---------- Active filter chips ---------- */
+.card-chips {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+
+    &:empty { display: none; }
+
+    .card-chip-clear {
+        background: transparent;
+        color: $ct-muted;
+        text-decoration: underline;
+        cursor: pointer;
+        border: 0;
+        font-size: 12px;
+    }
+}
+
+.card-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 6px 0 12px;
+    border-radius: 999px;
+    background: $ct-primary-soft;
+    color: $ct-primary;
+    font-size: 12px;
+    font-weight: 500;
+
+    button {
+        border: 0;
+        background: rgba(0, 0, 0, .06);
+        color: inherit;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 13px;
+        line-height: 1;
+        transition: background $ct-t;
+
+        &:hover { background: rgba(0, 0, 0, .16); }
+    }
+}
+
+/* ---------- Menu heading (inside dropdowns) ---------- */
+.dropdown-menu .card-menu-head {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: $ct-muted;
+    padding: 6px 10px 4px;
+    font-weight: 600;
+}
+
+/* ---------- Empty state ---------- */
+.card-empty {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+
+    &.show { display: block; }
+
+    .card-empty-art {
+        width: 132px;
+        height: 132px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, $ct-primary-soft, transparent 70%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        i { font-size: 60px; color: $ct-primary; }
+    }
+
+    h5 { font-weight: 700; margin-bottom: 6px; }
+    p { color: $ct-muted; max-width: 380px; margin: 0 auto 18px; }
+}
+
+/* ---------- Pagination footer ---------- */
+.card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 12px;
+    border-top: 1px solid $ct-border;
+}
+
+.card-foot-info {
+    font-size: 12.5px;
+    color: $ct-muted;
+
+    span { color: var(--bs-heading-color, #111827); font-weight: 600; }
+}
+
+.card-foot-size {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: $ct-muted;
+    margin-left: auto;
+
+    .form-select {
+        height: 30px;
+        width: auto;
+        padding: 0 26px 0 9px;
+        font-size: 12.5px;
+    }
+}
+
+.card-pagination {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.card-page-numbers { display: inline-flex; gap: 3px; align-items: center; }
+
+.card-page-btn {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 6px;
+    border: 1px solid $ct-border;
+    background: $ct-surface;
+    border-radius: $ct-radius-sm;
+    color: var(--bs-body-color, #374151);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all $ct-t;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    i { font-size: 15px; }
+
+    &:hover:not(:disabled) { border-color: $ct-primary; color: $ct-primary; }
+    &.active { background: $ct-primary; border-color: $ct-primary; color: var(--bs-body-bg); }
+    &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+/* ---------- Fullscreen ---------- */
+.data-workspace.card-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 1055;
+    background: var(--bs-body-bg, var(--bs-body-bg));
+    padding: 18px;
+    overflow: auto;
+
+    .data-table { max-height: calc(100vh - 260px); overflow: auto; }
+}
+
+/* ---------- Toolbar extras (filter menus, count badges, search clear) ---------- */
+.card-filter-menu { min-width: 340px; max-width: 92vw; }
+.card-col-menu { min-width: 210px; max-width: 92vw; }
+
+.card-search-x[hidden],
+.card-count[hidden],
+.card-clear-quick[hidden] { display: none; }
+
+.card-search .card-search-x {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: 0;
+    border-radius: 50%;
+    background: $ct-surface-soft;
+    color: var(--bs-secondary-color, var(--bs-secondary-color));
+    display: flex;
+    place-items: center;
+    font-size: 13px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center; 
+    transition: all $ct-t;
+
+    &:hover { background: $ct-primary; color: var(--bs-body-bg); }
+}
+
+.card-vcount {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--bs-secondary-color, var(--bs-secondary-color));
+}
+
+.card-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: $ct-primary;
+    color: var(--bs-body-bg);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* ============================================================
+   DATA-TABLE STATUS + PRESENCE EXTENSIONS
+   ============================================================ */
+
+/* extra status pills */
+.dt-pill.is-blocked   { background: rgba(220, 38, 38, .12); color: #b91c1c; }
+.dt-pill.is-suspended { background: rgba(217, 119, 6, .14); color: #b45309; }
+.dt-pill.is-review    { background: rgba(99, 102, 241, .12); color: #4338ca; }
+.dt-pill.is-completed { background: rgba(13, 148, 136, .12); color: #0f766e; }
+
+.dt-pill.is-active   .dt-pill-dot { background: #16a34a; }
+.dt-pill.is-inactive .dt-pill-dot { background: var(--bs-secondary-color); }
+.dt-pill.is-pending  .dt-pill-dot { background: #d97706; }
+.dt-pill.is-blocked  .dt-pill-dot { background: #dc2626; }
+.dt-pill.is-suspended .dt-pill-dot { background: #ea580c; }
+.dt-pill.is-review    .dt-pill-dot { background: #6366f1; }
+.dt-pill.is-completed .dt-pill-dot { background: #0d9488; }
+
+/* live statuses get a soft pulse ring */
+.dt-pill.is-active .dt-pill-dot,
+.dt-pill.is-pending .dt-pill-dot,
+.dt-pill.is-review .dt-pill-dot { position: relative; }
+
+.dt-pill.is-active .dt-pill-dot::after,
+.dt-pill.is-pending .dt-pill-dot::after,
+.dt-pill.is-review .dt-pill-dot::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: inherit;
+    opacity: .45;
+    animation: dt-pill-pulse 1.8s ease-out infinite;
+}
+
+@keyframes dt-pill-pulse {
+    0%   { transform: scale(.6); opacity: .5; }
+    70%  { transform: scale(1.9); opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* online presence dot on the profile avatar */
+.dt-user .dt-avatar { position: relative; overflow: visible; }
+
+.dt-user .dt-avatar .dt-presence {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #9ca3af;
+    border: 2px solid var(--bs-body-bg);
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, .5);
+}
+
+.dt-user .dt-avatar .dt-presence.on {
+    background: #16a34a;
+    animation: dt-presence-pulse 2s ease-out infinite;
+}
+
+@keyframes dt-presence-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(22, 163, 74, .5); }
+    70%  { box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+/* ---------- Last-login cell ---------- */
+.dt-login { line-height: 1.35; }
+.dt-login-date { font-weight: 500; color: var(--bs-body-color, #1f2937); }
+.dt-login-time { font-size: 12px; color: var(--bs-secondary-color, var(--bs-secondary-color)); }
+.dt-login-rel {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--bs-secondary-color, var(--bs-secondary-color));
+    margin-top: 2px;
+}
+.dt-login-rel i { font-size: 12px; }
+.dt-login.is-never .dt-login-date { color: var(--bs-secondary-color, var(--bs-secondary-color)); font-weight: 400; }
+[data-bs-theme="dark"] .dt-login-date { color: #e9edf5; }
+
+.data-table.dt-scroll {
+    max-height: calc(100vh - 300px);
+    min-height: 260px;
+}
+
+/* An absent row is tinted rather than recoloured, so its text stays as legible
+   as every other row. Bootstrap's `.table-*` row variants cannot do this here:
+   the grid paints an opaque background on the cells themselves, and the
+   variant's `--bs-table-color` washes the roll and admission numbers out. */
+.data-table > .table > tbody > tr.dt-absent > td {
+    background: rgba(variables.$warning, 0.08);
+}
+
+.data-table > .table > tbody > tr.dt-absent:hover > td {
+    background: rgba(variables.$warning, 0.14);
+}

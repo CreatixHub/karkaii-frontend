@@ -1,0 +1,930 @@
+/* ============================================================
+   STATS CARD (dashboard metric cards) — migrated from app-new.css
+   ============================================================ */
+/* ============================================================
+   METRIC CARD
+   Dashboard statistic card with 15 domain layouts and 8 accent
+   colours. Every layout is driven by component-scoped custom
+   properties so a single accent class recolours the whole card:
+     --mc / --mc-rgb    accent colour (set by .metric-* accent)
+     --s / --t / --m    surface / title / muted text
+     --b / --soft       border / soft accent tint
+     --stats-positive  / --stats-negative   trend colours
+   NOTE: these accents are a bespoke palette independent of the
+   theme's $primary/$success, so they are intentionally not mapped
+   to the Bootstrap colour tokens.
+   ============================================================ */
+.stats-card {
+	--mc: #3577f1;
+	--mc-rgb: 53, 119, 241;
+	--s: #fff;
+	--t: #0f172a;
+	--m: #8f9bb3;
+	--b: rgba(17, 24, 39, .08);
+	--soft: rgba(var(--mc-rgb), .12);
+	--stats-positive: #0ca678;
+	--stats-negative: #e7515a;
+	position: relative;
+	width: 100%;
+	background: var(--s);
+	border: 1px solid var(--b);
+	border-radius: 16px;
+	padding: 1.1rem 1.2rem;
+	overflow: hidden;
+	transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.stats-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 .8rem 1.6rem rgba(17, 24, 39, .10);
+}
+
+.stats-card .stats-value {
+	color: var(--t);
+	font-weight: 700;
+	line-height: 1.1;
+	letter-spacing: -.01em;
+}
+
+.stats-card .stats-label {
+	color: var(--m);
+	font-size: .78rem;
+	margin: 0;
+}
+
+.stats-card .stats-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Accent colours — set the card's --mc token */
+.stats-card.stats-primary {
+	--mc: #3577f1;
+	--mc-rgb: 53, 119, 241;
+}
+
+.stats-card.stats-success {
+	--mc: #0ca678;
+	--mc-rgb: 12, 166, 120;
+}
+
+.stats-card.stats-info {
+	--mc: #3b7ddd;
+	--mc-rgb: 59, 125, 221;
+}
+
+.stats-card.stats-warning {
+	--mc: #f39c12;
+	--mc-rgb: 243, 156, 18;
+}
+
+.stats-card.stats-danger {
+	--mc: #e7515a;
+	--mc-rgb: 231, 81, 90;
+}
+
+.stats-card.stats-purple {
+	--mc: #7c3aed;
+	--mc-rgb: 124, 58, 237;
+}
+
+.stats-card.stats-teal {
+	--mc: #12b3b3;
+	--mc-rgb: 18, 179, 179;
+}
+
+.stats-card.stats-pink {
+	--mc: #e83e8c;
+	--mc-rgb: 232, 62, 140;
+}
+
+/* ---------- 1. STUDENTS — profile: avatar ring + dashed footer ---------- */
+.stats-card-students .stats-head {
+	display: flex;
+	align-items: center;
+	gap: .85rem;
+}
+
+.stats-card-students .stats-avatar {
+	flex: 0 0 52px;
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	font-size: 22px;
+	color: var(--mc);
+	background: var(--soft);
+	box-shadow: 0 0 0 3px rgba(var(--mc-rgb), .15);
+}
+
+.stats-card-students .stats-value {
+	font-size: 1.5rem;
+}
+
+.stats-card-students .stats-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: .85rem;
+	padding-top: .65rem;
+	border-top: 1px dashed var(--b);
+	font-size: .72rem;
+}
+
+.stats-card-students .stats-subtitle {
+	display: inline-flex;
+	align-items: center;
+	gap: .3rem;
+	color: var(--m);
+}
+
+.stats-card-students .stats-subtitle i {
+	color: var(--mc);
+}
+
+.stats-card-students .stats-badge {
+	font-weight: 700;
+	color: var(--stats-positive);
+}
+
+/* ---------- 2. PARENTS — centered,
+soft top wash,
+floating icon ---------- */
+.stats-card-parents {
+	text-align: center;
+	padding-top: 2.3rem;
+}
+
+.stats-card-parents::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 44px;
+	background: linear-gradient(180deg, var(--soft), transparent);
+}
+
+.stats-card-parents .stats-icon {
+	position: relative;
+	width: 50px;
+	height: 50px;
+	border-radius: 14px;
+	margin: 0 auto .5rem;
+	font-size: 22px;
+	background: var(--s);
+	color: var(--mc);
+	box-shadow: 0 .3rem .8rem rgba(var(--mc-rgb), .25);
+}
+
+.stats-card-parents .stats-value {
+	font-size: 1.5rem;
+}
+
+.stats-card-parents .stats-label {
+	margin: .1rem 0 .55rem;
+}
+
+.stats-card-parents .stats-link {
+	display: inline-flex;
+	align-items: center;
+	gap: .3rem;
+	font-size: .7rem;
+	font-weight: 700;
+	color: var(--mc);
+	background: var(--soft);
+	padding: .2rem .6rem;
+	border-radius: 50rem;
+}
+
+/* ---------- 3. TEACHERS — team: overlapping avatars + capacity bar ---------- */
+.stats-card-teachers .stats-avatars {
+	display: flex;
+	align-items: center;
+	margin-bottom: .7rem;
+}
+
+.stats-card-teachers .stats-avatars span {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	margin-left: -8px;
+	border: 2px solid var(--s);
+	background: var(--soft);
+	color: var(--mc);
+	font-size: 12px;
+	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.stats-card-teachers .stats-avatars span:first-child {
+	margin-left: 0;
+}
+
+.stats-card-teachers .stats-avatars .stats-icon {
+	margin-left: auto;
+	width: 40px;
+	height: 40px;
+	border-radius: 12px;
+	background: var(--soft);
+	color: var(--mc);
+	font-size: 20px;
+}
+
+.stats-card-teachers .stats-value {
+	font-size: 1.5rem;
+}
+
+.stats-card-teachers .stats-label {
+	margin: 0 0 .6rem;
+}
+
+.stats-card-teachers .stats-bar {
+	height: 5px;
+	border-radius: 50rem;
+	background: var(--soft);
+	overflow: hidden;
+}
+
+.stats-card-teachers .stats-bar i {
+	display: block;
+	height: 100%;
+	border-radius: 50rem;
+	background: var(--mc);
+}
+
+/* ---------- 4. HR — big value + bordered side mini-metrics ---------- */
+.stats-card-hr {
+	display: flex;
+	align-items: stretch;
+	gap: 1rem;
+}
+
+.stats-card-hr .stats-main {
+	flex: 1;
+	min-width: 0;
+}
+
+.stats-card-hr .stats-icon {
+	width: 42px;
+	height: 42px;
+	border-radius: 12px;
+	background: var(--soft);
+	color: var(--mc);
+	font-size: 20px;
+	margin-bottom: .55rem;
+}
+
+.stats-card-hr .stats-value {
+	font-size: 1.5rem;
+}
+
+.stats-card-hr .stats-aside {
+	flex: 0 0 78px;
+	border-left: 1px solid var(--b);
+	padding-left: .85rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: .45rem;
+}
+
+.stats-card-hr .stats-aside small {
+	font-size: .68rem;
+	color: var(--m);
+	display: block;
+}
+
+.stats-card-hr .stats-aside b {
+	font-size: .95rem;
+	color: var(--t);
+}
+
+/* ---------- 5. EXAMS — pass-rate ring + score sparkline ---------- */
+.stats-card-exams {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.stats-card-exams .stats-ring {
+	flex: 0 0 62px;
+	width: 62px;
+	height: 62px;
+	border-radius: 50%;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: conic-gradient(var(--mc) calc(var(--p, 70)*1%), var(--soft) 0);
+}
+
+.stats-card-exams .stats-ring::before {
+	content: "";
+	position: absolute;
+	width: 46px;
+	height: 46px;
+	border-radius: 50%;
+	background: var(--s);
+}
+
+.stats-card-exams .stats-ring b {
+	position: relative;
+	z-index: 2;
+	font-size: .78rem;
+	color: var(--mc);
+}
+
+.stats-card-exams .stats-value {
+	font-size: 20px;
+	margin-bottom: 6px;
+}
+
+.stats-card-exams .stats-spark {
+	display: flex;
+	align-items: flex-end;
+	gap: 3px;
+	height: 20px;
+	margin-top: .45rem;
+}
+
+.stats-card-exams .stats-spark i {
+	width: 5px;
+	border-radius: 2px 2px 0 0;
+	background: var(--soft);
+}
+
+.stats-card-exams .stats-spark i:last-child {
+	background: var(--mc);
+}
+
+/* ---------- 6. ACADEMICS — icon + completion donut top-right ---------- */
+.stats-card-academics .stats-top {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+}
+
+.stats-card-academics .stats-icon {
+	width: 44px;
+	height: 44px;
+	border-radius: 12px;
+	background: var(--soft);
+	color: var(--mc);
+	font-size: 20px;
+}
+
+.stats-card-academics .stats-ring {
+	width: 46px;
+	height: 46px;
+	border-radius: 50%;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: conic-gradient(var(--mc) calc(var(--p, 65)*1%), var(--soft) 0);
+}
+
+.stats-card-academics .stats-ring::before {
+	content: "";
+	position: absolute;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background: var(--s);
+}
+
+.stats-card-academics .stats-ring b {
+	position: relative;
+	z-index: 2;
+	font-size: .6rem;
+	color: var(--mc);
+}
+
+.stats-card-academics .stats-value {
+	font-size: 1.55rem;
+	margin-top: .8rem;
+}
+
+/* ---------- 7. FINANCE — currency + cash-flow bars + comparison ---------- */
+.stats-card-finance .stats-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.stats-card-finance .stats-icon {
+	width: 42px;
+	height: 42px;
+	border-radius: 12px;
+	background: var(--soft);
+	color: var(--mc);
+	font-size: 20px;
+}
+
+.stats-card-finance .stats-compare {
+	font-size: .7rem;
+	font-weight: 700;
+}
+
+.stats-card-finance .stats-compare.up {
+	color: var(--stats-positive);
+}
+
+.stats-card-finance .stats-compare.down {
+	color: var(--stats-negative);
+}
+
+.stats-card-finance .stats-value {
+	font-size: 1.5rem;
+	margin-top: .65rem;
+	letter-spacing: -.02em;
+}
+
+.stats-card-finance .stats-label {
+	margin: 0 0 .55rem;
+}
+
+.stats-card-finance .stats-bars {
+	display: flex;
+	gap: 5px;
+	align-items: flex-end;
+	height: 26px;
+}
+
+.stats-card-finance .stats-bars i {
+	flex: 1;
+	border-radius: 3px 3px 0 0;
+	background: var(--soft);
+}
+
+.stats-card-finance .stats-bars i.hi {
+	background: var(--mc);
+}
+
+/* ---------- 8. LIBRARY — inventory: stock progress + meta row ---------- */
+.stats-card-library .stats-top {
+	display: flex;
+	align-items: center;
+	gap: .7rem;
+	margin-bottom: .7rem;
+}
+
+.stats-card-library .stats-icon {
+	width: 44px;
+	height: 44px;
+	border-radius: 12px;
+	background: var(--soft);
+	color: var(--mc);
+	font-size: 20px;
+}
+
+.stats-card-library .stats-value {
+	font-size: 1.4rem;
+}
+
+.stats-card-library .stats-progress {
+	height: 6px;
+	border-radius: 50rem;
+	background: var(--soft);
+	overflow: hidden;
+}
+
+.stats-card-library .stats-progress i {
+	display: block;
+	height: 100%;
+	background: var(--mc);
+	border-radius: 50rem;
+}
+
+.stats-card-library .stats-meta {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: .5rem;
+	font-size: .7rem;
+	color: var(--m);
+}
+
+/* ---------- 9. HOSTEL — occupancy segmented bar + legend ---------- */
+.stats-card-hostel .stats-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: .55rem;
+}
+
+.stats-card-hostel .stats-icon {
+	width: 42px;
+	height: 42px;
+	border-radius: 12px;
+	background: var(--soft);
+	color: var(--mc);
+	font-size: 20px;
+}
+
+.stats-card-hostel .stats-value {
+	font-size: 1.5rem;
+}
+
+.stats-card-hostel .stats-label {
+	margin: .45rem 0 .5rem;
+}
+
+.stats-card-hostel .stats-segments {
+	display: flex;
+	height: 8px;
+	border-radius: 50rem;
+	overflow: hidden;
+	background: var(--soft);
+}
+
+.stats-card-hostel .stats-segments i {
+	height: 100%;
+	background: var(--mc);
+}
+
+.stats-card-hostel .stats-legend {
+	display: flex;
+	gap: .9rem;
+	margin-top: .5rem;
+	font-size: .68rem;
+	color: var(--m);
+}
+
+.stats-card-hostel .stats-legend span {
+	display: inline-flex;
+	align-items: center;
+}
+
+.stats-card-hostel .stats-legend span::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	margin-right: .3rem;
+	background: var(--mc);
+}
+
+.stats-card-hostel .stats-legend span.mut::before {
+	background: rgba(var(--mc-rgb), .25);
+}
+
+/* ---------- 10. TRANSPORT — live status pulse + progress track ---------- */
+.stats-card-transport .stats-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.stats-card-transport .stats-icon {
+	width: 42px;
+	height: 42px;
+	border-radius: 12px;
+	background: var(--soft);
+	color: var(--mc);
+	font-size: 20px;
+}
+
+.stats-card-transport .stats-status {
+	display: inline-flex;
+	align-items: center;
+	gap: .35rem;
+	font-size: .68rem;
+	font-weight: 700;
+	color: var(--mc);
+}
+
+.stats-card-transport .stats-status .dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--mc);
+	animation: mcpulse 1.8s infinite;
+}
+
+@keyframes mcpulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(var(--mc-rgb), .5)
+	}
+
+	70% {
+		box-shadow: 0 0 0 8px rgba(var(--mc-rgb), 0)
+	}
+
+	100% {
+		box-shadow: 0 0 0 0 rgba(var(--mc-rgb), 0)
+	}
+}
+
+.stats-card-transport .stats-value {
+	font-size: 1.5rem;
+	margin-top: .65rem;
+}
+
+.stats-card-transport .stats-label {
+	margin: 0 0 .5rem;
+}
+
+.stats-card-transport .stats-track {
+	height: 5px;
+	border-radius: 50rem;
+	background: var(--soft);
+	overflow: hidden;
+}
+
+.stats-card-transport .stats-track i {
+	display: block;
+	height: 100%;
+	background: var(--mc);
+	border-radius: 50rem;
+}
+
+/* ---------- 11. SUPPORT — priority tag + SLA bar ---------- */
+.stats-card-support .stats-top {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+}
+
+.stats-card-support .stats-icon {
+	width: 42px;
+	height: 42px;
+	border-radius: 12px;
+	background: var(--soft);
+	color: var(--mc);
+	font-size: 20px;
+}
+
+.stats-card-support .stats-priority {
+	font-size: .6rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: .04em;
+	padding: .22rem .5rem;
+	border-radius: 6px;
+	background: var(--soft);
+	color: var(--mc);
+}
+
+.stats-card-support .stats-value {
+	font-size: 1.5rem;
+	margin-top: .65rem;
+}
+
+.stats-card-support .stats-label {
+	margin: 0 0 .5rem;
+}
+
+.stats-card-support .stats-sla {
+	display: flex;
+	align-items: center;
+	gap: .5rem;
+	font-size: .68rem;
+	color: var(--m);
+}
+
+.stats-card-support .stats-sla .bar {
+	flex: 1;
+	height: 5px;
+	border-radius: 50rem;
+	background: var(--soft);
+	overflow: hidden;
+}
+
+.stats-card-support .stats-sla .bar i {
+	display: block;
+	height: 100%;
+	background: var(--mc);
+}
+
+/* ---------- 12. SETTINGS — minimal system-health,
+left rail + status dot ---------- */
+.stats-card-settings {
+	border-left: 3px solid var(--mc);
+}
+
+.stats-card-settings .stats-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.stats-card-settings .stats-icon {
+	font-size: 22px;
+	color: var(--mc);
+}
+
+.stats-card-settings .stats-state {
+	display: inline-flex;
+	align-items: center;
+	gap: .32rem;
+	font-size: .66rem;
+	font-weight: 600;
+	color: var(--m);
+}
+
+.stats-card-settings .stats-state i {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--mc);
+}
+
+.stats-card-settings .stats-value {
+	font-size: 1.45rem;
+	margin-top: .8rem;
+}
+
+/* ---------- 13. ACTIVITIES — event date block ---------- */
+.stats-card-activities {
+	display: flex;
+	align-items: center;
+	gap: .9rem;
+}
+
+.stats-card-activities .stats-date {
+	flex: 0 0 54px;
+	height: 60px;
+	border-radius: 12px;
+	background: var(--soft);
+	color: var(--mc);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.stats-card-activities .stats-date b {
+	font-size: 1.25rem;
+	line-height: 1;
+}
+
+.stats-card-activities .stats-date span {
+	font-size: .58rem;
+	text-transform: uppercase;
+	letter-spacing: .06em;
+	margin-top: .1rem;
+}
+
+.stats-card-activities .stats-value {
+	font-size: 1.4rem;
+}
+
+.stats-card-activities .stats-tag {
+	display: inline-block;
+	margin-top: .3rem;
+	font-size: .66rem;
+	font-weight: 600;
+	color: var(--mc);
+}
+
+/* ---------- 14. MASTERS — flat directory row,
+bottom rule + count chip ---------- */
+.stats-card-masters {
+	border: 0;
+	border-bottom: 2px solid var(--soft);
+	border-radius: 0;
+	background: transparent;
+	padding: .55rem .2rem .85rem;
+}
+
+.stats-card-masters:hover {
+	transform: none;
+	box-shadow: none;
+	border-bottom-color: var(--mc);
+}
+
+.stats-card-masters .stats-top {
+	display: flex;
+	align-items: center;
+	gap: .6rem;
+}
+
+.stats-card-masters .stats-icon {
+	width: 38px;
+	height: 38px;
+	border-radius: 10px;
+	background: var(--soft);
+	color: var(--mc);
+	font-size: 18px;
+}
+
+.stats-card-masters .stats-value {
+	font-size: 1.35rem;
+}
+
+.stats-card-masters .stats-label {
+	font-size: .75rem;
+}
+
+.stats-card-masters .stats-chip {
+	margin-left: auto;
+	font-size: .66rem;
+	font-weight: 700;
+	color: var(--mc);
+	background: var(--soft);
+	padding: .15rem .5rem;
+	border-radius: 50rem;
+}
+
+/* ---------- 15. DIRECTORY (users/profile) — avatar w/ presence dot ---------- */
+.stats-card-directory {
+	display: flex;
+	align-items: center;
+	gap: .85rem;
+}
+
+.stats-card-directory .stats-avatar {
+	position: relative;
+	flex: 0 0 48px;
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	background: var(--soft);
+	color: var(--mc);
+	font-size: 20px;
+}
+
+.stats-card-directory .stats-avatar::after {
+	content: "";
+	position: absolute;
+	right: 1px;
+	bottom: 1px;
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+	background: var(--stats-positive);
+	border: 2px solid var(--s);
+}
+
+.stats-card-directory .stats-value {
+	font-size: 20px;
+	margin-bottom: 6px; 
+}
+
+.stats-card-directory .stats-role {
+	display: inline-block;
+	margin-top: .25rem;
+	font-size: .66rem;
+	font-weight: 600;
+	color: var(--mc);
+	background: var(--soft);
+	padding: .15rem .5rem;
+	border-radius: 50rem;
+}
+
+/* ============================================================ DARK MODE ============================================================ */
+[data-theme="dark"] .stats-card {
+	--s: #1a2233;
+	--t: #e9edf5;
+	--m: #8a94a6;
+	--b: rgba(255, 255, 255, .08);
+}
+
+[data-theme="dark"] .stats-card:hover {
+	box-shadow: 0 .8rem 1.6rem rgba(0, 0, 0, .4);
+}
+
+/* ============================================================ RTL ============================================================ */
+[dir="rtl"] .stats-card-settings {
+	border-left: 0;
+	border-right: 3px solid var(--mc);
+}
+
+[dir="rtl"] .stats-card-hr .stats-aside {
+	border-left: 0;
+	border-right: 1px solid var(--b);
+	padding-left: 0;
+	padding-right: .85rem;
+}
+
+[dir="rtl"] .stats-card-teachers .stats-avatars span {
+	margin-left: 0;
+	margin-right: -8px;
+}
+
+[dir="rtl"] .stats-card-teachers .stats-avatars span:first-child {
+	margin-right: 0;
+}
+
+[dir="rtl"] .stats-card-teachers .stats-avatars .stats-icon {
+	margin-left: 0;
+	margin-right: auto;
+}
+
+[dir="rtl"] .stats-card-masters .stats-chip {
+	margin-left: 0;
+	margin-right: auto;
+}
+
+/* ============================================================ RESPONSIVE ============================================================ */
+@media (max-width:575.98px) {
+	.stats-card {
+		padding: 1rem;
+	}
+
+	.stats-card .stats-value {
+		font-size: 1.35rem;
+	}
+}

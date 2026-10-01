@@ -1,0 +1,1559 @@
+@use "sass:color";
+@use "../utils/variables";
+
+/*-----------------
+	Alumni — community platform components
+
+	A shared vocabulary for the Alumni Network Platform: the members
+	themselves, the chapters they organise into, the mentorship they
+	offer, the opportunities they post, the events they attend and
+	the stories the school tells about them. Class prefix `alx-`.
+
+	The visual language is a professional community, not a directory.
+	A member is drawn as a community tile rather than a contact card:
+	the thing that leads is what they can offer the network — mentor,
+	recruit, speak — carried as intent pills rather than buried in a
+	field list. Chapters, opportunities and events each get their own
+	silhouette so the eye can tell the sections apart while scrolling,
+	and nothing on the page repeats the shape of a data table.
+
+	Contents
+	  1. Tokens + shared pieces
+	  2. Community tiles
+	  3. Chapter cards
+	  4. Career + mentorship rosters
+	  5. Opportunity postings
+	  6. Event cards
+	  7. Spotlight stories
+	  8. Community resources
+	  9. Community actions
+	 10. Offcanvas, panels and modals
+-----------------*/
+
+/* ============================================================
+   1. TOKENS + SHARED PIECES
+   ============================================================ */
+:root {
+	--community-radius: 14px;
+	--community-radius-sm: 9px;
+	--community-border: var(--bs-border-color, #{variables.$border-color});
+	--community-border-strong: #{variables.$light-800};
+	--community-surface: #ffffff;
+	--community-surface-soft: #{variables.$light-300};
+	--community-surface-hover: #{color.mix(variables.$primary, #ffffff, 4%)};
+	--community-text: #{variables.$dark};
+	--community-muted: #{variables.$text-muted};
+	--community-accent: #{color.mix(variables.$violet, variables.$dark, 52%)};
+	--community-accent-soft: #{color.mix(variables.$violet, #ffffff, 8%)};
+	--community-accent-line: #{color.mix(variables.$violet, #ffffff, 30%)};
+	--community-mono: "SFMono-Regular", "Menlo", "Consolas", monospace;
+	--community-shadow: 0 1px 2px rgba(17, 24, 39, .05);
+	--community-shadow-lift: 0 10px 28px rgba(17, 24, 39, .10);
+	--community-ease: .18s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* Sticky toolbar shell — rides just under the fixed 60px layout header.
+   Released below lg, where the header itself stops being fixed. */
+.toolbar-sticky {
+	position: sticky;
+	top: 64px;
+	z-index: 4;
+
+	@media (max-width: 991.98px) { position: static; }
+}
+
+/* Section heading — a rule that runs out from the label */
+.section-header {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin-bottom: 16px;
+
+	.section-title {
+		font-size: 18px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--community-text);
+		margin: 0;
+		white-space: nowrap;
+	}
+
+	.section-subtitle {
+		font-size: 13px;
+		color: var(--community-muted);
+		margin: 2px 0 0;
+	}
+
+	.section-rule {
+		flex: 1 1 auto;
+		height: 1px;
+		background: linear-gradient(90deg, var(--community-border) 0%, transparent 100%);
+	}
+}
+
+/* Micro label */
+.metric-label {
+	display: block;
+	font-size: 10px;
+	font-weight: variables.$font-weight-bold;
+	letter-spacing: .07em;
+	text-transform: uppercase;
+	color: var(--community-muted);
+	margin-bottom: 3px;
+}
+
+/* Skill / interest chip */
+.member-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	height: 24px;
+	padding: 0 9px;
+	border-radius: 999px;
+	border: 1px solid var(--community-border);
+	background: var(--community-surface-soft);
+	font-size: 11.5px;
+	font-weight: variables.$font-weight-medium;
+	color: var(--community-text);
+
+	i { font-size: 13px; color: var(--community-muted); }
+
+	&.is-accent {
+		border-color: var(--community-accent-line);
+		background: var(--community-accent-soft);
+		color: var(--community-accent);
+		i { color: currentcolor; }
+	}
+}
+
+/* Status badge */
+.status-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	height: 22px;
+	padding: 0 8px;
+	border-radius: 6px;
+	font-size: 11px;
+	font-weight: variables.$font-weight-semibold;
+	background: var(--community-surface-soft);
+	color: var(--community-muted);
+
+	i { font-size: 12px; }
+
+	&.is-open    { background: #{color.mix(variables.$success, #ffffff, 12%)}; color: #{color.mix(variables.$success, variables.$dark, 74%)}; }
+	&.is-soon    { background: #{color.mix(variables.$warning, #ffffff, 14%)}; color: #{color.mix(variables.$warning, variables.$dark, 58%)}; }
+	&.is-closed  { background: #{color.mix(variables.$danger, #ffffff, 10%)};  color: #{color.mix(variables.$danger, variables.$dark, 72%)}; }
+	&.is-accent  { background: var(--community-accent-soft); color: var(--community-accent); }
+	&.is-featured {
+		background: var(--community-accent);
+		color: #ffffff;
+	}
+}
+
+/* Avatar stack — who else is here */
+.avatar-stack {
+	display: flex;
+	align-items: center;
+
+	img,
+	span.more {
+		width: 26px;
+		height: 26px;
+		border-radius: 50%;
+		border: 2px solid var(--community-surface);
+		margin-left: -8px;
+		object-fit: cover;
+
+		&:first-child { margin-left: 0; }
+	}
+
+	span.more {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--community-surface-soft);
+		color: var(--community-muted);
+		font-size: 10px;
+		font-weight: variables.$font-weight-bold;
+	}
+}
+
+/* Capacity meter — a fill bar, deliberately not a chart */
+.progress-meter {
+	height: 5px;
+	border-radius: 999px;
+	background: var(--community-surface-soft);
+	overflow: hidden;
+
+	span {
+		display: block;
+		height: 100%;
+		border-radius: inherit;
+		background: var(--community-accent);
+	}
+
+	&.is-warm span { background: #{variables.$warning}; }
+	&.is-full span { background: #{variables.$danger}; }
+}
+
+
+/* ============================================================
+   2. COMMUNITY TILES
+   ============================================================ */
+.tile {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	border: 1px solid var(--community-border);
+	border-radius: var(--community-radius);
+	background: var(--community-surface);
+	box-shadow: var(--community-shadow);
+	overflow: hidden;
+	width: 100%;
+	transition: box-shadow var(--community-ease), border-color var(--community-ease), transform var(--community-ease);
+
+	&:hover {
+		border-color: var(--community-accent-line);
+		box-shadow: var(--community-shadow-lift);
+		transform: translateY(-2px);
+	}
+}
+
+/* Identity band — cover strip the avatar sits across */
+.tile-band {
+	position: relative;
+	height: 62px;
+	background:
+		linear-gradient(135deg, var(--community-accent) 0%, #{color.mix(variables.$primary, variables.$violet, 50%)} 100%);
+
+	/* A faint grid so the band reads as texture, not a colour block */
+	&::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background-image:
+			linear-gradient(rgba(255, 255, 255, .10) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255, 255, 255, .10) 1px, transparent 1px);
+		background-size: 22px 22px;
+	}
+
+	.tile-batch {
+		position: absolute;
+		top: 10px;
+		right: 12px;
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		height: 22px;
+		padding: 0 9px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, .18);
+		border: 1px solid rgba(255, 255, 255, .34);
+		color: #ffffff;
+		font-family: var(--community-mono);
+		font-size: 11px;
+		font-weight: variables.$font-weight-semibold;
+	}
+}
+
+.tile-identity {
+	position: relative;
+	display: flex;
+	align-items: flex-end;
+	gap: 12px;
+	padding: 0 16px;
+	margin-top: -26px;
+
+	/* Lets the name and role ellipsis instead of forcing the flex row wider */
+	> div { min-width: 0; }
+
+	.tile-avatar {
+		position: relative;
+		flex-shrink: 0;
+		width: 62px;
+		height: 62px;
+		border-radius: 14px;
+		border: 3px solid var(--community-surface);
+		object-fit: cover;
+		background: var(--community-surface-soft);
+	}
+
+	.tile-dot {
+		position: absolute;
+		left: 62px;
+		bottom: 4px;
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		border: 2px solid var(--community-surface);
+		background: #{variables.$success};
+	}
+
+	.tile-name {
+		font-size: 15.5px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--community-text);
+		margin: 0 0 1px;
+
+		a { color: inherit; }
+		a:hover { color: var(--community-accent); }
+	}
+
+	.tile-role {
+		font-size: 12.5px;
+		color: var(--community-muted);
+		margin: 0;
+		padding-bottom: 3px;
+	}
+}
+
+.tile-body {
+	flex: 1 1 auto;
+	padding: 14px 16px 0;
+}
+
+/* Company / industry / country facts, three to a row */
+.tile-facts {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+	padding: 10px 12px;
+	border: 1px solid var(--community-border);
+	border-radius: var(--community-radius-sm);
+	background: var(--community-surface-soft);
+	margin-bottom: 12px;
+
+	p {
+		margin: 0;
+		font-size: 12.5px;
+		font-weight: variables.$font-weight-medium;
+		color: var(--community-text);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+
+/* Intent pills — what this member offers the network */
+.intents {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 12px;
+}
+
+.intent {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	height: 26px;
+	padding: 0 10px;
+	border-radius: 7px;
+	border: 1px dashed var(--community-border-strong);
+	background: transparent;
+	color: var(--community-muted);
+	font-size: 11.5px;
+	font-weight: variables.$font-weight-semibold;
+
+	i { font-size: 14px; }
+
+	/* Solid + coloured only when the member has actually opted in, so a
+	   scan of the grid reads availability without reading any labels. */
+	&.is-on {
+		border-style: solid;
+
+		&.is-mentor {
+			border-color: #{color.mix(variables.$success, #ffffff, 44%)};
+			background: #{color.mix(variables.$success, #ffffff, 10%)};
+			color: #{color.mix(variables.$success, variables.$dark, 72%)};
+		}
+
+		&.is-recruit {
+			border-color: #{color.mix(variables.$info, #ffffff, 44%)};
+			background: #{color.mix(variables.$info, #ffffff, 10%)};
+			color: #{color.mix(variables.$info, variables.$dark, 72%)};
+		}
+
+		&.is-speak {
+			border-color: #{color.mix(variables.$warning, #ffffff, 44%)};
+			background: #{color.mix(variables.$warning, #ffffff, 14%)};
+			color: #{color.mix(variables.$warning, variables.$dark, 54%)};
+		}
+	}
+}
+
+/* Achievement line */
+.tile-note {
+	display: flex;
+	align-items: flex-start;
+	gap: 7px;
+	font-size: 12.5px;
+	color: var(--community-muted);
+	margin-bottom: 12px;
+
+	i {
+		flex-shrink: 0;
+		margin-top: 1px;
+		font-size: 15px;
+		color: #{variables.$warning};
+	}
+}
+
+.tile-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 11px 16px;
+	border-top: 1px solid var(--community-border);
+	background: #{color.mix(variables.$light-300, #ffffff, 46%)};
+
+	.tile-connections {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 11.5px;
+		color: var(--community-muted);
+	}
+}
+
+/* Compact icon button used across footers */
+.icon-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border-radius: 8px;
+	border: 1px solid var(--community-border);
+	background: var(--community-surface);
+	color: var(--community-muted);
+	transition: all var(--community-ease);
+
+	i { font-size: 15px; }
+
+	&:hover {
+		border-color: var(--community-accent-line);
+		background: var(--community-accent-soft);
+		color: var(--community-accent);
+	}
+}
+
+/* ============================================================
+   3. CHAPTER CARDS
+   ============================================================ */
+.chapter {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 100%; 
+	padding: 16px 16px 14px 20px;
+	border: 1px solid var(--community-border);
+	border-radius: var(--community-radius);
+	background: var(--community-surface);
+	box-shadow: var(--community-shadow);
+	transition: box-shadow var(--community-ease), border-color var(--community-ease);
+
+	/* Regional rail — the one piece of colour that distinguishes chapters */
+	&::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 14px;
+		bottom: 14px;
+		width: 3px;
+		border-radius: 0 3px 3px 0;
+		background: var(--chapter-hue, var(--community-accent));
+	}
+
+	&:hover {
+		border-color: var(--community-accent-line);
+		box-shadow: var(--community-shadow-lift);
+	}
+
+	&.hue-teal    { --chapter-hue: #{variables.$teal}; }
+	&.hue-purple  { --chapter-hue: #{variables.$purple}; }
+	&.hue-warning { --chapter-hue: #{variables.$warning}; }
+	&.hue-success { --chapter-hue: #{variables.$success}; }
+	&.hue-info    { --chapter-hue: #{variables.$info}; }
+	&.hue-danger  { --chapter-hue: #{variables.$danger}; }
+}
+
+.chapter-header {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	margin-bottom: 13px;
+
+	.crest {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 42px;
+		height: 42px;
+		border-radius: 12px;
+		background: color-mix(in srgb, var(--chapter-hue, var(--community-accent)) 12%, #ffffff);
+		color: var(--chapter-hue, var(--community-accent));
+
+		i { font-size: 21px; }
+	}
+
+	h6 {
+		font-size: 14.5px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--community-text);
+		margin: 0 0 1px;
+	}
+
+	p {
+		font-size: 12px;
+		color: var(--community-muted);
+		margin: 0;
+	}
+}
+
+/* Meetup strip */
+.meetup {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	padding: 9px 11px;
+	border-radius: var(--community-radius-sm);
+	background: var(--community-surface-soft);
+	margin-bottom: 12px;
+
+	i {
+		font-size: 16px;
+		color: var(--chapter-hue, var(--community-accent));
+	}
+
+	.meetup-text {
+		font-size: 12.5px;
+		font-weight: variables.$font-weight-medium;
+		color: var(--community-text);
+		line-height: 1.35;
+
+		small {
+			display: block;
+			font-size: 11px;
+			font-weight: variables.$font-weight-normal;
+			color: var(--community-muted);
+		}
+	}
+}
+
+.chapter-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin-top: auto;
+	padding-top: 12px;
+	border-top: 1px dashed var(--community-border);
+
+	.coordinator {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		min-width: 0;
+
+		img {
+			width: 26px;
+			height: 26px;
+			border-radius: 50%;
+			object-fit: cover;
+		}
+
+		span {
+			font-size: 12px;
+			color: var(--community-text);
+			font-weight: variables.$font-weight-medium;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		small {
+			display: block;
+			font-size: 10.5px;
+			font-weight: variables.$font-weight-normal;
+			color: var(--community-muted);
+		}
+	}
+}
+
+/* ============================================================
+   4. CAREER + MENTORSHIP ROSTERS
+   ============================================================ */
+.roster {
+	height: 100%;
+	width: 100%; 
+	border: 1px solid var(--community-border);
+	border-radius: var(--community-radius);
+	background: var(--community-surface);
+	box-shadow: var(--community-shadow);
+	overflow: hidden;
+}
+
+.roster-header {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	padding: 14px 16px;
+	border-bottom: 1px solid var(--community-border);
+
+	.roster-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 38px;
+		height: 38px;
+		border-radius: 11px;
+		background: var(--community-accent-soft);
+		color: var(--community-accent);
+
+		i { font-size: 19px; }
+	}
+
+	h6 {
+		font-size: 14px;
+		font-weight: variables.$font-weight-semibold;
+		margin: 0 0 1px;
+		color: var(--community-text);
+	}
+
+	p {
+		font-size: 11.5px;
+		color: var(--community-muted);
+		margin: 0;
+	}
+}
+
+/* One person inside a roster */
+.person {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	padding: 11px 16px;
+	border-bottom: 1px solid var(--community-border);
+	transition: background var(--community-ease);
+
+	&:last-child { border-bottom: 0; }
+	&:hover { background: var(--community-surface-hover); }
+
+	img {
+		width: 36px;
+		height: 36px;
+		border-radius: 10px;
+		object-fit: cover;
+		flex-shrink: 0;
+	}
+
+	.person-main {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.person-name {
+		font-size: 13px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--community-text);
+		margin: 0 0 1px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.person-org {
+		font-size: 11.5px;
+		color: var(--community-muted);
+		margin: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.person-meta {
+		flex-shrink: 0;
+		text-align: right;
+
+		.years {
+			display: block;
+			font-family: var(--community-mono);
+			font-size: 12px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--community-text);
+		}
+
+		small {
+			font-size: 10px;
+			color: var(--community-muted);
+		}
+	}
+}
+
+/* Availability dot + word */
+.availability {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 11px;
+	font-weight: variables.$font-weight-semibold;
+	color: var(--community-muted);
+
+	&::before {
+		content: "";
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: currentcolor;
+	}
+
+	&.is-free    { color: #{color.mix(variables.$success, variables.$dark, 70%)}; }
+	&.is-limited { color: #{color.mix(variables.$warning, variables.$dark, 52%)}; }
+	&.is-busy    { color: #{variables.$text-muted}; }
+}
+
+.roster-footer {
+	padding: 11px 16px;
+	border-top: 1px solid var(--community-border);
+	background: #{color.mix(variables.$light-300, #ffffff, 46%)};
+}
+
+/* ============================================================
+   5. OPPORTUNITY POSTINGS
+   ============================================================ */
+.post {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding: 15px 16px 14px;
+	border: 1px solid var(--community-border);
+	border-radius: var(--community-radius);
+	background: var(--community-surface);
+	box-shadow: var(--community-shadow);
+	transition: box-shadow var(--community-ease), border-color var(--community-ease);
+
+	&:hover {
+		border-color: var(--community-accent-line);
+		box-shadow: var(--community-shadow-lift);
+	}
+}
+
+/* Category worn on the top edge rather than as another badge in the body */
+.post-category {
+	position: absolute;
+	top: -1px;
+	left: 16px;
+	height: 3px;
+	width: 46px;
+	border-radius: 0 0 3px 3px;
+	background: var(--post-hue, var(--community-accent));
+}
+
+.post-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+	margin-bottom: 11px;
+
+	h6 {
+		font-size: 14.5px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--community-text);
+		margin: 0 0 3px;
+		line-height: 1.35;
+	}
+
+	.post-org {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 12px;
+		color: var(--community-muted);
+
+		img {
+			width: 18px;
+			height: 18px;
+			border-radius: 5px;
+			object-fit: cover;
+		}
+	}
+}
+
+.post-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 14px;
+	margin-bottom: 12px;
+	font-size: 12px;
+	color: var(--community-muted);
+
+	span {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+	}
+
+	i { font-size: 14px; }
+}
+
+/* Deadline strip — the fact that decides whether the card matters */
+.deadline {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin-top: auto;
+	padding: 9px 11px;
+	border-radius: var(--community-radius-sm);
+	background: var(--community-surface-soft);
+	font-size: 12px;
+
+	.deadline-when {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-weight: variables.$font-weight-medium;
+		color: var(--community-text);
+
+		i { font-size: 15px; color: var(--community-muted); }
+	}
+}
+
+/* ============================================================
+   6. EVENT CARDS
+   ============================================================ */
+.event {
+	display: flex;
+	height: 100%;
+	width: 100%; 
+	border: 1px solid var(--community-border);
+	border-radius: var(--community-radius);
+	background: var(--community-surface);
+	box-shadow: var(--community-shadow);
+	overflow: hidden;
+	transition: box-shadow var(--community-ease), border-color var(--community-ease);
+
+	&:hover {
+		border-color: var(--community-accent-line);
+		box-shadow: var(--community-shadow-lift);
+	}
+}
+
+/* Date block — a torn calendar leaf down the left edge */
+.event-date {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 78px;
+	padding: 14px 6px;
+	border-right: 1px solid var(--community-border);
+	background: linear-gradient(180deg, var(--community-accent-soft) 0%, var(--community-surface) 100%);
+
+	.event-day {
+		font-size: 26px;
+		font-weight: variables.$font-weight-bold;
+		line-height: 1;
+		color: var(--community-accent);
+	}
+
+	.event-month {
+		font-size: 11px;
+		font-weight: variables.$font-weight-bold;
+		letter-spacing: .08em;
+		text-transform: uppercase;
+		color: var(--community-muted);
+		margin-top: 3px;
+	}
+
+	.event-time {
+		font-size: 10.5px;
+		color: var(--community-muted);
+		margin-top: 7px;
+		padding-top: 7px;
+		border-top: 1px dashed var(--community-border);
+		width: 100%;
+		text-align: center;
+	}
+}
+
+.event-body {
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: 13px 15px;
+	display: flex;
+	flex-direction: column;
+
+	h6 {
+		font-size: 14.5px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--community-text);
+		margin: 0 0 4px;
+	}
+
+	.event-where {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 13px;
+		font-size: 12px;
+		color: var(--community-muted);
+		margin-bottom: 11px;
+
+		span { display: inline-flex; align-items: center; gap: 5px; }
+		i { font-size: 14px; }
+	}
+}
+
+.event-seats {
+	margin-top: auto;
+
+	.seats-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		font-size: 11.5px;
+		color: var(--community-muted);
+		margin-bottom: 5px;
+
+		b { color: var(--community-text); }
+	}
+}
+
+.event-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin-top: 12px;
+	padding-top: 11px;
+	border-top: 1px solid var(--community-border);
+}
+
+/* ============================================================
+   7. SPOTLIGHT STORIES
+   ============================================================ */
+.spotlight {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	border-radius: var(--community-radius);
+	overflow: hidden;
+	border: 1px solid var(--community-border);
+	background: var(--community-surface);
+	box-shadow: var(--community-shadow);
+	transition: box-shadow var(--community-ease), transform var(--community-ease);
+
+	&:hover {
+		box-shadow: var(--community-shadow-lift);
+		transform: translateY(-2px);
+	}
+}
+
+.spotlight-photo {
+	position: relative;
+	height: 168px;
+	overflow: hidden;
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+	}
+
+	/* Scrim so the ribbon and award stay legible on any photo */
+	&::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(180deg, rgba(32, 44, 75, .48) 0%, rgba(32, 44, 75, 0) 46%, rgba(32, 44, 75, .72) 100%);
+	}
+
+	.spotlight-ribbon {
+		position: absolute;
+		top: 12px;
+		left: 12px;
+		z-index: 2;
+	}
+
+	.spotlight-award {
+		position: absolute;
+		left: 14px;
+		right: 14px;
+		bottom: 11px;
+		z-index: 2;
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		color: #ffffff;
+		font-size: 12px;
+		font-weight: variables.$font-weight-medium;
+
+		i { font-size: 16px; color: #{variables.$warning}; }
+	}
+}
+
+.spotlight:hover .spotlight-photo img { transform: scale(1.04); }
+
+.spotlight-body {
+	flex: 1 1 auto;
+	padding: 14px 16px 0;
+
+	h6 {
+		font-size: 15.5px;
+		font-weight: variables.$font-weight-semibold;
+		line-height: 1.4;
+		color: var(--community-text);
+		margin: 0 0 7px;
+	}
+
+	p {
+		font-size: 12.5px;
+		color: var(--community-muted);
+		line-height: 1.6;
+		margin: 0;
+	}
+}
+
+.spotlight-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 13px 16px;
+
+	.spotlight-who {
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		min-width: 0;
+
+		img {
+			width: 32px;
+			height: 32px;
+			border-radius: 9px;
+			object-fit: cover;
+		}
+
+		b {
+			display: block;
+			font-size: 12.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--community-text);
+		}
+
+		small {
+			font-size: 11px;
+			color: var(--community-muted);
+		}
+	}
+}
+
+/* ============================================================
+   8. COMMUNITY RESOURCES
+   ============================================================ */
+/* Rounded glyph tile. Top level rather than nested under .resource because the
+   offcanvas event rows reuse it outside a resource card. */
+.resource-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 40px;
+	height: 40px;
+	border-radius: 11px;
+	background: var(--community-surface-soft);
+	color: var(--community-accent);
+
+	i { font-size: 20px; }
+}
+
+.resource {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	height: 100%;
+	padding: 13px 14px;
+	border: 1px solid var(--community-border);
+	border-radius: var(--community-radius);
+	background: var(--community-surface);
+	box-shadow: var(--community-shadow);
+	transition: all var(--community-ease);
+
+	&:hover {
+		border-color: var(--community-accent-line);
+		background: var(--community-surface-hover);
+		box-shadow: var(--community-shadow-lift);
+
+		.resource-go { color: var(--community-accent); transform: translateX(2px); }
+	}
+
+	.resource-main {
+		flex: 1 1 auto;
+		min-width: 0;
+
+		h6 {
+			font-size: 13.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--community-text);
+			margin: 0 0 2px;
+		}
+
+		p {
+			font-size: 11.5px;
+			color: var(--community-muted);
+			margin: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	.resource-go {
+		flex-shrink: 0;
+		color: var(--community-muted);
+		font-size: 17px;
+		transition: all var(--community-ease);
+	}
+}
+
+/* ============================================================
+   9. COMMUNITY ACTIONS
+   ============================================================ */
+.action {
+	position: relative;
+	display: block;
+	height: 100%;
+	padding: 16px 15px 14px;
+	border: 1px solid var(--community-border);
+	border-radius: var(--community-radius);
+	background: var(--community-surface);
+	box-shadow: var(--community-shadow);
+	text-align: left;
+	width: 100%;
+	transition: all var(--community-ease);
+
+	&:hover {
+		border-color: var(--community-accent);
+		box-shadow: var(--community-shadow-lift);
+		transform: translateY(-2px);
+	}
+
+	.action-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 38px;
+		height: 38px;
+		border-radius: 11px;
+		background: var(--community-accent-soft);
+		color: var(--community-accent);
+		margin-bottom: 11px;
+
+		i { font-size: 19px; }
+	}
+
+	h6 {
+		font-size: 13.5px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--community-text);
+		margin: 0 0 3px;
+	}
+
+	p {
+		font-size: 11.5px;
+		color: var(--community-muted);
+		line-height: 1.5;
+		margin: 0;
+	}
+
+	.action-go {
+		position: absolute;
+		top: 16px;
+		right: 15px;
+		color: var(--community-border-strong);
+		font-size: 16px;
+		transition: all var(--community-ease);
+	}
+
+	&:hover .action-go { color: var(--community-accent); transform: translateX(2px); }
+}
+
+/* ============================================================
+   10. OFFCANVAS, PANELS AND MODALS
+   ============================================================ */
+.detail-panel {
+	width: 88%;
+
+	@media (max-width: 991.98px) { width: 100%; }
+
+	.offcanvas-body { background: #{color.mix(variables.$light-300, #ffffff, 40%)}; }
+}
+
+/* Member header inside the offcanvas */
+.detail-identity {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+
+	img {
+		width: 56px;
+		height: 56px;
+		border-radius: 14px;
+		object-fit: cover;
+	}
+
+	h5 {
+		font-size: 17px;
+		font-weight: variables.$font-weight-semibold;
+		margin: 0 0 2px;
+		color: var(--community-text);
+	}
+
+	p {
+		font-size: 12.5px;
+		color: var(--community-muted);
+		margin: 0;
+	}
+}
+
+/* Generic panel used for every block in the offcanvas */
+.panel {
+	border: 1px solid var(--community-border);
+	border-radius: var(--community-radius);
+	background: var(--community-surface);
+	box-shadow: var(--community-shadow);
+	margin-bottom: 16px;
+
+	.panel-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--community-border);
+
+		h6 {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 13.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--community-text);
+			margin: 0;
+
+			i { font-size: 16px; color: var(--community-accent); }
+		}
+	}
+
+	.panel-body { padding: 14px 16px; }
+	.panel-body.is-flush { padding: 0; }
+}
+
+/* Definition rows — profile and education facts */
+.facts {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 14px;
+
+	.fact {
+		p {
+			margin: 0;
+			font-size: 13px;
+			font-weight: variables.$font-weight-medium;
+			color: var(--community-text);
+		}
+	}
+}
+
+/* Professional journey — stacked posting blocks, not a timeline */
+.journey {
+	.job {
+		display: flex;
+		gap: 12px;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--community-border);
+
+		&:last-child { border-bottom: 0; }
+
+		.job-logo {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+			width: 38px;
+			height: 38px;
+			border-radius: 10px;
+			border: 1px solid var(--community-border);
+			background: var(--community-surface-soft);
+			color: var(--community-muted);
+
+			i { font-size: 18px; }
+		}
+
+		h6 {
+			font-size: 13px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--community-text);
+			margin: 0 0 2px;
+		}
+
+		.job-org {
+			font-size: 12px;
+			color: var(--community-muted);
+			margin: 0 0 4px;
+		}
+
+		.job-span {
+			font-family: var(--community-mono);
+			font-size: 11px;
+			color: var(--community-muted);
+			white-space: nowrap;
+			margin-left: auto;
+			flex-shrink: 0;
+		}
+
+		&.is-current .job-logo {
+			border-color: var(--community-accent-line);
+			background: var(--community-accent-soft);
+			color: var(--community-accent);
+		}
+	}
+}
+
+/* Achievement rows */
+.award {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 10px 0;
+	border-bottom: 1px dashed var(--community-border);
+
+	&:first-child { padding-top: 0; }
+	&:last-child { border-bottom: 0; padding-bottom: 0; }
+
+	i {
+		flex-shrink: 0;
+		margin-top: 1px;
+		font-size: 17px;
+		color: #{variables.$warning};
+	}
+
+	b {
+		display: block;
+		font-size: 12.5px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--community-text);
+	}
+
+	small {
+		font-size: 11.5px;
+		color: var(--community-muted);
+	}
+}
+
+/* Community participation counters, no card chrome */
+.tally {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+	gap: 1px;
+	background: var(--community-border);
+	border-radius: var(--community-radius-sm);
+	overflow: hidden;
+
+	.tally-cell {
+		padding: 12px 10px;
+		background: var(--community-surface);
+		text-align: center;
+
+		b {
+			display: block;
+			font-size: 19px;
+			font-weight: variables.$font-weight-bold;
+			color: var(--community-text);
+			line-height: 1.15;
+		}
+
+		small {
+			font-size: 11px;
+			color: var(--community-muted);
+		}
+	}
+}
+
+/* Gallery thumbs */
+.gallery {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+	gap: 8px;
+
+	img {
+		width: 100%;
+		aspect-ratio: 4 / 3;
+		object-fit: cover;
+		border-radius: var(--community-radius-sm);
+		border: 1px solid var(--community-border);
+	}
+}
+
+/* Social links */
+.social {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+
+	a {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		height: 32px;
+		padding: 0 12px;
+		border-radius: 8px;
+		border: 1px solid var(--community-border);
+		background: var(--community-surface-soft);
+		font-size: 12px;
+		font-weight: variables.$font-weight-medium;
+		color: var(--community-text);
+		transition: all var(--community-ease);
+
+		i { font-size: 15px; color: var(--community-muted); }
+
+		&:hover {
+			border-color: var(--community-accent-line);
+			background: var(--community-accent-soft);
+			color: var(--community-accent);
+			i { color: currentcolor; }
+		}
+	}
+}
+
+/* Note entries */
+.note-item {
+	padding: 11px 12px;
+	border-radius: var(--community-radius-sm);
+	background: var(--community-surface-soft);
+	border: 1px solid var(--community-border);
+	margin-bottom: 9px;
+
+	&:last-child { margin-bottom: 0; }
+
+	p {
+		font-size: 12.5px;
+		color: var(--community-text);
+		line-height: 1.55;
+		margin: 0 0 6px;
+	}
+
+	.note-by {
+		font-size: 11px;
+		color: var(--community-muted);
+	}
+}
+
+/* Related alumni rows */
+.related-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 9px 16px;
+	border-bottom: 1px solid var(--community-border);
+	transition: background var(--community-ease);
+
+	&:last-child { border-bottom: 0; }
+	&:hover { background: var(--community-surface-hover); }
+
+	img {
+		width: 34px;
+		height: 34px;
+		border-radius: 9px;
+		object-fit: cover;
+	}
+
+	.related-main {
+		flex: 1 1 auto;
+		min-width: 0;
+
+		b {
+			display: block;
+			font-size: 12.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--community-text);
+		}
+
+		small {
+			font-size: 11px;
+			color: var(--community-muted);
+		}
+	}
+}
+
+/* Modal header icon */
+.modal-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	background: var(--community-accent-soft);
+	color: var(--community-accent);
+	margin-right: 11px;
+
+	i { font-size: 18px; }
+}
+
+/* ============================================================
+   DARK THEME
+   ============================================================ */
+[data-theme="dark"],
+[data-bs-theme="dark"] {
+	--community-border: #2c3448;
+	--community-border-strong: #3a4459;
+	--community-surface: #1f2536;
+	--community-surface-soft: #262d40;
+	--community-surface-hover: #2a3145;
+	--community-text: #e6e9f2;
+	--community-muted: #9aa3b8;
+	--community-accent: #{color.mix(variables.$violet, #ffffff, 52%)};
+	--community-accent-soft: rgba(103, 58, 183, .18);
+	--community-accent-line: rgba(103, 58, 183, .42);
+	--community-shadow: 0 1px 2px rgba(0, 0, 0, .32);
+	--community-shadow-lift: 0 10px 28px rgba(0, 0, 0, .42);
+
+	.tile-footer,
+	.roster-footer { background: #232a3c; }
+
+	.intent { border-color: #3a4459; }
+
+	.detail-panel .offcanvas-body { background: #1a2030; }
+
+	.tile-band::after {
+		background-image:
+			linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+	}
+}
+
+.sticky-item {
+	position: sticky;
+	top: 80px;   
+}
+
+.choices[data-type*="select-multiple"] .choices__inner {
+	padding-top: 3px !important;
+	padding-left: 10px !important;
+}
+.timepicker ~ .cal-icon, .datetimepicker ~ .cal-icon  {
+	display: none !important;
+}

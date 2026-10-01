@@ -1,0 +1,18 @@
+/*-----------------
+    Dashboard Controls
+
+    The quick-attendance segmented toggle and the toast stack — the two
+    interactive controls the dashboard JS drives directly.
+-----------------*/
+
+/*----- quick attendance -----*/
+.qa-toggle { display: inline-flex; border: 1px solid var(--bs-border-color); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+.qa-toggle button { border: 0; background: transparent; font-size: 11.5px; font-weight: 600; padding: 5px 13px; color: var(--bs-secondary-color); cursor: pointer; transition: all var(--transition); }
+.qa-toggle button.p.active { background: var(--bs-success); color: #fff; }
+.qa-toggle button.a.active { background: var(--bs-danger); color: #fff; }
+/* the whole roster row is a click target */
+#dashQaList .data-list-item { cursor: pointer; }
+
+/*----- toasts -----*/
+#toastStack { position: fixed; top: 76px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
+#toastStack .toast { min-width: 250px; }

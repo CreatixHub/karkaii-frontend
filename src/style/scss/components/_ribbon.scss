@@ -1,0 +1,82 @@
+@use "../utils/variables";
+
+[data-bs-toggle="card-fullscreen"] {
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+} 
+[data-bs-toggle="card-remove"] {
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+} 
+svg {
+  &.collapse-open,&.collapse-close {
+    width: 15px;
+    height: 15px;
+  }
+}
+.btn-icon {
+  &.btn-danger-light {
+    color: variables.$danger-900;
+    background: variables.$danger-100;
+  }
+}
+.live-rating {
+  &.badge {
+    background: variables.$success-200;
+    color: variables.$white;
+  }
+}
+@media (min-width: 576px) {
+  .mx-sm-7 {
+    margin-inline: 3rem !important;
+  }
+}
+[dir="rtl"] {
+  .power-ribbone-top-left span {
+    transform: rotate(45deg);
+  }
+
+  .power-ribbone-top-left span i {
+    transform: rotate(-45deg);
+  }
+
+  .power-ribbone-bottom-left span {
+    transform: rotate(-45deg);
+  }
+
+  .power-ribbone-bottom-left span i {
+    transform: rotate(45deg);
+  }
+
+  .power-ribbone-top-right span {
+    transform: rotate(-45deg);
+  }
+
+  .power-ribbone-top-right span i {
+    transform: rotate(45deg);
+  }
+
+  .power-ribbone-bottom-right span {
+    transform: rotate(45deg);
+  }
+
+  .power-ribbone-bottom-right span i {
+    transform: rotate(-45deg);
+  }
+
+  .ribbone-top-left span {
+    transform: rotate(45deg);
+  }
+
+  .ribbone-top-right span {
+    transform: rotate(-45deg);
+  }
+
+  .ribbon-price .badge {
+    transform: rotate(-45deg);
+  }
+}

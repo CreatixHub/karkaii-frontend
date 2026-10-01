@@ -1,0 +1,260 @@
+@use "../utils/variables";
+/*-----------------
+    Dashboard widgets — hero, performance, AI, funnel, ranking panels.
+    Extracted from app-new.css unchanged.
+-----------------*//*-----------------
+    Design tokens consumed by the widgets. Previously declared on
+    `body.mui-premium` in _app-shell.scss; moved here so the widgets stay
+    self-contained now that the body class is gone.
+-----------------*/
+.widget-canvas{
+}
+
+[data-theme="dark"] .widget-canvas{
+}@media (max-width:1199.98px) { .widget-canvas .pk-exec .pk-exec-kpi:nth-child(3n+1) { border-left:0; } }
+
+@media (max-width:767.98px) { .widget-canvas .pk-exec .pk-exec-kpi { border-left:0 !important; border-top:1px solid var(--bs-border-color); } }@media (max-width:1399.98px) { .widget-canvas .pk-si-donut { border-left:0; border-top:1px solid var(--bs-border-color); } }
+
+/* leaderboard rank chip *//* map placeholder */
+
+.widget-canvas .map-panel{ position:relative; border-radius:12px; min-height:200px; overflow:hidden; border:1px solid var(--bs-border-color);
+	background-image:linear-gradient(rgba(var(--bs-primary-rgb),.10) 1px,transparent 1px),linear-gradient(90deg,rgba(var(--bs-primary-rgb),.10) 1px,transparent 1px),radial-gradient(120% 120% at 30% 20%, rgba(var(--bs-primary-rgb),.10), transparent 60%);
+	background-size:26px 26px,26px 26px,100% 100%; display:grid; place-items:center; }
+
+.widget-canvas .map-panel .map-panel-pin{ background:var(--bs-primary); box-shadow:0 8px 20px rgba(var(--bs-primary-rgb),.4); z-index:2; }
+
+.widget-canvas .map-panel .map-panel-pin::after{ content:""; position:absolute; width:46px; height:46px; border-radius:50%; background:rgba(var(--bs-primary-rgb),.35); animation:pkPing 2s var(--transition) infinite; }@media (max-width:991.98px) { .widget-canvas .pk-inbox-item .pk-inbox-actions { opacity:1; } }/* premium performer cards */
+.widget-canvas .spotlight-card{ position:relative; overflow:hidden; border:0 !important; border-radius:16px; }
+
+.widget-canvas .spotlight-card.perf-green{ background:linear-gradient(135deg,#22c55e 0%, #0f8f42 100%); box-shadow:0 10px 24px rgba(22,163,74,.28); }
+
+.widget-canvas .spotlight-card.perf-blue{ background:linear-gradient(135deg,#5b76e6 0%, #2f6fd0 100%); box-shadow:0 10px 24px rgba(61,94,225,.28); }
+
+.widget-canvas .spotlight-card::before{ content:""; position:absolute; right:-46px; top:-56px; width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,.12); }
+
+.widget-canvas .spotlight-card::after{ content:""; position:absolute; right:56px; top:34px; width:96px; height:96px; border-radius:50%; border:2px dashed rgba(255,255,255,.22); }
+
+.widget-canvas .spotlight-card > *{ position:relative; z-index:2; }.widget-canvas .spotlight-card .spotlight-img{ max-height:150px; width:auto; filter:drop-shadow(0 8px 14px rgba(0,0,0,.28)); margin-bottom: -16px;}/* ============================================================
+   SCHOOL HERO STRIP (index2 only) — compact, white background
+   Card border/radius/shadow inherited from base .content .card.
+   Only a faint brand tint sits inside the white hero.
+   ============================================================ */
+.widget-canvas .welcome-banner{ position:relative; overflow:hidden; }
+
+.widget-canvas .welcome-banner::before{
+	content:""; position:absolute; right:-70px; top:-90px; width:280px; height:280px; border-radius:50%;
+	background:radial-gradient(circle, rgba(var(--bs-primary-rgb),.10), transparent 68%); pointer-events:none;
+}
+
+.widget-canvas .welcome-banner .card-body{ position:relative; z-index:1; padding:1.35rem 1.5rem; }
+
+/* brand tile + greeting */
+
+.widget-canvas .welcome-banner .welcome-banner-brand{
+	background:linear-gradient(135deg,var(--bs-primary),#6d8bff); box-shadow:0 8px 18px rgba(var(--bs-primary-rgb),.30);
+}
+
+.widget-canvas .welcome-banner h2{ font-weight:800; letter-spacing:-.02em; color:var(--bs-emphasis-color); font-size:1.4rem; }/* KPI strip — white bordered tiles with divider feel */
+@media (max-width:575.98px) { .widget-canvas .welcome-banner .card-body { padding:1.15rem; } }/* ---- Popular Categories → bubble cluster + insights ---- */
+.widget-canvas .bubble-cloud{ display:flex; flex-wrap:wrap; gap:.55rem; align-items:center; justify-content:center; padding:.4rem 0 .9rem; }
+
+.widget-canvas .bubble{ 
+	border-radius:50%; display:grid; place-items:center; text-align:center; color:#fff; line-height:1.05; padding:4px; box-shadow:0 6px 14px rgba(15,23,42,.14); transition:transform .18s var(--transition); cursor:default;
+	&.bubble-01 {
+		width: 85px; 
+		height: 85px;
+	}
+	&.bubble-02 {
+		width: 75px; 
+		height: 75px;
+	}
+	&.bubble-03 {
+		width: 60px; 
+		height: 60px;	
+	}
+	&.bubble-04 {
+		width: 45px; 
+		height: 45px;
+	}
+	&.bubble-05 {
+		width: 38px; 
+		height: 38px;
+	}
+}
+
+
+
+.widget-canvas .bubble:hover{ transform:scale(1.06); }
+
+.widget-canvas .bubble b{ font-size:15px; font-weight:800; letter-spacing:-.02em; }
+
+.widget-canvas .bubble span{ font-size:9.5px; opacity:.92; font-weight:600; text-transform:uppercase; letter-spacing:.02em; }/* ---- Best Teacher / Top Student — achievement chip + tighter stats ---- */
+.widget-canvas .spotlight-card .spotlight-img{ max-height:132px; }
+
+/* ============================================================
+   Premium body treatment — still used by student-grid.html
+   ============================================================ *//* ===== pk-premium.css ===== *//* ============================================================
+   PreSkool — Premium Card + Button layer (portable)
+   Matches index2.html's button/card language WITHOUT the full
+   enterprise shell. Opt in per page with <body class="pk-premium">.
+   Light + Dark (data-theme="dark") aware.
+   ============================================================ */
+
+body.pk-premium{
+}
+
+
+/* ---- Cards ---- */
+
+body.pk-premium .card{
+	border:1px solid var(--bs-border-color); border-radius:14px; background:var(--bs-body-bg);
+	box-shadow:0 1px 2px rgba(15,23,42,.04), 0 6px 18px rgba(15,23,42,.05);
+	transition:box-shadow .25s var(--transition), transform .25s var(--transition);
+}
+
+body.pk-premium .card:hover{ box-shadow:0 .75rem 1.75rem rgba(15,23,42,.12); }
+
+body.pk-premium .card .card-header{ background:transparent; border-bottom:1px solid var(--bs-border-color); }
+
+[data-theme="dark"] body.pk-premium .card{ box-shadow:0 1px 2px rgba(0,0,0,.3); }
+
+[data-theme="dark"] body.pk-premium .card:hover{ box-shadow:0 .75rem 1.75rem rgba(0,0,0,.5); }
+
+/* ---- Buttons: shared radius/weight ---- */
+
+body.pk-premium .btn{ border-radius:10px; font-weight:500; }
+
+/* ---- 3D PRIMARY BUTTON (same as index2) ---- */
+
+body.pk-premium .btn.btn-primary{
+	position:relative; border:0 !important; border-radius:10px; font-weight:600;
+	background:var(--bs-primary) !important;
+	box-shadow:0 2px 0 #2c47b5, 0 6px 14px rgba(var(--bs-primary-rgb),.35) !important;
+	transition:transform .12s var(--transition), box-shadow .12s var(--transition), background-color .12s var(--transition) !important;
+}
+
+body.pk-premium .btn.btn-primary:hover,
+
+body.pk-premium .btn.btn-primary:focus{
+	transform:translateY(-1px); background:#4568e8 !important;
+	box-shadow:0 3px 0 #2c47b5, 0 10px 20px rgba(var(--bs-primary-rgb),.42) !important;
+}
+
+body.pk-premium .btn.btn-primary:active{
+	transform:translateY(2px); background:var(--bs-primary) !important;
+	box-shadow:0 0 0 #2c47b5, 0 2px 5px rgba(var(--bs-primary-rgb),.30) !important;
+}
+
+body.pk-premium .btn.btn-primary i{ line-height:1; }
+
+[data-theme="dark"] body.pk-premium .btn.btn-primary{ box-shadow:0 2px 0 #223a95, 0 6px 14px rgba(0,0,0,.45) !important; }
+
+[data-theme="dark"] body.pk-premium .btn.btn-primary:hover,
+
+[data-theme="dark"] body.pk-premium .btn.btn-primary:focus{ box-shadow:0 3px 0 #223a95, 0 10px 20px rgba(0,0,0,.5) !important; }
+
+[data-theme="dark"] body.pk-premium .btn.btn-primary:active{ box-shadow:0 0 0 #223a95, 0 2px 5px rgba(0,0,0,.4) !important; }
+
+/* ---- 3D LIGHT BUTTON (same as index2) ---- */
+
+body.pk-premium .btn.btn-light,
+
+body.pk-premium .btn.btn-outline-light.bg-white{
+	position:relative; border:1px solid var(--bs-border-color) !important; border-radius:10px; font-weight:600;
+	color:var(--bs-emphasis-color) !important; background:var(--bs-body-bg) !important;
+	box-shadow:0 2px 0 #d5dae2, 0 4px 10px rgba(15,23,42,.08) !important;
+	transition:transform .12s var(--transition), box-shadow .12s var(--transition), background-color .12s var(--transition) !important;
+}
+
+body.pk-premium .btn.btn-light:hover,
+
+body.pk-premium .btn.btn-light:focus,
+
+body.pk-premium .btn.btn-outline-light.bg-white:hover{
+	transform:translateY(-1px); background:var(--bs-tertiary-bg) !important;
+	box-shadow:0 3px 0 #d5dae2, 0 8px 16px rgba(15,23,42,.10) !important;
+}
+
+body.pk-premium .btn.btn-light:active,
+
+body.pk-premium .btn.btn-outline-light.bg-white:active{
+	transform:translateY(2px); background:var(--bs-body-bg) !important;
+	box-shadow:0 0 0 #d5dae2, 0 2px 4px rgba(15,23,42,.08) !important;
+}
+
+body.pk-premium .btn.btn-light i{ line-height:1; }
+
+[data-theme="dark"] body.pk-premium .btn.btn-light,
+
+[data-theme="dark"] body.pk-premium .btn.btn-outline-light.bg-white{ box-shadow:0 2px 0 rgba(0,0,0,.5), 0 4px 10px rgba(0,0,0,.45) !important; }
+
+[data-theme="dark"] body.pk-premium .btn.btn-light:hover,
+
+[data-theme="dark"] body.pk-premium .btn.btn-light:focus{ box-shadow:0 3px 0 rgba(0,0,0,.5), 0 8px 16px rgba(0,0,0,.5) !important; }
+
+[data-theme="dark"] body.pk-premium .btn.btn-light:active{ box-shadow:0 0 0 rgba(0,0,0,.5), 0 2px 4px rgba(0,0,0,.4) !important; }
+
+
+/*-----------------
+	Dashboard widgets — merged in from the former
+	components/_ui-dashboard-widgets.scss. These are generic, reusable
+	components; they live with their own kind rather than in a page-shaped file.
+-----------------*/
+.widget-title { gap: 7px; font-size: 13.5px; font-weight: 700; color: var(--heading); }
+.widget-title i { font-size: 18px; color: var(--bs-primary); }
+.widget-subtitle { font-size: 11.5px; font-weight: 500; color: var(--muted); }
+.widget-header { gap: 12px; margin-bottom: 14px; }
+.widget-link { font-size: 12px; font-weight: 600; color: var(--bs-primary); text-decoration: none; gap: 3px; }
+.widget-link:hover { color: var(--bs-primary); text-decoration: underline; }
+/* ---------- ROUTE STRIP ---------- */
+.route-line { height: 8px; border-radius: 999px; background: var(--surface-soft); margin: 14px 0 8px; }
+.route-line .fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--bs-primary); }
+.route-line .bus { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; color: #fff; background: var(--bs-primary); box-shadow: 0 0 0 3px var(--surface); }
+/* .route-stops — all declarations now Bootstrap utilities in the markup */
+.route-stops span { font-size: 10px; color: var(--muted); }
+.route-stops .done { color: var(--tone-success); font-weight: 650; }
+.route-stops .now { color: var(--bs-primary); font-weight: 700; }
+/* ---------- LIVE TRACKER ---------- */
+.tracker-hero { gap: 14px; padding: 14px 16px; border-radius: var(--radius-list); color: #fff; background: linear-gradient(130deg, #1f2433, #343b52); margin-bottom: 14px; }
+.tracker-id { gap: 12px; min-width: 0; }
+.tracker-id .ic { width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; font-size: 21px; color: #fff; background: rgba(255,255,255,.14); }
+.tracker-id b { display: block; font-size: 14px; font-weight: 700; }
+.tracker-id span { font-size: 11.5px; opacity: .72; }
+/* .tracker-eta — all declarations now Bootstrap utilities in the markup */
+.tracker-eta b { display: block; font-size: 26px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+.tracker-eta span { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; opacity: .72; }
+.tracker-map { border: 1px solid var(--border-soft); border-radius: var(--radius-list); background: var(--surface-soft); margin-bottom: 14px; }
+.tracker-svg { height: auto; }
+.tracker-svg .grid path { stroke: var(--border-soft); stroke-width: 1; fill: none; }
+.tracker-svg .route { fill: none; stroke: var(--border-soft); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.tracker-svg .route-done { fill: none; stroke: url(#trackerRouteGradient); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.tracker-svg .stop circle { fill: var(--surface); stroke: var(--border-soft); stroke-width: 3; }
+.tracker-svg .stop text { font-size: 12px; font-weight: 600; text-anchor: middle; fill: var(--muted); }
+.tracker-svg .stop.done circle { stroke: var(--tone-success); }
+.tracker-svg .stop.done text { fill: var(--tone-success); }
+.tracker-svg .stop.next circle { stroke: var(--bs-primary); }
+.tracker-svg .stop.next text { fill: var(--bs-primary); font-weight: 700; }
+.tracker-svg .bus circle { fill: var(--bs-primary); }
+.tracker-svg .bus text { font-size: 14px; text-anchor: middle; }
+.tracker-badge { top: 10px; right: 10px; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; color: var(--tone-danger); background: var(--surface); border: 1px solid var(--border-soft); }
+
+
+/* a scrolling events panel — also rescued from the former
+   pages/_student-dashboard.scss; used by the layout demo pages */
+.event-wrapper {
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+
+/*-----------------
+	Section header
+	
+		The band that opens a page section: eyebrow + title on the left, actions on
+		the right, with the vertical rhythm baked in so sections space themselves.
+
+	Promoted from pages/_parent-portal.scss — a reusable pattern, not page style.
+-----------------*/
+/* ---------- primitives ---------- */
+.portal-section { gap: 12px; margin: 26px 2px 14px; }
+.portal-section:first-child { margin-top: 4px; }
