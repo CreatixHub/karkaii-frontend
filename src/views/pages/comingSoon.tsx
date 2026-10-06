@@ -35,7 +35,7 @@ const ComingSoon = () => {
   return (
     <div className="main-wrapper">
       <div className="text-center mt-4">
-        <ImageWithBasePath src="assets/img/logo.svg" alt="img" className="img-fluid" />
+        <ImageWithBasePath src="assets/img/karkaii-logo.png" alt="img" className="img-fluid" />
       </div>
       <div className="comming-soon-pg w-100">
         <div>

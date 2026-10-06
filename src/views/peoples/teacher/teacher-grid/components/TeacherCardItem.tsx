@@ -117,12 +117,6 @@ const TeacherCardItem = ({
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item rounded-1" to={routes.chat} onClick={() => onToggleMenu(null)}>
-                    <i className="ti ti-message me-2" />
-                    Send Message
-                  </Link>
-                </li>
-                <li>
                   <Link className="dropdown-item rounded-1" to={routes.email} onClick={() => onToggleMenu(null)}>
                     <i className="ti ti-mail me-2" />
                     Send Email
@@ -310,20 +304,6 @@ const TeacherCardItem = ({
               aria-label="Edit"
             >
               <i className="ti ti-edit" />
-            </Link>
-            <Link
-              to={routes.audioCall}
-              className="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 p-0"
-              aria-label="Call"
-            >
-              <i className="ti ti-phone" />
-            </Link>
-            <Link
-              to={routes.chat}
-              className="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 p-0"
-              aria-label="Message"
-            >
-              <i className="ti ti-brand-hipchat" />
             </Link>
             <Link
               to={routes.classTimetable}

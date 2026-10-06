@@ -13,17 +13,28 @@ export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
  * writes (`dataTheme`, `dataLayout`, ...).
  */
 export const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'preskool.auth.accessToken',
-  REFRESH_TOKEN: 'preskool.auth.refreshToken',
-  USER: 'preskool.auth.user',
+  ACCESS_TOKEN: 'karkaii.auth.accessToken',
+  REFRESH_TOKEN: 'karkaii.auth.refreshToken',
+  USER: 'karkaii.auth.user',
 } as const;
 
-/** Roles the application understands. Mirrors the four dashboards. */
+/**
+ * Roles the application understands. MUST match `ROLES` in server/src/config/constants.js — the server is the
+ * source of truth and enforces access; the client only uses roles to decide what to show.
+ */
 export const USER_ROLE = {
+  SUPERADMIN: 'superadmin',
   ADMIN: 'admin',
   TEACHER: 'teacher',
   STUDENT: 'student',
   PARENT: 'parent',
+  ACCOUNTANT: 'accountant',
+  LIBRARIAN: 'librarian',
+  RECEPTIONIST: 'receptionist',
+  WARDEN: 'warden',
+  TRANSPORT_MANAGER: 'transport_manager',
+  NURSE: 'nurse',
+  SECURITY: 'security',
 } as const;
 
 export type UserRole = (typeof USER_ROLE)[keyof typeof USER_ROLE];

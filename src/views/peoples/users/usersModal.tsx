@@ -53,7 +53,7 @@ const UsersModal = () => {
                 <input
                   type="email"
                   className="form-control"
-                  placeholder="name@preskool.com"
+                  placeholder="name@karkaii.com"
                   required
                   id="email-address"
                 />

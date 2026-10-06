@@ -132,7 +132,7 @@ export const statusTint = (status: CardStatus) =>
 /** The preview card is the first one in the register, not a copy of it. */
 export const PREVIEW = CARDS[0];
 
-export const SCHOOL_NAME = 'PreSkool International';
+export const SCHOOL_NAME = 'Karkaii International';
 
 /* ------------------------------------------------------------------ *
  * The dialog                                                         *

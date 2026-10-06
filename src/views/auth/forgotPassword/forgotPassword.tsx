@@ -26,7 +26,7 @@ const ForgotPassword = () => {
                 </div>
                 <div className="authen-overlay-item  w-100 p-4">
                   <h4 className="text-white mb-3">
-                    What's New on Preskool !!!
+                    What's New on Karkaii !!!
                   </h4>
                   <div className="d-flex align-items-center flex-row mb-3 justify-content-between p-3 br-5 gap-3 card">
                     <div>
@@ -97,7 +97,7 @@ const ForgotPassword = () => {
                     <div>
                       <div className=" mx-auto mb-5 text-center">
                         <ImageWithBasePath
-                          src="assets/img/authentication/authentication-logo.svg"
+                          src="assets/img/karkaii-logo.png"
                           className="img-fluid"
                           alt="Logo"
                         />

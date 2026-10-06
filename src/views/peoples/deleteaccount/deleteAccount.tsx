@@ -856,7 +856,7 @@ const DeleteAccount = () => {
                     <tr
                       className="dt-row"
                       data-dar-status="Approved"
-                      data-search="dr-1001 janet doe u461893 janet.d@preskool.com student class iii graduated approved recent"
+                      data-search="dr-1001 janet doe u461893 janet.d@karkaii.com student class iii graduated approved recent"
                     >
                       <td className="dt-pin">
                         <input
@@ -889,7 +889,7 @@ const DeleteAccount = () => {
                             <div className="dt-sub">
                               <span>U461893</span>
                               <span className="dt-dot">•</span>
-                              <span>janet.d@preskool.com</span>
+                              <span>janet.d@karkaii.com</span>
                             </div>
                           </div>
                         </div>
@@ -1032,7 +1032,7 @@ const DeleteAccount = () => {
                     <tr
                       className="dt-row"
                       data-dar-status="Pending"
-                      data-search="dr-1002 joann smith u461892 joann.s@preskool.com student class iv duplicate account pending recent high priority"
+                      data-search="dr-1002 joann smith u461892 joann.s@karkaii.com student class iv duplicate account pending recent high priority"
                     >
                       <td className="dt-pin">
                         <input
@@ -1065,7 +1065,7 @@ const DeleteAccount = () => {
                             <div className="dt-sub">
                               <span>U461892</span>
                               <span className="dt-dot">•</span>
-                              <span>joann.s@preskool.com</span>
+                              <span>joann.s@karkaii.com</span>
                             </div>
                           </div>
                         </div>
@@ -1204,7 +1204,7 @@ const DeleteAccount = () => {
                     <tr
                       className="dt-row"
                       data-dar-status="Under Review"
-                      data-search="dr-1003 marcus lee u461887 marcus.l@preskool.com employee transport employee left under review recent"
+                      data-search="dr-1003 marcus lee u461887 marcus.l@karkaii.com employee transport employee left under review recent"
                     >
                       <td className="dt-pin">
                         <input
@@ -1237,7 +1237,7 @@ const DeleteAccount = () => {
                             <div className="dt-sub">
                               <span>U461887</span>
                               <span className="dt-dot">•</span>
-                              <span>marcus.l@preskool.com</span>
+                              <span>marcus.l@karkaii.com</span>
                             </div>
                           </div>
                         </div>
@@ -1556,7 +1556,7 @@ const DeleteAccount = () => {
                     <tr
                       className="dt-row"
                       data-dar-status="Completed"
-                      data-search="dr-1005 emily clarke u461884 emily.c@preskool.com employee library no longer required completed "
+                      data-search="dr-1005 emily clarke u461884 emily.c@karkaii.com employee library no longer required completed "
                     >
                       <td className="dt-pin">
                         <input
@@ -1589,7 +1589,7 @@ const DeleteAccount = () => {
                             <div className="dt-sub">
                               <span>U461884</span>
                               <span className="dt-dot">•</span>
-                              <span>emily.c@preskool.com</span>
+                              <span>emily.c@karkaii.com</span>
                             </div>
                           </div>
                         </div>
@@ -1732,7 +1732,7 @@ const DeleteAccount = () => {
                     <tr
                       className="dt-row"
                       data-dar-status="Under Review"
-                      data-search="dr-1006 olivia grant u461886 olivia.g@preskool.com employee front office privacy concern under review high priority"
+                      data-search="dr-1006 olivia grant u461886 olivia.g@karkaii.com employee front office privacy concern under review high priority"
                     >
                       <td className="dt-pin">
                         <input
@@ -1765,7 +1765,7 @@ const DeleteAccount = () => {
                             <div className="dt-sub">
                               <span>U461886</span>
                               <span className="dt-dot">•</span>
-                              <span>olivia.g@preskool.com</span>
+                              <span>olivia.g@karkaii.com</span>
                             </div>
                           </div>
                         </div>
@@ -1908,7 +1908,7 @@ const DeleteAccount = () => {
                     <tr
                       className="dt-row"
                       data-dar-status="Cancelled"
-                      data-search="dr-1007 ryan cooper u461885 ryan.c@preskool.com teacher science other cancelled "
+                      data-search="dr-1007 ryan cooper u461885 ryan.c@karkaii.com teacher science other cancelled "
                     >
                       <td className="dt-pin">
                         <input
@@ -1941,7 +1941,7 @@ const DeleteAccount = () => {
                             <div className="dt-sub">
                               <span>U461885</span>
                               <span className="dt-dot">•</span>
-                              <span>ryan.c@preskool.com</span>
+                              <span>ryan.c@karkaii.com</span>
                             </div>
                           </div>
                         </div>
@@ -2080,7 +2080,7 @@ const DeleteAccount = () => {
                     <tr
                       className="dt-row"
                       data-dar-status="Pending"
-                      data-search="dr-1008 susan ray u461883 susan.r@preskool.com parent — duplicate account pending "
+                      data-search="dr-1008 susan ray u461883 susan.r@karkaii.com parent — duplicate account pending "
                     >
                       <td className="dt-pin">
                         <input
@@ -2113,7 +2113,7 @@ const DeleteAccount = () => {
                             <div className="dt-sub">
                               <span>U461883</span>
                               <span className="dt-dot">•</span>
-                              <span>susan.r@preskool.com</span>
+                              <span>susan.r@karkaii.com</span>
                             </div>
                           </div>
                         </div>

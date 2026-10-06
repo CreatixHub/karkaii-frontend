@@ -22,7 +22,8 @@ export interface AuthContextValue {
   /** True while a login request is in flight. */
   isLoggingIn: boolean;
   error: ApiError | null;
-  login: (credentials: LoginCredentials) => Promise<boolean>;
+  /** Resolves with the signed-in user; rejects with an `ApiError` (also exposed as `error`) when sign-in fails. */
+  login: (credentials: LoginCredentials) => Promise<AuthUser>;
   logout: () => Promise<void>;
   hasRole: (role: UserRole | UserRole[]) => boolean;
   hasPermission: (permission: string) => boolean;

@@ -55,6 +55,9 @@ export type FieldErrors = Record<string, string>;
 export interface ApiErrorPayload {
   message?: string;
   code?: string;
-  errors?: FieldErrors;
+  /** A `{ field: message }` map, or the Express API's `[{ field, message }]` list. */
+  errors?: FieldErrors | Array<{ field: string; message: string }>;
+  /** Set on 5xx responses; quote it to a developer, who can find the call in the /dev dashboard. */
+  requestId?: string;
   [key: string]: unknown;
 }

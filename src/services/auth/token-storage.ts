@@ -16,6 +16,11 @@
 import { STORAGE_KEYS } from '@constants/app.constants';
 import type { AuthUser } from './auth.types';
 
+const EPHEMERAL_KEY = 'karkaii.auth.ephemeral';
+
+/** The "Remember me" choice of the current sign-in; null until known (see `isPersisted`). */
+let persistMode: boolean | null = null;
+
 /** Used when `rememberMe` is false, and as a fallback if storage is blocked. */
 let inMemoryAccessToken: string | null = null;
 let inMemoryRefreshToken: string | null = null;
@@ -65,6 +70,7 @@ export const tokenStorage = {
   ): void {
     inMemoryAccessToken = accessToken;
     inMemoryRefreshToken = refreshToken ?? null;
+    persistMode = persist;
 
     if (!persist) return;
 
@@ -92,12 +98,52 @@ export const tokenStorage = {
   clear(): void {
     inMemoryAccessToken = null;
     inMemoryRefreshToken = null;
+    persistMode = null;
     safeRemove(STORAGE_KEYS.ACCESS_TOKEN);
     safeRemove(STORAGE_KEYS.REFRESH_TOKEN);
     safeRemove(STORAGE_KEYS.USER);
+    try {
+      window.sessionStorage.removeItem(EPHEMERAL_KEY);
+    } catch {
+      // Nothing to do.
+    }
   },
 
   hasSession(): boolean {
     return this.getAccessToken() !== null;
+  },
+
+  /**
+   * True when the current sign-in chose "Remember me". The in-memory choice wins; the stored user (only
+   * written for remembered sign-ins) answers after a reload, before anything has called `setTokens`.
+   */
+  isPersisted(): boolean {
+    return persistMode ?? safeGet(STORAGE_KEYS.USER) !== null;
+  },
+
+  /**
+   * "Remember me" off: the server's refresh cookie still lives for days, so remember in sessionStorage
+   * (per tab, gone when the browser closes) that THIS tab may silently restore its session on reload.
+   */
+  markEphemeralSession(): void {
+    try {
+      window.sessionStorage.setItem(EPHEMERAL_KEY, '1');
+    } catch {
+      // Without sessionStorage a reload simply asks the user to sign in again.
+    }
+  },
+
+  /**
+   * Whether a reload may try to restore the session from the refresh cookie: only for "Remember me"
+   * sign-ins, or the tab that signed in without it. A fresh browser session after a non-remembered login
+   * must sign in again.
+   */
+  canRestoreSession(): boolean {
+    if (this.isPersisted()) return true;
+    try {
+      return window.sessionStorage.getItem(EPHEMERAL_KEY) === '1';
+    } catch {
+      return false;
+    }
   },
 };

@@ -35,17 +35,6 @@ const ClassAnalytics = React.lazy(() => import("../views/report/reports-analytic
 const FeeCollectionReport = React.lazy(() => import("../views/report/reports-analytics/fee-collection"));
 const TeacherPerformancePage = React.lazy(() => import("../views/report/reports-analytics/teacher-performance"));
 const CustomReports = React.lazy(() => import("../views/report/reports-analytics/custom-reports"));
-const AiAttendancePredictor = React.lazy(() => import("../views/report/ai-insights/attendance-predictor"));
-const AiRiskDetection = React.lazy(() => import("../views/report/ai-insights/risk-detection"));
-const AiStudentIntelligence = React.lazy(() => import("../views/report/ai-insights/student-intelligence"));
-const AiTeacherProductivity = React.lazy(() => import("../views/report/ai-insights/teacher-productivity"));
-const AiHomeworkEvaluation = React.lazy(() => import("../views/report/ai-insights/homework-evaluation"));
-const AiFeeForecast = React.lazy(() => import("../views/report/ai-insights/fee-forecast"));
-const AiParentInsights = React.lazy(() => import("../views/report/ai-insights/parent-insights"));
-const AiTimetableOptimizer = React.lazy(() => import("../views/report/ai-insights/timetable-optimizer"));
-const AiStudentAssistant = React.lazy(() => import("../views/report/ai-insights/student-assistant"));
-const AiReportGenerator = React.lazy(() => import("../views/report/ai-insights/report-generator"));
-const AiCommandCenter = React.lazy(() => import("../views/report/ai-insights/command-center"));
 const Competitions = React.lazy(() => import("../views/report/achievements/competitions"));
 const CertificateRecords = React.lazy(() => import("../views/report/achievements/certificate-records"));
 const BonafideCertificate = React.lazy(() => import("../views/report/certificates/bonafide-certificate"));
@@ -76,7 +65,6 @@ const BackupRestore = React.lazy(() => import("../views/settings/systemSettings/
 const Cache = React.lazy(() => import("../views/settings/systemSettings/cache"));
 const Gdpr = React.lazy(() => import("../views/settings/systemSettings/gdpr"));
 const MaintenanceMode = React.lazy(() => import("../views/settings/systemSettings/maintenance-mode"));
-const Webhooks = React.lazy(() => import("../views/settings/integrations/webhooks"));
 const ActivityLogs = React.lazy(() => import("../views/settings/account-security/activity-logs"));
 const LoginActivity = React.lazy(() => import("../views/settings/account-security/login-activity"));
 const SystemLogs = React.lazy(() => import("../views/settings/systemSettings/system-logs"));
@@ -112,16 +100,11 @@ const OnlineExamination = React.lazy(() => import("../views/pages/online-examina
 const QuestionBank = React.lazy(() => import("../views/pages/question-bank"));
 const SystemSettingsPage = React.lazy(() => import("../views/settings/systemSettings/system-settings"));
 const AiSettings = React.lazy(() => import("../views/settings/aiSettings/ai-settings"));
-const V2Index = React.lazy(() => import("../views/pages/v2-index"));
-const AiBehaviorAnalysis = React.lazy(() => import("../views/pages/ai-behavior-analysis"));
-const AiNotificationAssistant = React.lazy(() => import("../views/pages/ai-notification-assistant"));
-const AiScholarshipRecommendation = React.lazy(() => import("../views/pages/ai-scholarship-recommendation"));
 const DocumentViewer = React.lazy(() => import("../views/pages/document-viewer"));
 const DigitalIdCard = React.lazy(() => import("../views/pages/digital-id-card"));
 const RewardsGamification = React.lazy(() => import("../views/pages/rewards-gamification"));
 const ScholarshipManagement = React.lazy(() => import("../views/pages/scholarship-management"));
 const AttendanceReport = React.lazy(() => import("../views/report/reports-analytics/attendance-reports"));
-const AudioCall = React.lazy(() => import("../views/application/call/audioCall"));
 const Avatar = React.lazy(() => import("../views/uiInterface/base-ui/avatar"));
 const Badges = React.lazy(() => import("../views/uiInterface/base-ui/badges"));
 const BanIpAddress = React.lazy(() => import("../views/settings/otherSettings/banIpaddress"));
@@ -141,10 +124,8 @@ const Breadcrumb = React.lazy(() => import("../views/uiInterface/base-ui/breadcr
 const Buttons = React.lazy(() => import("../views/uiInterface/base-ui/buttons"));
 const ButtonsGroup = React.lazy(() => import("../views/uiInterface/base-ui/buttonsgroup"));
 const Calendar = React.lazy(() => import("../views/mainMenu/apps/calendar"));
-const CallHistory = React.lazy(() => import("../views/application/call/callHistory"));
 const Cards = React.lazy(() => import("../views/uiInterface/base-ui/cards"));
 const Carousel = React.lazy(() => import("../views/uiInterface/base-ui/carousel"));
-const Chat = React.lazy(() => import("../views/application/chat"));
 const CheckboxRadios = React.lazy(() => import("../views/uiInterface/forms/formelements/checkbox-radios"));
 const AcademicCalendar = React.lazy(() => import("../views/academic/academic-calendar"));
 const Cities = React.lazy(() => import("../views/content/location/cities"));
@@ -161,7 +142,6 @@ const Collapse = React.lazy(() => import("../views/uiInterface/base-ui/collapse.
 const CollectFees = React.lazy(() => import("../views/finance-accounts/fees/collect-fees"));
 const ComingSoon = React.lazy(() => import("../views/pages/comingSoon"));
 const CompanySettings = React.lazy(() => import("../views/settings/websiteSettings/companySettings"));
-const ConnectedApps = React.lazy(() => import("../views/settings/generalSettings/connectedApps"));
 const ContactMessages = React.lazy(() => import("../views/support/contact-messages"));
 const Countries = React.lazy(() => import("../views/content/location/countries"));
 const Curriculum = React.lazy(() => import("../views/academic/curriculum"));
@@ -413,7 +393,6 @@ const TwoStepVerification3 = React.lazy(() => import("../views/auth/twoStepVerif
 const TypiconIcons = React.lazy(() => import("../views/uiInterface/icons/typicons"));
 const Typography = React.lazy(() => import("../views/uiInterface/base-ui/typography"));
 const UnderMaintenance = React.lazy(() => import("../views/pages/underMaintenance"));
-const Videocall = React.lazy(() => import("../views/application/call/videoCall"));
 const WeatherIcons = React.lazy(() => import("../views/uiInterface/icons/weathericons"));
 
 const routes = all_routes;
@@ -519,78 +498,8 @@ export const publicRoutes = [
     route: Route,
   },
   {
-    path: routes.aiAttendancePredictor,
-    element: <AiAttendancePredictor />,
-    route: Route,
-  },
-  {
-    path: routes.aiBehaviorAnalysis,
-    element: <AiBehaviorAnalysis />,
-    route: Route,
-  },
-  {
-    path: routes.aiCommandCenter,
-    element: <AiCommandCenter />,
-    route: Route,
-  },
-  {
-    path: routes.aiFeeForecast,
-    element: <AiFeeForecast />,
-    route: Route,
-  },
-  {
-    path: routes.aiHomeworkEvaluation,
-    element: <AiHomeworkEvaluation />,
-    route: Route,
-  },
-  {
-    path: routes.aiNotificationAssistant,
-    element: <AiNotificationAssistant />,
-    route: Route,
-  },
-  {
-    path: routes.aiParentInsights,
-    element: <AiParentInsights />,
-    route: Route,
-  },
-  {
-    path: routes.aiReportGenerator,
-    element: <AiReportGenerator />,
-    route: Route,
-  },
-  {
-    path: routes.aiRiskDetection,
-    element: <AiRiskDetection />,
-    route: Route,
-  },
-  {
-    path: routes.aiScholarshipRecommendation,
-    element: <AiScholarshipRecommendation />,
-    route: Route,
-  },
-  {
     path: routes.aiSettings,
     element: <AiSettings />,
-    route: Route,
-  },
-  {
-    path: routes.aiStudentAssistant,
-    element: <AiStudentAssistant />,
-    route: Route,
-  },
-  {
-    path: routes.aiStudentIntelligence,
-    element: <AiStudentIntelligence />,
-    route: Route,
-  },
-  {
-    path: routes.aiTeacherProductivity,
-    element: <AiTeacherProductivity />,
-    route: Route,
-  },
-  {
-    path: routes.aiTimetableOptimizer,
-    element: <AiTimetableOptimizer />,
     route: Route,
   },
   {
@@ -754,16 +663,6 @@ export const publicRoutes = [
     route: Route,
   },
   {
-    path: routes.audioCall,
-    element: <AudioCall />,
-    route: Route,
-  },
-  {
-    path: routes.callHistory,
-    element: <CallHistory />,
-    route: Route,
-  },
-  {
     path: routes.centralDashboard,
     element: <CentralDashboard />,
     route: Route,
@@ -849,11 +748,6 @@ export const publicRoutes = [
     route: Route,
   },
   {
-    path: routes.chat,
-    element: <Chat />,
-    route: Route,
-  },
-  {
     path: routes.chatInbox,
     element: <ChatInboxPage />,
     route: Route,
@@ -926,11 +820,6 @@ export const publicRoutes = [
   {
     path: routes.competitions,
     element: <Competitions />,
-    route: Route,
-  },
-  {
-    path: routes.connectedApps,
-    element: <ConnectedApps />,
     route: Route,
   },
   {
@@ -2429,16 +2318,6 @@ export const publicRoutes = [
     route: Route,
   },
   {
-    path: routes.v2Index,
-    element: <V2Index />,
-    route: Route,
-  },
-  {
-    path: routes.videoCall,
-    element: <Videocall />,
-    route: Route,
-  },
-  {
     path: routes.visitorLog,
     element: <VisitorLogPage />,
     route: Route,
@@ -2451,11 +2330,6 @@ export const publicRoutes = [
   {
     path: routes.wardens,
     element: <HostelWardens />,
-    route: Route,
-  },
-  {
-    path: routes.webhooks,
-    element: <Webhooks />,
     route: Route,
   },
   {

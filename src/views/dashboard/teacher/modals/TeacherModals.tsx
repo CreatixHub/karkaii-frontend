@@ -462,13 +462,6 @@ const TeacherModals = ({ active, onClose, onOpen, onToast }: TeacherModalsProps)
         footer={
           <>
             <Link
-              to={routes.chat}
-              className="action-button d-inline-flex align-items-center text-nowrap text-decoration-none"
-            >
-              <i className="ti ti-message" />
-              Open Chat
-            </Link>
-            <Link
               to={routes.email}
               className="action-button d-inline-flex align-items-center text-nowrap text-decoration-none"
             >

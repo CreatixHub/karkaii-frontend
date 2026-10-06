@@ -305,7 +305,7 @@ export const wardens: Warden[] = [
     designation: 'Chief Warden', employeeId: 'EMP-2019-014',
     hostel: 'Nightingale', block: 'Block A', floors: 'All floors', shift: 'Day Shift',
     contact: '+1 546 8548 301', experience: 7, status: 'Active',
-    gender: 'Female', dob: '14 Mar 1984', joined: '02 Apr 2019', email: 'alice.ray@preskool.com',
+    gender: 'Female', dob: '14 Mar 1984', joined: '02 Apr 2019', email: 'alice.ray@karkaii.com',
     residence: 'On campus · Warden Quarters 1',
     hostelPairs: [
       { label: 'Hostel', value: 'Nightingale Hostel' },
@@ -345,7 +345,7 @@ export const wardens: Warden[] = [
     designation: 'Warden', employeeId: 'EMP-2020-027',
     hostel: 'Everest', block: 'Block C', floors: 'All floors', shift: 'Day Shift',
     contact: '+1 546 8548 302', experience: 6, status: 'Active',
-    gender: 'Male', dob: '02 Sep 1986', joined: '17 Jun 2020', email: 'david.kim@preskool.com',
+    gender: 'Male', dob: '02 Sep 1986', joined: '17 Jun 2020', email: 'david.kim@karkaii.com',
     residence: 'On campus · Warden Quarters 3',
     hostelPairs: [
       { label: 'Hostel', value: 'Everest Hostel' },
@@ -385,7 +385,7 @@ export const wardens: Warden[] = [
     designation: 'Assistant Warden', employeeId: 'EMP-2021-046',
     hostel: 'Nightingale', block: 'Block B', floors: '1st & 2nd floor', shift: 'Night Shift',
     contact: '+1 546 8548 303', experience: 4, status: 'Active',
-    gender: 'Female', dob: '25 Nov 1991', joined: '09 Aug 2021', email: 'priya.raman@preskool.com',
+    gender: 'Female', dob: '25 Nov 1991', joined: '09 Aug 2021', email: 'priya.raman@karkaii.com',
     residence: 'On campus · Warden Quarters 2',
     hostelPairs: [
       { label: 'Hostel', value: 'Nightingale Hostel' },
@@ -424,7 +424,7 @@ export const wardens: Warden[] = [
     designation: 'Assistant Warden', employeeId: 'EMP-2018-009',
     hostel: 'Everest', block: 'Block A', floors: 'Ground & 1st floor', shift: 'Night Shift',
     contact: '+1 546 8548 304', experience: 8, status: 'Active',
-    gender: 'Male', dob: '18 Jan 1982', joined: '21 May 2018', email: 'samuel.ortiz@preskool.com',
+    gender: 'Male', dob: '18 Jan 1982', joined: '21 May 2018', email: 'samuel.ortiz@karkaii.com',
     residence: 'Off campus · Fern Hill',
     hostelPairs: [
       { label: 'Hostel', value: 'Everest Hostel' },
@@ -463,7 +463,7 @@ export const wardens: Warden[] = [
     designation: 'Assistant Warden', employeeId: 'EMP-2022-058',
     hostel: 'Nightingale', block: 'Block C', floors: '1st floor', shift: 'Day Shift',
     contact: '+1 546 8548 305', experience: 3, status: 'On Leave',
-    gender: 'Female', dob: '07 Jul 1993', joined: '14 Mar 2022', email: 'nora.fielding@preskool.com',
+    gender: 'Female', dob: '07 Jul 1993', joined: '14 Mar 2022', email: 'nora.fielding@karkaii.com',
     residence: 'Off campus · Green Park',
     hostelPairs: [
       { label: 'Hostel', value: 'Nightingale Hostel' },
@@ -502,7 +502,7 @@ export const wardens: Warden[] = [
     designation: 'Junior Warden', employeeId: 'EMP-2023-071',
     hostel: 'Everest', block: 'Block B', floors: '1st floor', shift: 'Night Shift',
     contact: '+1 546 8548 306', experience: 2, status: 'Probation',
-    gender: 'Male', dob: '30 Apr 1997', joined: '05 Sep 2023', email: 'ethan.brooks@preskool.com',
+    gender: 'Male', dob: '30 Apr 1997', joined: '05 Sep 2023', email: 'ethan.brooks@karkaii.com',
     residence: 'On campus · Warden Quarters 4',
     hostelPairs: [
       { label: 'Hostel', value: 'Everest Hostel' },
@@ -541,7 +541,7 @@ export const wardens: Warden[] = [
     designation: 'Assistant Warden', employeeId: 'EMP-2024-088',
     hostel: '', block: '', floors: '', shift: 'Day Shift',
     contact: '+1 546 8548 307', experience: 1, status: 'Pending Assignment',
-    gender: 'Female', dob: '11 Feb 1998', joined: '01 Jul 2026', email: 'carla.mendes@preskool.com',
+    gender: 'Female', dob: '11 Feb 1998', joined: '01 Jul 2026', email: 'carla.mendes@karkaii.com',
     residence: 'Off campus · Market Town',
     hostelPairs: [
       { label: 'Preferred Hostel', value: 'Nightingale Hostel' },
@@ -580,7 +580,7 @@ export const wardens: Warden[] = [
     designation: 'Warden', employeeId: 'EMP-2017-005',
     hostel: 'Everest', block: 'Block C', floors: '2nd floor', shift: 'Rotational',
     contact: '+1 546 8548 308', experience: 9, status: 'Retired',
-    gender: 'Male', dob: '03 Dec 1966', joined: '10 Jan 2017', email: 'victor.hale@preskool.com',
+    gender: 'Male', dob: '03 Dec 1966', joined: '10 Jan 2017', email: 'victor.hale@karkaii.com',
     residence: 'Off campus · Central Square',
     hostelPairs: [
       { label: 'Hostel', value: 'Everest Hostel' },

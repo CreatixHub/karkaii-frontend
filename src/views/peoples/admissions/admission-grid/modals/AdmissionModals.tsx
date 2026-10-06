@@ -502,7 +502,7 @@ const AdmissionModals = ({
       >
         <div className="border rounded p-4 bg-white">
           <div className="d-flex align-items-center justify-content-between mb-4">
-            <ImageWithBasePath src="assets/img/logo.svg" alt="Logo" height={32} />
+            <ImageWithBasePath src="assets/img/karkaii-logo.png" alt="Logo" height={32} />
             <div className="text-end">
               <h5 className="mb-0 fs-15">Global International School</h5>
               <span className="fs-12 text-muted">Springfield Campus</span>

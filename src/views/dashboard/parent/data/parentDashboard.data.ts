@@ -492,7 +492,7 @@ export const notificationGroups = [
 /* ------------------------------- File exports ------------------------------ */
 
 /** Verbatim from `reportCard()` in parent-portal.js. */
-export const REPORT_CARD_BODY = `PRESKOOL ACADEMY - REPORT CARD (Term II 2024-26)
+export const REPORT_CARD_BODY = `KARKAII ACADEMY - REPORT CARD (Term II 2024-26)
 Student: Emma Daniel - Grade 4-A
 Parent: Robert Daniel (PAR-2043)
 
@@ -507,7 +507,7 @@ Result: PASS (Distinction) | Class Teacher: Ms. Teresa Susan
 `;
 
 /** Verbatim from `receipt()` in parent-portal.js. */
-export const RECEIPT_BODY = `PRESKOOL ACADEMY - FEE RECEIPT
+export const RECEIPT_BODY = `KARKAII ACADEMY - FEE RECEIPT
 Student: Emma Daniel - Grade 4-A
 Paid: $3,000 (Term I Tuition)
 Date: 05 Sep 2024 | Method: Card ****4521

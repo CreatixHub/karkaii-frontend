@@ -16,7 +16,7 @@ const AiLearningInsights = ({ onOpenModal }: AiLearningInsightsProps) => (
     >
       <span className="badge badge-sm badge-soft-purple d-inline-flex align-items-center gap-1 rounded-pill">
         <i className="ti ti-robot fs-14" />
-        Preskool AI
+        Karkaii AI
       </span>
     </WidgetHeader>
 

@@ -85,18 +85,41 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * The backend reports field problems as `errors: [{ field, message }]` (see formatZodError in
+ * server/src/utils/validation.js); forms want `{ [field]: message }`. Accepts both shapes.
+ */
+export function normalizeFieldErrors(raw: unknown): FieldErrors | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  if (Array.isArray(raw)) {
+    const out: FieldErrors = {};
+    for (const item of raw) {
+      if (item && typeof item === 'object' && 'field' in item && 'message' in item) {
+        const { field, message } = item as { field: unknown; message: unknown };
+        // first message per field wins; nested paths ("items.0.qty") are kept as-is
+        if (typeof field === 'string' && typeof message === 'string' && !(field in out)) out[field] = message;
+      }
+    }
+    return Object.keys(out).length ? out : undefined;
+  }
+  return raw as FieldErrors;
+}
+
 /** Builds an `ApiError` from an HTTP response and its parsed body. */
 export function createHttpError(
   status: number,
   payload: ApiErrorPayload | undefined,
   fallbackDetails?: unknown,
 ): ApiError {
-  const code = errorCodeForStatus(status);
+  const fieldErrors = normalizeFieldErrors(payload?.errors);
+  // The server answers invalid input with 400 (and a duplicate with 409); with field errors attached it is a
+  // validation failure as far as the UI is concerned, whatever the status.
+  const code = fieldErrors && status === 400 ? ERROR_CODE.VALIDATION : errorCodeForStatus(status);
   return new ApiError(messageForErrorCode(code), {
     status,
     code,
     details: payload ?? fallbackDetails,
-    fieldErrors: payload?.errors,
+    fieldErrors,
   });
 }
 

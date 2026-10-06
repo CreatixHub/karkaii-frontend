@@ -166,7 +166,7 @@ const WhatsappModals = ({
   const [templateLanguage, setTemplateLanguage] = useState('English');
   const [templateHeader, setTemplateHeader] = useState('');
   const [templateBody, setTemplateBody] = useState('');
-  const [templateFooter, setTemplateFooter] = useState('Preskool');
+  const [templateFooter, setTemplateFooter] = useState('Karkaii');
   const [templateButton, setTemplateButton] = useState('None');
 
   const [column, setColumn] = useState('Column A — whatsapp');
@@ -586,7 +586,7 @@ const WhatsappModals = ({
         ].map((who) => (
           <div className="border rounded p-3 mb-2" key={who.name}>
             <div className="d-flex align-items-center justify-content-between mb-2">
-              <span className="fs-12 fw-medium">Preskool</span>
+              <span className="fs-12 fw-medium">Karkaii</span>
               <span className="fs-12 text-muted">{who.name}</span>
             </div>
             {/* The registered wording with this recipient's values in it. */}

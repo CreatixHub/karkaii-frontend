@@ -96,11 +96,9 @@ export const messages = [
 export const appTiles = [
   { label: "Calendar", icon: "ti ti-calendar", tone: "ai-blue", link: routes.calendar },
   { label: "Email", icon: "ti ti-mail", tone: "ai-green", link: routes.email },
-  { label: "Chat", icon: "ti ti-message", tone: "ai-cyan", link: routes.chat },
   { label: "To Do", icon: "ti ti-checklist", tone: "ai-amber", link: routes.todo },
   { label: "Files", icon: "ti ti-folder", tone: "ai-red", link: routes.fileManager },
   { label: "Notes", icon: "ti ti-notes", tone: "ai-indigo", link: routes.notes },
-  { label: "Call", icon: "ti ti-phone", tone: "ai-purple", link: routes.audioCall },
   // `accounts-invoices.html` in the template is a dead link; the real page is invoices.html
   { label: "Invoices", icon: "ti ti-file-invoice", tone: "ai-teal", link: routes.accountsInvoices },
   { label: "Tickets", icon: "ti ti-ticket", tone: "ai-pink", link: routes.tickets },

@@ -256,7 +256,7 @@ export const TOTAL_COUNT = 12;
 export const templates: SmsTemplate[] = [
   {
     id: 'TPL-001', name: 'Attendance Alert', category: 'Attendance',
-    body: '{{student_name}} was marked absent for {{date}}. If this is unexpected, please contact the class teacher. - Preskool',
+    body: '{{student_name}} was marked absent for {{date}}. If this is unexpected, please contact the class teacher. - Karkaii',
     route: 'Transactional', encoding: 'GSM-7', senderId: 'PRSKUL',
     submittedOn: '12 Jan 2026', approvedOn: '14 Jan 2026', rejectedReason: '',
     updatedOn: '14 Jan 2026', updatedBy: 'Ms. Divya Nair',
@@ -264,7 +264,7 @@ export const templates: SmsTemplate[] = [
   },
   {
     id: 'TPL-002', name: 'Fee Reminder', category: 'Fees',
-    body: 'Dear {{parent_name}}, the term-2 fee of Rs. {{fee_amount}} for {{student_name}} ({{class}}-{{section}}) is due on {{due_date}}. Pay via the parent portal to avoid a late fee. - Preskool',
+    body: 'Dear {{parent_name}}, the term-2 fee of Rs. {{fee_amount}} for {{student_name}} ({{class}}-{{section}}) is due on {{due_date}}. Pay via the parent portal to avoid a late fee. - Karkaii',
     route: 'Transactional', encoding: 'GSM-7', senderId: 'PRSKUL',
     submittedOn: '08 Jan 2026', approvedOn: '10 Jan 2026', rejectedReason: '',
     updatedOn: '24 Jul 2026', updatedBy: 'Ms. Latha Rao',
@@ -272,7 +272,7 @@ export const templates: SmsTemplate[] = [
   },
   {
     id: 'TPL-003', name: 'Exam Notification', category: 'Examination',
-    body: '{{exam_name}} begins on {{date}} for {{class}}. Hall tickets are on the parent portal. Report twenty minutes early with your ID card. - Preskool',
+    body: '{{exam_name}} begins on {{date}} for {{class}}. Hall tickets are on the parent portal. Report twenty minutes early with your ID card. - Karkaii',
     route: 'Transactional', encoding: 'GSM-7', senderId: 'PRSKUL',
     submittedOn: '15 Jan 2026', approvedOn: '17 Jan 2026', rejectedReason: '',
     updatedOn: '26 Jul 2026', updatedBy: 'Ms. Divya Nair',
@@ -280,7 +280,7 @@ export const templates: SmsTemplate[] = [
   },
   {
     id: 'TPL-004', name: 'Holiday Notice', category: 'Holiday',
-    body: 'School will remain closed on {{date}} for {{reason}}. Classes resume the following working day. - Preskool',
+    body: 'School will remain closed on {{date}} for {{reason}}. Classes resume the following working day. - Karkaii',
     route: 'Transactional', encoding: 'GSM-7', senderId: 'PRSKUL',
     submittedOn: '05 Jan 2026', approvedOn: '07 Jan 2026', rejectedReason: '',
     updatedOn: '08 Jul 2026', updatedBy: 'Ms. Latha Rao',
@@ -288,7 +288,7 @@ export const templates: SmsTemplate[] = [
   },
   {
     id: 'TPL-005', name: 'Emergency Alert', category: 'Emergency',
-    body: 'URGENT: {{message}} Please follow the school app for updates. - Preskool',
+    body: 'URGENT: {{message}} Please follow the school app for updates. - Karkaii',
     route: 'Transactional', encoding: 'GSM-7', senderId: 'PRSKUL',
     submittedOn: '05 Jan 2026', approvedOn: '05 Jan 2026', rejectedReason: '',
     updatedOn: '29 Jul 2026', updatedBy: 'Ms. Latha Rao',
@@ -296,7 +296,7 @@ export const templates: SmsTemplate[] = [
   },
   {
     id: 'TPL-006', name: 'PTA Meeting', category: 'PTA',
-    body: 'Dear {{parent_name}}, the PTA meeting is on {{date}} at {{time}}. Book your slot on the parent portal. - Preskool',
+    body: 'Dear {{parent_name}}, the PTA meeting is on {{date}} at {{time}}. Book your slot on the parent portal. - Karkaii',
     route: 'Transactional', encoding: 'GSM-7', senderId: 'PRSKUL',
     submittedOn: '20 Jan 2026', approvedOn: '22 Jan 2026', rejectedReason: '',
     updatedOn: '18 Jul 2026', updatedBy: 'Ms. Divya Nair',
@@ -304,7 +304,7 @@ export const templates: SmsTemplate[] = [
   },
   {
     id: 'TPL-007', name: 'Birthday Wishes', category: 'Greetings',
-    body: 'Happy birthday, {{student_name}}! Wishing you a wonderful year ahead. - Preskool',
+    body: 'Happy birthday, {{student_name}}! Wishing you a wonderful year ahead. - Karkaii',
     route: 'Promotional', encoding: 'GSM-7', senderId: 'PRSKOL',
     submittedOn: '02 Feb 2026', approvedOn: '05 Feb 2026', rejectedReason: '',
     updatedOn: '05 Feb 2026', updatedBy: 'Mr. Arun Prakash',
@@ -312,7 +312,7 @@ export const templates: SmsTemplate[] = [
   },
   {
     id: 'TPL-008', name: 'Admission Confirmation', category: 'Admissions',
-    body: 'Admission confirmed for {{student_name}} in {{class}}. Admission number {{admission_no}}. Reporting details follow by email. - Preskool',
+    body: 'Admission confirmed for {{student_name}} in {{class}}. Admission number {{admission_no}}. Reporting details follow by email. - Karkaii',
     route: 'Transactional', encoding: 'GSM-7', senderId: 'PRSKUL',
     submittedOn: '10 Feb 2026', approvedOn: '12 Feb 2026', rejectedReason: '',
     updatedOn: '12 Feb 2026', updatedBy: 'Ms. Latha Rao',
@@ -320,7 +320,7 @@ export const templates: SmsTemplate[] = [
   },
   {
     id: 'TPL-009', name: 'Result Published', category: 'Results',
-    body: '{{exam_name}} results are published for {{student_name}}. View the report card on the parent portal. - Preskool',
+    body: '{{exam_name}} results are published for {{student_name}}. View the report card on the parent portal. - Karkaii',
     route: 'Transactional', encoding: 'GSM-7', senderId: 'PRSKUL',
     submittedOn: '28 Jul 2026', approvedOn: '', rejectedReason: '',
     updatedOn: '28 Jul 2026', updatedBy: 'Ms. Divya Nair',
@@ -328,7 +328,7 @@ export const templates: SmsTemplate[] = [
   },
   {
     id: 'TPL-010', name: 'Transport Delay', category: 'Transport',
-    body: '{{transport_route}} is running late by {{delay_mins}} minutes this morning. The bus will reach your stop shortly. - Preskool',
+    body: '{{transport_route}} is running late by {{delay_mins}} minutes this morning. The bus will reach your stop shortly. - Karkaii',
     route: 'Transactional', encoding: 'GSM-7', senderId: 'PRSKUL',
     submittedOn: '18 Mar 2026', approvedOn: '20 Mar 2026', rejectedReason: '',
     updatedOn: '22 Jul 2026', updatedBy: 'Mr. Arun Prakash',
@@ -336,7 +336,7 @@ export const templates: SmsTemplate[] = [
   },
   {
     id: 'TPL-011', name: 'Payment Confirmation', category: 'Fees',
-    body: 'Payment of Rs. {{amount}} received against receipt {{receipt_no}}. Thank you. - Preskool',
+    body: 'Payment of Rs. {{amount}} received against receipt {{receipt_no}}. Thank you. - Karkaii',
     route: 'Transactional', encoding: 'GSM-7', senderId: 'PRSKUL',
     submittedOn: '08 Jan 2026', approvedOn: '10 Jan 2026', rejectedReason: '',
     updatedOn: '01 Aug 2026', updatedBy: 'Mr. Arun Prakash',
@@ -344,7 +344,7 @@ export const templates: SmsTemplate[] = [
   },
   {
     id: 'TPL-012', name: 'Library Reminder', category: 'Library',
-    body: '{{book}} borrowed by {{student_name}} is overdue since {{due_date}}. Please return it to the senior library this week to avoid a fine. - Preskool',
+    body: '{{book}} borrowed by {{student_name}} is overdue since {{due_date}}. Please return it to the senior library this week to avoid a fine. - Karkaii',
     route: 'Promotional', encoding: 'GSM-7', senderId: 'PRSKOL',
     submittedOn: '25 Jun 2026', approvedOn: '', rejectedReason: 'Promotional route not permitted for overdue notices; resubmit on the transactional route.',
     updatedOn: '25 Jun 2026', updatedBy: 'Mr. Arun Prakash',

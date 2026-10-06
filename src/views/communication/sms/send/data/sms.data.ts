@@ -331,7 +331,7 @@ export const smsTemplates: SmsTemplate[] = [
 ];
 
 /** The body the composer opens with — the fee reminder, 187 characters expanded. */
-export const DEFAULT_BODY = 'Dear {{parent_name}}, the term-2 fee of Rs. {{fee_amount}} for {{student_name}} ({{class}}-{{section}}) is due on 10 Aug. Pay via the parent portal to avoid a late fee. - Preskool';
+export const DEFAULT_BODY = 'Dear {{parent_name}}, the term-2 fee of Rs. {{fee_amount}} for {{student_name}} ({{class}}-{{section}}) is due on 10 Aug. Pay via the parent portal to avoid a late fee. - Karkaii';
 
 export const DEFAULT_TITLE = 'Term-2 fee — final reminder';
 

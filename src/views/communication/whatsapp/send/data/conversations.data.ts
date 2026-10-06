@@ -222,7 +222,7 @@ export const QUICK_TOTALS = {
 const feeThread: Message[] = [
   {
     id: 'M1', direction: 'out', kind: 'template',
-    text: 'Dear Rahul Menon, the term-2 fee of Rs. 18,500 for Aarav Menon (7-B) is due on 10 Aug. Pay via the parent portal to avoid a late fee. – Preskool',
+    text: 'Dear Rahul Menon, the term-2 fee of Rs. 18,500 for Aarav Menon (7-B) is due on 10 Aug. Pay via the parent portal to avoid a late fee. – Karkaii',
     templateName: 'Fee Reminder', fileName: '', fileMeta: '',
     at: '07:30', receipt: 'read', day: 'Yesterday',
   },

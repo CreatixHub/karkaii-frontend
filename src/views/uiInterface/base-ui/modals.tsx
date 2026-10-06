@@ -674,7 +674,7 @@ const Modals = () => {
                         <Link to={all_routes.adminDashboard} className="logo logo-dark">
                           <span className="logo-lg">
                             <ImageWithBasePath
-                              src="assets/img/logo.svg"
+                              src="assets/img/karkaii-logo.png"
                               alt="Logo"
                               height={42}
                             />
@@ -761,7 +761,7 @@ const Modals = () => {
                         <Link to={all_routes.adminDashboard} className="logo logo-dark">
                           <span className="logo-lg">
                             <ImageWithBasePath
-                              src="assets/img/logo.svg"
+                              src="assets/img/karkaii-logo.png"
                               alt="Logo"
                               height={42}
                             />

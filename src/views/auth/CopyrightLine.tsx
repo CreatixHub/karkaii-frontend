@@ -3,7 +3,7 @@ export interface CopyrightLineProps {
   className?: string;
 }
 
-export const PRODUCT = 'Preskool';
+export const PRODUCT = 'Karkaii';
 
 const CopyrightLine = ({ className }: CopyrightLineProps) => (
   <p className={className}>

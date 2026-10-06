@@ -517,7 +517,7 @@ const IssueModals = ({
           <div className="border rounded p-3">
             <div className="d-flex align-items-center justify-content-between mb-3">
               <div className="d-flex align-items-center gap-2">
-                <img src="assets/img/logo-small.svg" alt="Logo" style={{ height: 28 }} />
+                <img src="assets/img/karkaii-logo.png" alt="Logo" style={{ height: 28 }} />
                 <span className="fw-semibold">Global International Library</span>
               </div>
               <span className="badge badge-soft-primary">Issue Slip</span>

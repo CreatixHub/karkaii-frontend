@@ -4,7 +4,7 @@ import { daysBetween } from '../../../../report/ai-insights/data/dates';
 export const RUN_DATE = '31 Jul 2026';
 export const LAST_UPDATED = 'Today, 09:42';
 
-export const SCHOOL_NAME = 'Preskool International School';
+export const SCHOOL_NAME = 'Karkaii International School';
 export const ACADEMIC_YEAR = '2026 – 2027';
 
 /** The template's completeness meter. See the deviation note above. */
@@ -221,14 +221,14 @@ export const GENERAL_ROWS: ProfileRow[] = [
   { key: 'Established year', value: '2011' },
   { key: 'Academic year', value: `${ACADEMIC_YEAR} · Term 2 active` },
   { key: 'Medium of instruction', value: 'English · Hindi as second language' },
-  { key: 'Website', value: 'www.preskool.edu' },
-  { key: 'Official email', value: 'office@preskool.edu' },
+  { key: 'Website', value: 'www.karkaii.edu' },
+  { key: 'Official email', value: 'office@karkaii.edu' },
   { key: 'Primary phone', value: '+91 80 4123 8800' },
   { key: 'Status', value: 'Active' },
 ];
 
 export const IDENTITY_ROWS: ProfileRow[] = [
-  { key: 'Legal name', value: 'Preskool Educational Trust (Regd.)' },
+  { key: 'Legal name', value: 'Karkaii Educational Trust (Regd.)' },
   { key: 'Display name', value: SCHOOL_NAME },
   { key: 'Short name', value: 'PIS' },
   { key: 'Motto', value: '“Learn. Question. Grow.”' },
@@ -246,9 +246,9 @@ export interface Asset {
 }
 
 export const ASSETS: Asset[] = [
-  { name: 'School Logo', spec: 'SVG · 240 × 60', image: 'assets/img/logo.svg' },
-  { name: 'Dark Logo', spec: 'SVG · 240 × 60', image: 'assets/img/logo-dark.svg', dark: true },
-  { name: 'Compact Logo', spec: 'SVG · 60 × 60', image: 'assets/img/logo-small.svg' },
+  { name: 'School Logo', spec: 'SVG · 240 × 60', image: 'assets/img/karkaii-logo.png' },
+  { name: 'Dark Logo', spec: 'SVG · 240 × 60', image: 'assets/img/karkaii-logo.png', dark: true },
+  { name: 'Compact Logo', spec: 'SVG · 60 × 60', image: 'assets/img/karkaii-logo.png' },
   { name: 'Favicon', spec: 'PNG · 32 × 32', image: 'assets/img/favicon.png' },
 ];
 
@@ -317,7 +317,7 @@ export const CONTACT_BLOCKS: ContactBlock[] = [
   {
     title: 'Principal Office',
     icon: 'ti ti-user-star',
-    lines: ['Block A, Second Floor', '+91 80 4123 8801', 'principal@preskool.edu'],
+    lines: ['Block A, Second Floor', '+91 80 4123 8801', 'principal@karkaii.edu'],
   },
   {
     title: 'Reception',
@@ -332,7 +332,7 @@ export const CONTACT_BLOCKS: ContactBlock[] = [
   {
     title: 'Email Addresses',
     icon: 'ti ti-mail',
-    lines: ['office@preskool.edu', 'admissions@preskool.edu', 'accounts@preskool.edu'],
+    lines: ['office@karkaii.edu', 'admissions@karkaii.edu', 'accounts@karkaii.edu'],
   },
   {
     title: 'Emergency Contact',
@@ -345,7 +345,7 @@ export const ADDRESS_BLOCKS: ContactBlock[] = [
   {
     title: 'Office Address',
     icon: 'ti ti-building-bank',
-    lines: ['Preskool Educational Trust', '4th Floor, Ashirwad Tower', 'Residency Road, Bengaluru 560025'],
+    lines: ['Karkaii Educational Trust', '4th Floor, Ashirwad Tower', 'Residency Road, Bengaluru 560025'],
   },
   {
     title: 'Campus Address',
@@ -367,18 +367,18 @@ export interface SocialLink {
 }
 
 export const SOCIAL_LINKS: SocialLink[] = [
-  { name: 'Facebook', handle: 'facebook.com/preskoolintl', icon: 'ti ti-brand-facebook', state: 'Connected' },
-  { name: 'X (Twitter)', handle: '@preskoolintl', icon: 'ti ti-brand-x', state: 'Connected' },
-  { name: 'Instagram', handle: '@preskool.international', icon: 'ti ti-brand-instagram', state: 'Connected' },
-  { name: 'YouTube', handle: 'youtube.com/@preskoolintl', icon: 'ti ti-brand-youtube', state: 'Connected' },
+  { name: 'Facebook', handle: 'facebook.com/karkaiiintl', icon: 'ti ti-brand-facebook', state: 'Connected' },
+  { name: 'X (Twitter)', handle: '@karkaiiintl', icon: 'ti ti-brand-x', state: 'Connected' },
+  { name: 'Instagram', handle: '@karkaii.international', icon: 'ti ti-brand-instagram', state: 'Connected' },
+  { name: 'YouTube', handle: 'youtube.com/@karkaiiintl', icon: 'ti ti-brand-youtube', state: 'Connected' },
   { name: 'LinkedIn', handle: UNSET, icon: 'ti ti-brand-linkedin', state: 'Not linked' },
-  { name: 'Public website', handle: 'www.preskool.edu', icon: 'ti ti-world', state: 'Live' },
+  { name: 'Public website', handle: 'www.karkaii.edu', icon: 'ti ti-world', state: 'Live' },
 ];
 
 export const COMMUNICATION_ROWS: ProfileRow[] = [
   { key: 'Default sender name', value: SCHOOL_NAME },
-  { key: 'Default sender email', value: 'noreply@preskool.edu' },
-  { key: 'Reply-to address', value: 'office@preskool.edu' },
+  { key: 'Default sender email', value: 'noreply@karkaii.edu' },
+  { key: 'Reply-to address', value: 'office@karkaii.edu' },
   { key: 'SMS sender id', value: 'PRESKL', code: true },
   { key: 'WhatsApp business number', value: 'Not configured' },
   { key: 'Letterhead template', value: 'Classic · used on 6 document types' },
@@ -425,56 +425,56 @@ export const PEOPLE: Person[] = [
   {
     role: 'Principal',
     name: 'Dr. Anitha Krishnan',
-    contact: 'principal@preskool.edu · +91 80 4123 8801',
+    contact: 'principal@karkaii.edu · +91 80 4123 8801',
     image: 'assets/img/teachers/teacher-01.jpg',
     state: 'In office',
   },
   {
     role: 'Vice Principal',
     name: 'Mr. Suresh Iyer',
-    contact: 'viceprincipal@preskool.edu · Ext. 8802',
+    contact: 'viceprincipal@karkaii.edu · Ext. 8802',
     image: 'assets/img/teachers/teacher-02.jpg',
     state: 'In office',
   },
   {
     role: 'Administrator',
     name: 'Ms. Latha Rao',
-    contact: 'admin@preskool.edu · Ext. 8803',
+    contact: 'admin@karkaii.edu · Ext. 8803',
     image: 'assets/img/teachers/teacher-03.jpg',
     state: 'In office',
   },
   {
     role: 'Chairman',
     name: 'Mr. R. Venkataraman',
-    contact: 'chairman@preskool.edu · By appointment',
+    contact: 'chairman@karkaii.edu · By appointment',
     image: 'assets/img/teachers/teacher-04.jpg',
     state: 'Trust',
   },
   {
     role: 'Academic Head',
     name: 'Mrs. Kavitha Menon',
-    contact: 'academics@preskool.edu · Ext. 8806',
+    contact: 'academics@karkaii.edu · Ext. 8806',
     image: 'assets/img/teachers/teacher-05.jpg',
     state: 'In office',
   },
   {
     role: 'Finance Officer',
     name: 'Mr. Deepak Shetty',
-    contact: 'accounts@preskool.edu · Ext. 8807',
+    contact: 'accounts@karkaii.edu · Ext. 8807',
     image: 'assets/img/teachers/teacher-06.jpg',
     state: 'In office',
   },
 ];
 
 export const TRUST_ROWS: ProfileRow[] = [
-  { key: 'Trust name', value: 'Preskool Educational Trust (Regd.)' },
+  { key: 'Trust name', value: 'Karkaii Educational Trust (Regd.)' },
   { key: 'Trust registration', value: 'TR/KA/2011/4471', code: true },
   { key: 'Registered office', value: 'Ashirwad Tower, Residency Road, Bengaluru 560025' },
   { key: 'Management committee', value: '9 members · last constituted May 2025' },
   { key: 'Chairman', value: 'Mr. R. Venkataraman' },
   { key: 'Secretary', value: 'Mrs. Padma Venkataraman' },
   { key: 'Committee term ends', value: 'April 2028' },
-  { key: 'Office contact', value: '+91 80 4123 8888 · trust@preskool.edu' },
+  { key: 'Office contact', value: '+91 80 4123 8888 · trust@karkaii.edu' },
 ];
 
 /* ------------------------------------------------------------------ *

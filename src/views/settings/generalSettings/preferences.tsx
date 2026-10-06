@@ -363,7 +363,7 @@ const Preferences = () => {
                     <p>Shown in the browser tab and on printed headers.</p>
                   </div>
                   <div className="option-item-control">
-                    <span className="fs-13 fw-medium text-dark">Preskool</span>
+                    <span className="fs-13 fw-medium text-dark">Karkaii</span>
                     <div className="form-check form-switch mb-0">
                       <input
                         className="form-check-input"

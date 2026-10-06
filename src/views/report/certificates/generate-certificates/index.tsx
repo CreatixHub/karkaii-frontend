@@ -471,7 +471,7 @@ const GenerateCertificates = () => {
                       <i className={meta.icon} />
                     </span>
                     <div className="overflow-hidden">
-                      <h6 className="fs-13 mb-0">PreSkool School</h6>
+                      <h6 className="fs-13 mb-0">Karkaii School</h6>
                       <span className="fs-12 text-muted">
                         {row.certificateType} · {ACADEMIC_YEAR}
                       </span>

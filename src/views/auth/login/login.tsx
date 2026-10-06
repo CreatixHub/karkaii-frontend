@@ -1,12 +1,18 @@
 import  { useEffect, useState } from "react";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { all_routes } from "@/routes/all_routes";
 import CopyrightLine from "../CopyrightLine";
+import { env } from "@config/env";
+import { useAuth } from "@hooks/useAuth";
+import { useLogin } from "@features/auth";
+import { roleHomeRoute } from "@features/auth/roleHome";
 
 const Login = () => {
   const routes = all_routes;
   const [isPasswordVisible, setPasswordVisible] = useState(false);
+  const { form, isLoggingIn } = useLogin();
+  const { user, isAuthenticated } = useAuth();
 
   const togglePasswordVisibility = () => {
     setPasswordVisible((prevState) => !prevState);
@@ -14,6 +20,11 @@ const Login = () => {
   useEffect(() => {
     localStorage.setItem("menuOpened", "Dashboard");
   }, []);
+
+  // Already signed in (e.g. opened /login in a second tab): go straight to the dashboard.
+  if (env.authEnabled && isAuthenticated && user) {
+    return <Navigate to={roleHomeRoute(user.role)} replace />;
+  }
 
   return (
     <div className="container-fuild">
@@ -28,7 +39,7 @@ const Login = () => {
                 />
               </div>
               <div className="authen-overlay-item  w-100 p-4">
-                <h4 className="text-white mb-3">What's New on Preskool !!!</h4>
+                <h4 className="text-white mb-3">What's New on Karkaii !!!</h4>
                 <div className="d-flex align-items-center flex-row mb-3 justify-content-between p-3 br-5 gap-3 card">
                   <div>
                     <h6>Summer Vacation Holiday Homework</h6>
@@ -94,11 +105,11 @@ const Login = () => {
           <div className="col-lg-6 col-md-12 col-sm-12">
             <div className="row justify-content-center align-items-center vh-100 overflow-auto flex-wrap ">
               <div className="col-md-8 mx-auto p-4">
-                <form>
+                <form onSubmit={form.handleSubmit} noValidate>
                   <div>
                     <div className=" mx-auto mb-5 text-center">
                       <ImageWithBasePath
-                        src="assets/img/authentication/authentication-logo.svg"
+                        src="assets/img/karkaii-logo.png"
                         className="img-fluid"
                         alt="Logo"
                       />
@@ -161,16 +172,30 @@ const Login = () => {
                               <i className="ti ti-mail" />
                             </span>
                             <input
-                              type="text"
-                              defaultValue=""
-                              className="form-control"
+                              type="email"
+                              name="email"
+                              autoComplete="username"
+                              value={form.values.email}
+                              onChange={form.handleChange}
+                              onBlur={form.handleBlur}
+                              className={`form-control${form.touched.email && form.errors.email ? " is-invalid" : ""}`}
+                              aria-invalid={Boolean(form.touched.email && form.errors.email)}
                             />
                           </div>
+                          {form.touched.email && form.errors.email && (
+                            <div className="text-danger fs-13 mb-2">{form.errors.email}</div>
+                          )}
                           <label className="form-label">Password</label>
                           <div className="pass-group">
                             <input
                               type={isPasswordVisible ? "text" : "password"}
-                              className="pass-input form-control"
+                              name="password"
+                              autoComplete="current-password"
+                              value={form.values.password}
+                              onChange={form.handleChange}
+                              onBlur={form.handleBlur}
+                              className={`pass-input form-control${form.touched.password && form.errors.password ? " is-invalid" : ""}`}
+                              aria-invalid={Boolean(form.touched.password && form.errors.password)}
                             />
                             <span
                               className={`ti toggle-password ${
@@ -179,13 +204,25 @@ const Login = () => {
                               onClick={togglePasswordVisibility}
                             />
                           </div>
+                          {form.touched.password && form.errors.password && (
+                            <div className="text-danger fs-13 mt-1">{form.errors.password}</div>
+                          )}
                         </div>
+                        {form.submitError && (
+                          <div className="alert alert-danger py-2 mb-3" role="alert">
+                            {form.submitError.message}
+                          </div>
+                        )}
                         <div className="form-wrap form-wrap-checkbox">
                           <div className="d-flex align-items-center">
                             <div className="form-check form-check-md mb-0">
                               <input
                                 className="form-check-input mt-0"
                                 type="checkbox"
+                                name="rememberMe"
+                                id="rememberMe"
+                                checked={form.values.rememberMe}
+                                onChange={form.handleChange}
                               />
                             </div>
                             <p className="ms-1 mb-0 ">Remember Me</p>
@@ -199,12 +236,13 @@ const Login = () => {
                       </div>
                       <div className="p-4 pt-0">
                         <div className="mb-3">
-                          <Link
-                            to={routes.adminDashboard}
+                          <button
+                            type="submit"
                             className="btn btn-primary w-100"
+                            disabled={form.isSubmitting || isLoggingIn}
                           >
-                            Sign In
-                          </Link>
+                            {form.isSubmitting || isLoggingIn ? "Signing in…" : "Sign In"}
+                          </button>
                         </div>
                         <div className="text-center">
                           <h6 className="fw-normal text-dark mb-0">

@@ -154,7 +154,7 @@ const WardenForm = ({ draft, onField, suffix }: FormProps) => (
     <div className="col-md-6"><div className="mb-3">
       <label className="form-label" htmlFor={`warden-email${suffix}`}>Email</label>
       <input
-        type="email" className="form-control" id={`warden-email${suffix}`} placeholder="name@preskool.com"
+        type="email" className="form-control" id={`warden-email${suffix}`} placeholder="name@karkaii.com"
         value={draft.email} onChange={(event) => onField('email', event.target.value)}
       />
     </div></div>

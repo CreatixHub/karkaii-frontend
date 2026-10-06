@@ -6,7 +6,7 @@ const AiInsightsPanel = () => (
     <WidgetHeader icon="ti ti-sparkles" title="AI Teaching Insights" as="h5" titleClassName="fs-15">
       <span className="insight-badge d-inline-flex align-items-center">
         <i className="ti ti-robot" />
-        Preskool AI
+        Karkaii AI
       </span>
     </WidgetHeader>
 

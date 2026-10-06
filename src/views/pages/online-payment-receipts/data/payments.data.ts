@@ -111,7 +111,7 @@ export const GATEWAYS = ['Stripe', 'Razorpay', 'PayPal'];
  * ------------------------------------------------------------------ */
 
 export const RECEIPT = {
-  school: 'PreSkool International',
+  school: 'Karkaii International',
   title: 'Fee Payment Receipt',
   number: 'RCPT-88213',
   student: TRANSACTIONS[0].student,

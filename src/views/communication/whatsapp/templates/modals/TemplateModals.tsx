@@ -29,7 +29,7 @@ export interface TemplateDraft {
 
 export const emptyDraft: TemplateDraft = {
   name: '', label: '', category: 'Utility', languages: ['English'],
-  header: '', body: '', footer: 'Preskool', button: 'None',
+  header: '', body: '', footer: 'Karkaii', button: 'None',
 };
 
 export const draftOf = (row: WhatsappTemplate): TemplateDraft => ({

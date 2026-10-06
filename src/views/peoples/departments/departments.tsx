@@ -2374,7 +2374,7 @@ const Departments = () => {
                                     Department Email
                                   </p>
                                   <p className="mb-0 fw-medium text-dark text-truncate">
-                                    admin@preskool.com
+                                    admin@karkaii.com
                                   </p>
                                 </div>
                               </div>
@@ -2900,7 +2900,7 @@ const Departments = () => {
                                     Department Email
                                   </p>
                                   <p className="mb-0 fw-medium text-dark text-truncate">
-                                    finance@preskool.com
+                                    finance@karkaii.com
                                   </p>
                                 </div>
                               </div>
@@ -3426,7 +3426,7 @@ const Departments = () => {
                                     Department Email
                                   </p>
                                   <p className="mb-0 fw-medium text-dark text-truncate">
-                                    academic@preskool.com
+                                    academic@karkaii.com
                                   </p>
                                 </div>
                               </div>
@@ -3952,7 +3952,7 @@ const Departments = () => {
                                     Department Email
                                   </p>
                                   <p className="mb-0 fw-medium text-dark text-truncate">
-                                    library@preskool.com
+                                    library@karkaii.com
                                   </p>
                                 </div>
                               </div>
@@ -4478,7 +4478,7 @@ const Departments = () => {
                                     Department Email
                                   </p>
                                   <p className="mb-0 fw-medium text-dark text-truncate">
-                                    health@preskool.com
+                                    health@karkaii.com
                                   </p>
                                 </div>
                               </div>
@@ -5004,7 +5004,7 @@ const Departments = () => {
                                     Department Email
                                   </p>
                                   <p className="mb-0 fw-medium text-dark text-truncate">
-                                    transport@preskool.com
+                                    transport@karkaii.com
                                   </p>
                                 </div>
                               </div>
@@ -5530,7 +5530,7 @@ const Departments = () => {
                                     Department Email
                                   </p>
                                   <p className="mb-0 fw-medium text-dark text-truncate">
-                                    hostel@preskool.com
+                                    hostel@karkaii.com
                                   </p>
                                 </div>
                               </div>
@@ -6056,7 +6056,7 @@ const Departments = () => {
                                     Department Email
                                   </p>
                                   <p className="mb-0 fw-medium text-dark text-truncate">
-                                    management@preskool.com
+                                    management@karkaii.com
                                   </p>
                                 </div>
                               </div>
@@ -6582,7 +6582,7 @@ const Departments = () => {
                                     Department Email
                                   </p>
                                   <p className="mb-0 fw-medium text-dark text-truncate">
-                                    guidance@preskool.com
+                                    guidance@karkaii.com
                                   </p>
                                 </div>
                               </div>
@@ -7108,7 +7108,7 @@ const Departments = () => {
                                     Department Email
                                   </p>
                                   <p className="mb-0 fw-medium text-dark text-truncate">
-                                    sports@preskool.com
+                                    sports@karkaii.com
                                   </p>
                                 </div>
                               </div>

@@ -24,12 +24,43 @@ import type { ApiError } from '@services/api/errors';
 import { toApiError } from '@services/api/errors';
 import { authService } from '@services/auth/auth.service';
 import { tokenStorage } from '@services/auth/token-storage';
-import type { AuthUser, LoginCredentials } from '@services/auth/auth.types';
+import type { AuthSession, AuthUser, LoginCredentials } from '@services/auth/auth.types';
 import { AuthContext } from './auth-context';
 import type { AuthContextValue, AuthStatus } from './auth-context';
 
 export interface AuthProviderProps {
   children: ReactNode;
+}
+
+/** Module-level so every component instance and effect run shares it (see `refreshSession`). */
+let refreshInFlight: Promise<boolean> | null = null;
+
+const sleep = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+
+/**
+ * Trades the httpOnly refresh cookie for a new access token and stores it.
+ * A 409 means another tab/request rotated the cookie a moment ago: the browser's cookie jar already holds the
+ * new one, so waiting briefly and trying again succeeds without signing anyone out.
+ */
+async function exchangeRefreshCookie(onSession: (session: AuthSession) => void): Promise<boolean> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const session = await authService.refresh();
+      const persist = tokenStorage.isPersisted();
+      tokenStorage.setTokens(session.accessToken, undefined, persist);
+      tokenStorage.setUser(session.user, persist);
+      onSession(session);
+      return true;
+    } catch (raw: unknown) {
+      const error = toApiError(raw);
+      if (error.status === 409 && attempt < 2) {
+        await sleep(300 * (attempt + 1));
+        continue;
+      }
+      return false;
+    }
+  }
+  return false;
 }
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -56,50 +87,83 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     setStatus('unauthenticated');
   }, []);
 
-  // Teach the API client where to find the token and what to do on a 401.
+  /**
+   * Exchanges the httpOnly refresh cookie for a new access token (the server rotates the cookie each time).
+   * Used by the API client when a request gets a 401, and on reload when only the cookie survived.
+   */
+  const refreshSession = useCallback((): Promise<boolean> => {
+    // The refresh token is single-use, so only ONE exchange may run at a time across the whole app - React
+    // StrictMode's double-invoked startup effect and the API client's 401 handler would otherwise race and the
+    // server would see a replayed token. Everyone awaits the same promise.
+    if (!refreshInFlight) {
+      refreshInFlight = exchangeRefreshCookie(
+        (session) => {
+          if (!mountedRef.current) return;
+          setUser(session.user);
+          setStatus('authenticated');
+        },
+      ).finally(() => {
+        refreshInFlight = null;
+      });
+    }
+    return refreshInFlight;
+  }, []);
+
+  // Teach the API client where to find the token, how to renew it and what to do when the session is truly over.
   // Done via callbacks so `client.ts` has no dependency on the auth module.
   useEffect(() => {
     apiClient.setAuthTokenProvider(() => tokenStorage.getAccessToken());
+    apiClient.setRefreshHandler(refreshSession);
     apiClient.setUnauthorizedHandler(() => clearSession());
 
     return () => {
       apiClient.setAuthTokenProvider(null);
+      apiClient.setRefreshHandler(null);
       apiClient.setUnauthorizedHandler(null);
     };
-  }, [clearSession]);
+  }, [clearSession, refreshSession]);
 
-  // Bootstrap: restore a session from storage on first load.
+  // Bootstrap: restore a session on first load.
   useEffect(() => {
     if (!env.authEnabled) {
       setStatus('unauthenticated');
       return;
     }
 
-    if (!tokenStorage.hasSession()) {
+    const hasToken = tokenStorage.hasSession();
+    if (!hasToken && !tokenStorage.canRestoreSession()) {
       setStatus('unauthenticated');
       return;
     }
 
     const controller = new AbortController();
 
-    authService
-      .getCurrentUser(controller.signal)
-      .then((currentUser) => {
-        if (!mountedRef.current) return;
-        setUser(currentUser);
-        setStatus('authenticated');
-      })
-      .catch(() => {
-        // A stored token that no longer works is treated as no session.
-        if (!mountedRef.current) return;
-        clearSession();
-      });
+    // A stored token may be expired; the client refreshes it transparently on the 401. With no token at all
+    // (e.g. a reload after a non-remembered sign-in) the refresh cookie is used directly.
+    const restore = hasToken
+      ? authService.getCurrentUser(controller.signal).then((currentUser) => {
+          if (!mountedRef.current) return;
+          setUser(currentUser);
+          setStatus('authenticated');
+        })
+      : refreshSession().then((ok) => {
+          if (!ok && mountedRef.current) clearSession();
+        });
+
+    restore.catch((raw: unknown) => {
+      // Our own cleanup aborts the request (unmount, StrictMode's double effect): that says nothing about the
+      // session and must never sign anyone out.
+      if (controller.signal.aborted || toApiError(raw).isCancelled) return;
+      // A stored token that no longer works (and could not be refreshed) is treated as no session.
+      if (!mountedRef.current) return;
+      clearSession();
+    });
 
     return () => controller.abort();
-  }, [clearSession]);
+  }, [clearSession, refreshSession]);
 
   const login = useCallback(
-    async (credentials: LoginCredentials): Promise<boolean> => {
+    async (credentials: LoginCredentials): Promise<AuthUser> => {
       setIsLoggingIn(true);
       setError(null);
 
@@ -107,22 +171,24 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         const session = await authService.login(credentials);
         const persist = credentials.rememberMe ?? true;
 
+        tokenStorage.clear(); // never mix a previous account's leftovers with this session
         tokenStorage.setTokens(session.accessToken, session.refreshToken, persist);
         tokenStorage.setUser(session.user, persist);
+        if (!persist) tokenStorage.markEphemeralSession();
 
         if (mountedRef.current) {
           setUser(session.user);
           setStatus('authenticated');
           setIsLoggingIn(false);
         }
-        return true;
+        return session.user;
       } catch (raw: unknown) {
         const apiError = toApiError(raw);
         if (mountedRef.current) {
           setError(apiError);
           setIsLoggingIn(false);
         }
-        return false;
+        throw apiError; // the caller (a form) shows `apiError.message`
       }
     },
     [],

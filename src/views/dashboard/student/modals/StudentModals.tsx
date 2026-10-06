@@ -1016,7 +1016,7 @@ const StudentModals = ({ active, onClose, onOpen }: StudentModalsProps) => {
           <div>
             <b>{studentProfile.name}</b>
             <div className="id-card-class">Class III-A · Roll 35013</div>
-            <div className="org">PRESKOOL ACADEMY</div>
+            <div className="org">KARKAII ACADEMY</div>
           </div>
         </div>
 

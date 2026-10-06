@@ -5,7 +5,7 @@
 	Global design system
 
 	The single token configuration for the whole template. Bootstrap's custom
-	properties are the public API; `utils/_variables.scss` holds the PreSkool
+	properties are the public API; `utils/_variables.scss` holds the Karkaii
 	brand values that fill them. Nothing is duplicated: every colour below
 	references the brand variable rather than restating a hex, so changing the
 	brand in one place changes Bootstrap, the components and every module.
@@ -14,7 +14,7 @@
 	it is added here, generically named, and inherited by everything.
 -----------------*/
 :root {
-	/* brand + status colours — Bootstrap's slots, PreSkool's identity */
+	/* brand + status colours — Bootstrap's slots, Karkaii's identity */
 	--bs-primary: #{variables.$primary};
 	--bs-primary-rgb: #{color.channel(variables.$primary, "red")}, #{color.channel(variables.$primary, "green")}, #{color.channel(variables.$primary, "blue")};
 	--bs-secondary: #{variables.$secondary};

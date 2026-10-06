@@ -334,7 +334,7 @@ const NoticeModals = ({
                 <i className="ti ti-school fs-20" />
               </span>
               <div>
-                <h6 className="fs-14 mb-0">PreSkool</h6>
+                <h6 className="fs-14 mb-0">Karkaii</h6>
                 <span className="fs-12 text-muted">Official Announcement</span>
               </div>
             </div>

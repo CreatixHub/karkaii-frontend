@@ -540,7 +540,7 @@ const StudentProfileModals = ({
               <i className="ti ti-school" />
             </span>
             <div className="idcard-brand">
-              <h5 className="fs-15">PRESKOOL ACADEMY</h5>
+              <h5 className="fs-15">KARKAII ACADEMY</h5>
               <span>Excellence in Education</span>
             </div>
             <div className="idcard-wave" />

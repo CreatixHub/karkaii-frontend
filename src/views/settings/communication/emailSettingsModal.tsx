@@ -153,7 +153,7 @@ const EmailSettingsModal = () => {
               Last handshake
             </h6>
             <div className="eml-dns-rec">
-              → EHLO mail.preskool.edu
+              → EHLO mail.karkaii.edu
               <br />← 250-STARTTLS 250-AUTH LOGIN PLAIN
               <br />→ AUTH LOGIN ∗∗∗∗∗∗
               <br />← 235 2.7.0 Authentication successful
@@ -631,8 +631,8 @@ const EmailSettingsModal = () => {
             attempted and the session is closed. Nothing is delivered to anyone.
           </p>
           <div className="eml-dns-rec">
-            → EHLO mail.preskool.edu
-            <br />← 250-smtp.preskool.edu Hello [103.21.58.14]
+            → EHLO mail.karkaii.edu
+            <br />← 250-smtp.karkaii.edu Hello [103.21.58.14]
             <br />→ STARTTLS
             <br />← 220 2.0.0 Ready to start TLS
             <br />→ AUTH LOGIN ∗∗∗∗∗∗
@@ -704,7 +704,7 @@ const EmailSettingsModal = () => {
               type="email"
               className="form-control"
               id="m_st_to"
-              defaultValue="it@preskool.edu"
+              defaultValue="it@karkaii.edu"
             />
           </div>
           <div className="mb-3">
@@ -725,9 +725,9 @@ const EmailSettingsModal = () => {
             </label>
             <select className="form-select" id="m_st_id">
               <option>
-                Preskool International School &lt;noreply@preskool.edu&gt;
+                Karkaii International School &lt;noreply@karkaii.edu&gt;
               </option>
-              <option>Preskool Accounts &lt;fees@preskool.edu&gt;</option>
+              <option>Karkaii Accounts &lt;fees@karkaii.edu&gt;</option>
             </select>
           </div>
           <div className="form-check">
@@ -812,8 +812,8 @@ const EmailSettingsModal = () => {
                 Sender identity
               </label>
               <select className="form-select" id="m_tp_id">
-                <option>Preskool Accounts</option>
-                <option>Preskool International School</option>
+                <option>Karkaii Accounts</option>
+                <option>Karkaii International School</option>
               </select>
             </div>
             <div className="col-12">
@@ -1109,7 +1109,7 @@ const EmailSettingsModal = () => {
             <h5 className="eml-panel-title mb-0" id="eml_verify_l">
               Verify domain
             </h5>
-            <p>preskool.org · awaiting DNS</p>
+            <p>karkaii.org · awaiting DNS</p>
           </div>
           <button
             type="button"
@@ -1125,9 +1125,9 @@ const EmailSettingsModal = () => {
           </p>
           <span className="eml-lbl">Record to publish</span>
           <div className="eml-dns-rec">
-            _preskool-verify.preskool.org TXT
+            _karkaii-verify.karkaii.org TXT
             <br />
-            preskool-site-verification=8f21ba4c9de7
+            karkaii-site-verification=8f21ba4c9de7
           </div>
           <div className="mt-3">
             <span className="eml-lbl">

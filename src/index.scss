@@ -1433,3 +1433,19 @@ body.app-chat {
   scrollbar-color: #FE9F43 transparent;
 }
 
+
+/* Karkaii logo: dark-blue lettering needs a light backing on the dark theme (one rule covers every place the logo appears). */
+[data-theme="dark"] img[src*="karkaii-logo"] {
+  background: #fff;
+  border-radius: 8px;
+  padding: 3px 8px;
+  box-sizing: border-box;
+}
+
+/* Big placements (login / error / maintenance pages) are capped to a sensible width. The source file is larger than
+   this on purpose so the logo stays sharp on high-density screens; the header uses the lighter karkaii-logo-sm.png. */
+img.img-fluid[src*="karkaii-logo"] {
+  max-width: 260px;
+  width: 100%;
+  height: auto;
+}

@@ -119,7 +119,7 @@ const AiCommandCenter = () => {
               <div>
                 <span className="ops-mission-badge">
                   <span className="ops-dot is-live" />
-                  Preskool AI · Operating System
+                  Karkaii AI · Operating System
                 </span>
                 <h1 className="ops-mission-title">
                   {SERVICES.length} intelligences. One console.

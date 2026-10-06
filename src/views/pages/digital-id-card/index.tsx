@@ -94,7 +94,7 @@ const DigitalIdCard = () => {
                     <div className="bg-primary text-white p-3 d-flex align-items-center justify-content-between">
                       <div className="d-flex align-items-center">
                         <ImageWithBasePath
-                          src="assets/img/logo-small.svg"
+                          src="assets/img/karkaii-logo.png"
                           alt={SCHOOL_NAME}
                           height={LOGO_HEIGHT}
                         />

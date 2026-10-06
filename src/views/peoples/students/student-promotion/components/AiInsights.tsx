@@ -15,7 +15,7 @@ const AiInsights = ({ cards, actions, onAction }: AiInsightsProps) => (
       </h6>
       <span className="promotion-ai-badge">
         <i className="ti ti-robot" />
-        Preskool AI
+        Karkaii AI
       </span>
     </div>
     <div className="promotion-ai-grid mb-3">

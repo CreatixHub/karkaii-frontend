@@ -43,16 +43,6 @@ export const SidebarData = [
         submenu: true,
         submenuItems: [
           {
-            label: "Chat",
-            submenu: false,
-            link: routes.chat,
-          },
-          {
-            label: "Call",
-            submenu: false,
-            link: routes.audioCall,
-          },
-          {
             label: "Calendar",
             submenu: false,
             link: routes.calendar,
@@ -1088,68 +1078,6 @@ export const SidebarData = [
         ],
       },
       {
-        label: "AI Insights",
-        icon: "ti ti-sparkles",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "AI Command Center",
-            submenu: false,
-            link: routes.aiCommandCenter,
-          },
-          {
-            label: "Attendance Predictor",
-            submenu: false,
-            link: routes.aiAttendancePredictor,
-          },
-          {
-            label: "Risk Detection",
-            submenu: false,
-            link: routes.aiRiskDetection,
-          },
-          {
-            label: "Student Intelligence",
-            submenu: false,
-            link: routes.aiStudentIntelligence,
-          },
-          {
-            label: "Report Generator",
-            submenu: false,
-            link: routes.aiReportGenerator,
-          },
-          {
-            label: "Timetable Optimizer",
-            submenu: false,
-            link: routes.aiTimetableOptimizer,
-          },
-          {
-            label: "Homework Evaluation",
-            submenu: false,
-            link: routes.aiHomeworkEvaluation,
-          },
-          {
-            label: "Teacher Productivity",
-            submenu: false,
-            link: routes.aiTeacherProductivity,
-          },
-          {
-            label: "Parent Insights",
-            submenu: false,
-            link: routes.aiParentInsights,
-          },
-          {
-            label: "Fee Forecast",
-            submenu: false,
-            link: routes.aiFeeForecast,
-          },
-          {
-            label: "Student Assistant",
-            submenu: false,
-            link: routes.aiStudentAssistant,
-          },
-        ],
-      },
-      {
         label: "Achievements",
         icon: "ti ti-trophy",
         submenu: true,
@@ -1500,28 +1428,6 @@ export const SidebarData = [
             label: "Prefixes",
             submenu: false,
             link: routes.prefixes,
-          },
-        ],
-      },
-      {
-        label: "Integrations",
-        icon: "ti ti-plug-connected",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Connected Apps",
-            submenu: false,
-            link: routes.connectedApps,
-          },
-          {
-            label: "API Keys",
-            submenu: false,
-            link: routes.apiKeys,
-          },
-          {
-            label: "Webhooks",
-            submenu: false,
-            link: routes.webhooks,
           },
         ],
       },

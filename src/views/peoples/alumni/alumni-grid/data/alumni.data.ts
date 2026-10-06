@@ -86,7 +86,7 @@ const arunProfile: MemberProfile = {
   bio: 'Platform engineer with thirteen years building large-scale distributed systems. Returns to campus every August for the hiring drive and keeps two mentoring slots open through the school year.',
   educationJourney: [
     { icon: 'ti ti-building-arch', title: 'B.E. Computer Science', org: 'Anna University, Chennai · First class with distinction', span: '2011 – 2015' },
-    { icon: 'ti ti-book', title: 'Higher Secondary — Science Stream', org: 'Preskool · School topper, Computer Science', span: '2009 – 2011' },
+    { icon: 'ti ti-book', title: 'Higher Secondary — Science Stream', org: 'Karkaii · School topper, Computer Science', span: '2009 – 2011' },
   ],
   professionalJourney: [
     { icon: 'ti ti-brand-google', title: 'Principal Engineer', org: 'Google · Bengaluru, India', span: '2021 – Present', current: true },

@@ -169,7 +169,7 @@ export const readBarOf = (row: Notice): string => `${Math.min(100, Math.max(0, r
 
 /** The share link the dialog offers, built from the notice's own reference. */
 export const shareLinkOf = (row: Notice): string =>
-  `https://preskool.edu/notices/${row.id}`;
+  `https://karkaii.edu/notices/${row.id}`;
 
 export interface Pair {
   label: string;

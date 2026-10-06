@@ -188,7 +188,7 @@ const AdmitCardModals = ({
               <input
                 type="email"
                 className="form-control"
-                placeholder="exams@preskool.com"
+                placeholder="exams@karkaii.com"
                 id="ac-cc"
                 value={mail.cc}
                 onChange={(event) => patchMail({ cc: event.target.value })}

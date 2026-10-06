@@ -19,7 +19,6 @@ import {
   currentAcademicYear,
   DOCS_URL,
   languages,
-  messages,
   notifications,
 } from "../../data/json/headerData";
 
@@ -39,7 +38,6 @@ const Header = () => {
 
   const isDark = dataTheme === "dark_data_theme";
   const unreadCount = notifications.filter((n) => n.unread).length;
-  const unreadMessages = messages.filter((m) => m.unread > 0).length;
 
   const visibleNotifications = notifications.filter((n) =>
     notificationTab === "Unread" ? n.unread : true
@@ -72,13 +70,13 @@ const Header = () => {
           onMouseLeave={onMouseLeave}
         >
           <Link to={routes.adminDashboard} className="logo logo-normal">
-            <ImageWithBasePath src="assets/img/logo.svg" alt="Logo" />
+            <ImageWithBasePath src="assets/img/karkaii-logo-sm.png" alt="Logo" />
           </Link>
           <Link to={routes.adminDashboard} className="logo-small">
-            <ImageWithBasePath src="assets/img/logo-small.svg" alt="Logo" />
+            <ImageWithBasePath src="assets/img/favicon.png" alt="Logo" />
           </Link>
           <Link to={routes.adminDashboard} className="dark-logo">
-            <ImageWithBasePath src="assets/img/logo-dark.svg" alt="Logo" />
+            <ImageWithBasePath src="assets/img/karkaii-logo-sm.png" alt="Logo" />
           </Link>
           <Link id="toggle_btn" to="#" onClick={handleToggleMiniSidebar}>
             <i className="ti ti-menu-deep" />
@@ -388,76 +386,6 @@ const Header = () => {
                 </div>
               </div>
 
-              {/* Messages */}
-              <div className="pe-1">
-                <div className="dropdown">
-                  <Link
-                    to="#"
-                    className="btn btn-outline-light bg-white btn-icon position-relative me-1"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    <i className="ti ti-brand-hipchat" />
-                    <span className="chat-status-dot" />
-                    <span className="mui-count">{messages.length + 1}</span>
-                  </Link>
-                  <div className="dropdown-menu dropdown-menu-end msg-panel">
-                    <div className="msg-head">
-                      <div className="msg-head-top">
-                        <div>
-                          <h6>Messages</h6>
-                          <span className="msg-sub">
-                            {unreadMessages} unread conversations
-                          </span>
-                        </div>
-                        <Link
-                          to={routes.chat}
-                          className="msg-compose"
-                          title="New message"
-                        >
-                          <i className="ti ti-pencil-plus" />
-                        </Link>
-                      </div>
-                      <div className="msg-search">
-                        <i className="ti ti-search" />
-                        <input type="text" placeholder="Search messages..." />
-                      </div>
-                    </div>
-                    <div className="noti-content msg-list">
-                      {messages.map((msg) => (
-                        <Link
-                          to={routes.chat}
-                          className={`msg-item${msg.unread ? " unread" : ""}`}
-                          key={msg.name}
-                        >
-                          <span className="avatar avatar-44 avatar-rounded">
-                            <ImageWithBasePath src={msg.avatar} alt="" />
-                            <span
-                              className={`avatar-status avatar-status-sm avatar-status-inset ${msg.status}`}
-                            />
-                          </span>
-                          <div className="msg-body">
-                            <div className="msg-row1">
-                              <span className="msg-name">{msg.name}</span>
-                              <span className="msg-time">{msg.time}</span>
-                            </div>
-                            <p className="msg-prev">{msg.preview}</p>
-                          </div>
-                          {msg.unread > 0 && (
-                            <span className="msg-unread">{msg.unread}</span>
-                          )}
-                        </Link>
-                      ))}
-                    </div>
-                    <div className="msg-foot">
-                      <Link to={routes.chat} className="btn btn-primary w-100">
-                        Open Inbox
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               {/* Apps Launcher */}
               <div className="pe-1 mui-hide-sm">
                 <div className="dropdown">
@@ -534,7 +462,7 @@ const Header = () => {
                     <div className="mui-profile-id">
                       <h6 className="mb-0">Kevin Larry</h6>
                       <span className="mui-profile-mail">
-                        kevin.larry@preskool.com
+                        kevin.larry@karkaii.com
                       </span>
                     </div>
                     <span className="mui-profile-role">Admin</span>

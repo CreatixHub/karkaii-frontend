@@ -849,7 +849,7 @@ const AcademicSettings = () => {
                       <span className="acd-lbl d-block mt-4 mb-2">Preview — Term 2, Class IX</span>
                       <div className="acd-preview">
                         <div className="acd-preview-head">
-                          <strong>PRESKOOL INTERNATIONAL SCHOOL</strong>
+                          <strong>KARKAII INTERNATIONAL SCHOOL</strong>
                           <span className="fs-12 text-muted d-block">
                             Report Card · Term 2 · 2026 – 27
                           </span>

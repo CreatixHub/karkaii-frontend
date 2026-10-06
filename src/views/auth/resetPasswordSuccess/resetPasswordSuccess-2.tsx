@@ -21,7 +21,7 @@ const ResetPasswordSuccess2 = () => {
           <div className="row justify-content-center align-items-center vh-100 overflow-auto flex-wrap ">
             <div className="col-md-8 mx-auto p-4">
               <div className=" mx-auto mb-5 text-center">
-                <ImageWithBasePath src="assets/img/authentication/authentication-logo.svg" className="img-fluid" alt="Logo" />
+                <ImageWithBasePath src="assets/img/karkaii-logo.png" className="img-fluid" alt="Logo" />
               </div>
               <div className="card">
                 <div className="card-body text-center">

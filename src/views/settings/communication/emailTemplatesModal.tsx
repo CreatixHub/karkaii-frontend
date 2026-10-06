@@ -132,7 +132,7 @@ const EmailTemplatesModal = () => {
                     <label className="form-label">Descriptions</label>
                     <div id="summernote2">
                       <p>
-                        Hi [User's Name], Welcome to Preskool ! We're thrilled
+                        Hi [User's Name], Welcome to Karkaii ! We're thrilled
                         to have you on board. Get ready to experience a seamless
                         and efficient way. To get started, Click here If you
                         have any questions or need assistance, feel free to

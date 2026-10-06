@@ -347,7 +347,7 @@ export interface AssignedUser {
 export const assignedUsers: AssignedUser[] = [
   {
     name: 'Kevin Larry',
-    email: 'kevin.larry@preskool.com',
+    email: 'kevin.larry@karkaii.com',
     avatar: 'assets/img/profiles/avatar-27.jpg',
     department: 'IT & Admin',
     role: 'Administrator',
@@ -356,7 +356,7 @@ export const assignedUsers: AssignedUser[] = [
   },
   {
     name: 'Sarah Mitchell',
-    email: 'sarah.m@preskool.com',
+    email: 'sarah.m@karkaii.com',
     avatar: 'assets/img/profiles/avatar-02.jpg',
     department: 'Science',
     role: 'Teacher',
@@ -365,7 +365,7 @@ export const assignedUsers: AssignedUser[] = [
   },
   {
     name: 'James Wilson',
-    email: 'james.w@preskool.com',
+    email: 'james.w@karkaii.com',
     avatar: 'assets/img/profiles/avatar-03.jpg',
     department: 'Finance',
     role: 'Accountant',
@@ -374,7 +374,7 @@ export const assignedUsers: AssignedUser[] = [
   },
   {
     name: 'Emily Clarke',
-    email: 'emily.c@preskool.com',
+    email: 'emily.c@karkaii.com',
     avatar: 'assets/img/profiles/avatar-04.jpg',
     department: 'Library',
     role: 'Librarian',
@@ -383,7 +383,7 @@ export const assignedUsers: AssignedUser[] = [
   },
   {
     name: 'Michael Chen',
-    email: 'michael.chen@preskool.com',
+    email: 'michael.chen@karkaii.com',
     avatar: 'assets/img/profiles/avatar-05.jpg',
     department: 'Transport',
     role: 'Transport Manager',
@@ -392,7 +392,7 @@ export const assignedUsers: AssignedUser[] = [
   },
   {
     name: 'Priya Sharma',
-    email: 'priya.sharma@preskool.com',
+    email: 'priya.sharma@karkaii.com',
     avatar: 'assets/img/profiles/avatar-06.jpg',
     department: 'Front Office',
     role: 'Receptionist',
@@ -401,7 +401,7 @@ export const assignedUsers: AssignedUser[] = [
   },
   {
     name: 'Olivia Grant',
-    email: 'olivia.grant@preskool.com',
+    email: 'olivia.grant@karkaii.com',
     avatar: 'assets/img/profiles/avatar-07.jpg',
     department: 'Hostel',
     role: 'Hostel Manager',

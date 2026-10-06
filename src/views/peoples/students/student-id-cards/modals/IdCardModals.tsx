@@ -547,7 +547,7 @@ const IdCardModals = ({ active, onClose, onOpen, onOpenPanel, onToast }: IdCardM
               <i className="ti ti-school fs-20" />
             </span>
             <div className="overflow-hidden">
-              <h5 className="fs-14 mb-0">PreSkool School</h5>
+              <h5 className="fs-14 mb-0">Karkaii School</h5>
               <span className="fs-12 text-muted">Student Identity Card · 2026-2027</span>
             </div>
             <span className="badge badge-soft-primary ms-auto">Everest</span>

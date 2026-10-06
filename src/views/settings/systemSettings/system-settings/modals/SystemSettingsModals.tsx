@@ -174,7 +174,7 @@ const SystemSettingsModals = ({ open, onClose, onToast }: SystemSettingsModalsPr
         open={open === 'edit'}
         onClose={onClose}
         title="Edit configuration"
-        subtitle={`Storage · ${'/var/preskool'}`}
+        subtitle={`Storage · ${'/var/karkaii'}`}
         onSubmit={(event) => {
           event.preventDefault();
           onToast(`Log retention set to ${edit.retention} days`);

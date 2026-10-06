@@ -19,7 +19,7 @@ const STOPS = [
   { id: 'maple', state: 'done', name: 'Maple Street', sub: 'Pickup', time: '07:32 AM', chip: { cls: 'ok', label: 'Boarded' } },
   { id: 'oak', state: 'now', name: 'Oak Avenue', sub: 'En route now', time: '07:38 AM', chip: { cls: 'info', label: 'Approaching' } },
   { id: 'downtown', state: '', name: 'Downtown Cross', sub: 'Upcoming', time: '07:41 AM' },
-  { id: 'school', state: '', flag: true, name: 'Preskool Academy', sub: 'Drop-off', time: '07:45 AM' },
+  { id: 'school', state: '', flag: true, name: 'Karkaii Academy', sub: 'Drop-off', time: '07:45 AM' },
 ];
 
 const STATS = [
@@ -225,7 +225,7 @@ const TrackBusModal = ({ open, onClose, onAction }: TrackBusModalProps) => {
                   Maple Street
                 </span>
                 <span>
-                  Preskool Academy
+                  Karkaii Academy
                   <i className="ti ti-flag-3" />
                 </span>
               </div>

@@ -64,7 +64,7 @@ export const labelOf = <Id extends string>(options: SelectOption<Id>[], id: Id):
 export const school = {
   name: 'Global International School',
   address: '128 Riverside Avenue, Springfield, CA 94040',
-  logo: 'assets/img/logo.svg',
+  logo: 'assets/img/karkaii-logo.png',
 };
 
 export interface Signatory {

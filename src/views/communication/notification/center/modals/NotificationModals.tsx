@@ -580,7 +580,7 @@ const NotificationModals = ({
         <h6 className="fs-13 mb-2 mt-3">As it lands</h6>
         <div className="border rounded p-3 mb-2">
           <div className="d-flex align-items-center justify-content-between mb-1">
-            <span className="fs-12 fw-medium">Preskool</span>
+            <span className="fs-12 fw-medium">Karkaii</span>
             <span className="fs-12 text-muted">now</span>
           </div>
           <h6 className="fs-13 mb-1">{pushTitle}</h6>
@@ -815,7 +815,7 @@ const NotificationModals = ({
             <h6 className="fs-13 mb-2">Push notification</h6>
             <div className="border rounded p-3 mb-3">
               <div className="d-flex align-items-center justify-content-between mb-1">
-                <span className="fs-12 fw-medium">Preskool</span>
+                <span className="fs-12 fw-medium">Karkaii</span>
                 <span className="fs-12 text-muted">{row.stamp.split(', ')[1] ?? 'now'}</span>
               </div>
               {/* Cut to what a handset shows, from the same copy. */}

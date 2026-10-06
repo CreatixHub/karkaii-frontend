@@ -223,7 +223,7 @@ export const loginCredentials: LoginCredential[] = [
 ];
 
 /** Body of the file the More menu's "Download Profile" writes. */
-export const PROFILE_TEXT = `PRESKOOL ACADEMY - TEACHER PROFILE
+export const PROFILE_TEXT = `KARKAII ACADEMY - TEACHER PROFILE
 ====================================
 Name         : Teresa (T849126)
 Designation  : Senior Teacher

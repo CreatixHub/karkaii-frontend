@@ -105,7 +105,7 @@ const InvoiceSettings = () => {
                                     <div className="d-flex align-items-center">
                                       <span className="avatar avatar-xl border rounded d-flex align-items-center justify-content-center p-2 me-2">
                                         <ImageWithBasePath
-                                          src="assets/img/logo-small.svg"
+                                          src="assets/img/karkaii-logo.png"
                                           alt="Img"
                                         />
                                       </span>

@@ -241,7 +241,7 @@ export const recordLinks = [
 /* ------------------------------- Downloads --------------------------------- */
 
 export const PROFILE_TEXT = [
-  'PRESKOOL ACADEMY — STUDENT PROFILE',
+  'KARKAII ACADEMY — STUDENT PROFILE',
   '====================================',
   'Name: Janet Daniel',
   'Admission No: AD1256589',
@@ -254,9 +254,9 @@ export const PROFILE_TEXT = [
 ].join('\n');
 
 export const CERTIFICATE_TEXT =
-  'PRESKOOL ACADEMY\nCertificate of Achievement\nAwarded to Janet Daniel (AD1256589).\n';
+  'KARKAII ACADEMY\nCertificate of Achievement\nAwarded to Janet Daniel (AD1256589).\n';
 
-export const REPORT_CARD_TEXT = `PRESKOOL ACADEMY
+export const REPORT_CARD_TEXT = `KARKAII ACADEMY
 Progress Report Card — 2024-26 · Term II
 Student: Janet Daniel (AD1256589) · Class III-A
 

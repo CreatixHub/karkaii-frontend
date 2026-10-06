@@ -246,14 +246,6 @@ const GuardianPreviewPanel = ({ guardian, onClose, onEdit }: GuardianPreviewPane
       </div>
 
       <div className="d-flex align-items-center gap-2 mb-3">
-        <Link to={routes.chat} className="btn btn-outline-light bg-white btn-sm flex-fill">
-          <i className="ti ti-message me-1" />
-          Message
-        </Link>
-        <Link to={routes.audioCall} className="btn btn-outline-light bg-white btn-sm flex-fill">
-          <i className="ti ti-phone me-1" />
-          Call
-        </Link>
         <button type="button" className="btn btn-primary btn-sm flex-fill" onClick={() => onEdit(g.id)}>
           <i className="ti ti-edit me-1" />
           Edit

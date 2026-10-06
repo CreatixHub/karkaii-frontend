@@ -70,7 +70,7 @@ const TeacherDetails = () => {
     (document: DocumentCard) => {
       downloadTextFile(
         slug(document.name),
-        `PRESKOOL ACADEMY\n${document.name}\nTeacher: ${teacherProfile.name} (${teacherProfile.id})\nUploaded: ${document.date}\nStatus: ${document.status}\n`,
+        `KARKAII ACADEMY\n${document.name}\nTeacher: ${teacherProfile.name} (${teacherProfile.id})\nUploaded: ${document.date}\nStatus: ${document.status}\n`,
       );
       push(`Downloading ${document.name}…`, 'success');
     },
@@ -81,7 +81,7 @@ const TeacherDetails = () => {
     (payslip: PayslipRow) => {
       downloadTextFile(
         `Payslip-${slug(payslip.month)}-${teacherProfile.id}`,
-        `PRESKOOL ACADEMY - PAYSLIP\n====================================\nTeacher : ${teacherProfile.name} (${teacherProfile.id})\nMonth   : ${payslip.month}\nNet Pay : ${payslip.netPay}\nPaid On : ${payslip.paidOn}\nStatus  : ${payslip.status}\n====================================\n`,
+        `KARKAII ACADEMY - PAYSLIP\n====================================\nTeacher : ${teacherProfile.name} (${teacherProfile.id})\nMonth   : ${payslip.month}\nNet Pay : ${payslip.netPay}\nPaid On : ${payslip.paidOn}\nStatus  : ${payslip.status}\n====================================\n`,
       );
       push(`Downloading ${payslip.month} payslip…`, 'success');
     },

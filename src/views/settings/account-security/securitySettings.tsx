@@ -18,7 +18,7 @@ const SecuritySettings = () => {
               <h1 className="acs-hero-name">Ms. Latha Rao</h1>
               <p className="acs-hero-role">
                 Super Administrator ·{" "}
-                <span className="acs-mono">latha.rao@preskool.edu</span>
+                <span className="acs-mono">latha.rao@karkaii.edu</span>
               </p>
             </div>
             <span className="acs-badge is-safe">
@@ -554,7 +554,7 @@ const SecuritySettings = () => {
                     <div className="overflow-hidden">
                       <p className="acs-rec-title">Verify the recovery email</p>
                       <p className="acs-rec-txt">
-                        The address on file is latha.rao@preskool.edu, which
+                        The address on file is latha.rao@karkaii.edu, which
                         sits on the same domain as the account it recovers. Add
                         a personal address so a domain outage does not lock you
                         out.
@@ -896,7 +896,7 @@ const SecuritySettings = () => {
                         <div className="acs-fact-txt">
                           <span>Email address</span>
                           <strong>
-                            latha.rao@preskool.edu{" "}
+                            latha.rao@karkaii.edu{" "}
                             <span className="acs-badge is-safe">Verified</span>
                           </strong>
                         </div>
@@ -904,7 +904,7 @@ const SecuritySettings = () => {
                           <input
                             type="text"
                             className="acs-input"
-                            defaultValue="latha.rao@preskool.edu"
+                            defaultValue="latha.rao@karkaii.edu"
                             aria-label="Setting value"
                           />
                         </div>
@@ -2164,7 +2164,7 @@ const SecuritySettings = () => {
                         <div className="acs-fact-txt">
                           <span>Current address</span>
                           <strong>
-                            latha.rao@preskool.edu — the account’s own address
+                            latha.rao@karkaii.edu — the account’s own address
                           </strong>
                         </div>
                         <div className="acs-fact-ctl">
@@ -2187,7 +2187,7 @@ const SecuritySettings = () => {
                         <div className="acs-fact-txt">
                           <span>Suggested</span>
                           <strong>
-                            A personal address outside preskool.edu
+                            A personal address outside karkaii.edu
                           </strong>
                         </div>
                         <div className="acs-fact-ctl">
@@ -2581,7 +2581,7 @@ const SecuritySettings = () => {
                   <p className="acs-device-meta">
                     <span>
                       <i className="ti ti-server" />
-                      preskool-reports-01
+                      karkaii-reports-01
                     </span>
                     <span>
                       <i className="ti ti-world" />

@@ -123,7 +123,7 @@ const UsersModals = ({ active, onClose, onToast, onAdd, onConfirmDelete }: Users
             <input
               type="email"
               className={`form-control${inviteForm.errors.email && inviteForm.touched.email ? ' is-invalid' : ''}`}
-              placeholder="name@preskool.com"
+              placeholder="name@karkaii.com"
               id="email-address"
               name="email"
               value={inviteForm.values.email}

@@ -126,7 +126,7 @@ const TeacherProfilePanel = ({ teacher, onClose }: TeacherProfilePanelProps) => 
             <i className="ti ti-building" />
           </span>
           <div className="ms-2">
-            <p className="mb-0 fs-13 text-dark">Senior Teacher — Preskool</p>
+            <p className="mb-0 fs-13 text-dark">Senior Teacher — Karkaii</p>
             <span className="fs-12 text-muted">2019 – Present</span>
           </div>
         </div>
@@ -232,14 +232,6 @@ const TeacherProfilePanel = ({ teacher, onClose }: TeacherProfilePanelProps) => 
       </div>
 
       <div className="d-flex align-items-center gap-2 mb-3">
-        <Link to={routes.chat} className="btn btn-outline-light bg-white btn-sm flex-fill">
-          <i className="ti ti-message me-1" />
-          Message
-        </Link>
-        <Link to={routes.audioCall} className="btn btn-outline-light bg-white btn-sm flex-fill">
-          <i className="ti ti-phone me-1" />
-          Call
-        </Link>
         <Link to={routes.editTeacher} className="btn btn-primary btn-sm flex-fill">
           <i className="ti ti-edit me-1" />
           Edit

@@ -3148,7 +3148,7 @@ const RolesPermission = () => {
                                 Kevin Larry
                               </h6>
                               <span className="fs-12 text-muted">
-                                kevin.larry@preskool.com
+                                kevin.larry@karkaii.com
                               </span>
                             </div>
                           </div>
@@ -3184,7 +3184,7 @@ const RolesPermission = () => {
                                 Sarah Mitchell
                               </h6>
                               <span className="fs-12 text-muted">
-                                sarah.m@preskool.com
+                                sarah.m@karkaii.com
                               </span>
                             </div>
                           </div>
@@ -3220,7 +3220,7 @@ const RolesPermission = () => {
                                 James Wilson
                               </h6>
                               <span className="fs-12 text-muted">
-                                james.w@preskool.com
+                                james.w@karkaii.com
                               </span>
                             </div>
                           </div>
@@ -3256,7 +3256,7 @@ const RolesPermission = () => {
                                 Emily Clarke
                               </h6>
                               <span className="fs-12 text-muted">
-                                emily.c@preskool.com
+                                emily.c@karkaii.com
                               </span>
                             </div>
                           </div>
@@ -3292,7 +3292,7 @@ const RolesPermission = () => {
                                 Michael Chen
                               </h6>
                               <span className="fs-12 text-muted">
-                                michael.chen@preskool.com
+                                michael.chen@karkaii.com
                               </span>
                             </div>
                           </div>
@@ -3328,7 +3328,7 @@ const RolesPermission = () => {
                                 Priya Sharma
                               </h6>
                               <span className="fs-12 text-muted">
-                                priya.sharma@preskool.com
+                                priya.sharma@karkaii.com
                               </span>
                             </div>
                           </div>
@@ -3364,7 +3364,7 @@ const RolesPermission = () => {
                                 Olivia Grant
                               </h6>
                               <span className="fs-12 text-muted">
-                                olivia.grant@preskool.com
+                                olivia.grant@karkaii.com
                               </span>
                             </div>
                           </div>

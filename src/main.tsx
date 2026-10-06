@@ -25,7 +25,8 @@ createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     {/* AppProviders composes the Redux store and the auth session provider. */}
     <AppProviders>
-      <BrowserRouter basename={base_path}>
+      {/* basename has no trailing slash: "/app/" -> "/app", "/" -> "/" */}
+      <BrowserRouter basename={base_path.replace(/\/+$/, "") || "/"}>
         <ALLRoutes />
       </BrowserRouter>
     </AppProviders>

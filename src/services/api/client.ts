@@ -18,6 +18,7 @@ import {
 } from '@constants/api.constants';
 import type { ApiErrorPayload, QueryParams } from '@/types/api.types';
 import {
+  ApiError,
   createHttpError,
   createTimeoutError,
   toApiError,
@@ -38,10 +39,21 @@ export interface RequestOptions {
   skipAuth?: boolean;
   /** Send the body as-is (FormData, Blob) instead of JSON-encoding it. */
   rawBody?: boolean;
+  /** Never try a silent token refresh for this call (used by the refresh call itself). */
+  skipRefresh?: boolean;
+}
+
+/** A success envelope with its metadata kept (pagination lives in `meta`). */
+export interface Envelope<T> {
+  data: T;
+  meta?: Record<string, unknown>;
+  message?: string;
 }
 
 type TokenProvider = () => string | null;
 type UnauthorizedHandler = () => void;
+/** Resolves true when a new access token is now available (the caller then retries once). */
+type RefreshHandler = () => Promise<boolean>;
 
 /**
  * Flattens `QueryParams` (including its nested `filters`) plus arbitrary
@@ -144,11 +156,23 @@ function unwrapEnvelope<T>(body: unknown): T {
   return body as T;
 }
 
+/** Splits a `{ success, data, meta, message }` body into its parts; a bare body becomes `{ data }`. */
+function toEnvelope<T>(body: unknown): Envelope<T> {
+  if (body !== null && typeof body === 'object' && 'success' in body) {
+    const b = body as { data?: T; meta?: Record<string, unknown>; message?: string };
+    return { data: b.data as T, meta: b.meta, message: b.message };
+  }
+  return { data: body as T };
+}
+
 class ApiClient {
   private baseUrl: string;
   private defaultTimeoutMs: number;
   private getToken: TokenProvider | null = null;
   private onUnauthorized: UnauthorizedHandler | null = null;
+  private refreshHandler: RefreshHandler | null = null;
+  /** Shared by every request that hits a 401 at the same moment, so the (single-use) refresh token is spent once. */
+  private refreshInFlight: Promise<boolean> | null = null;
 
   constructor(baseUrl: string, defaultTimeoutMs: number) {
     this.baseUrl = baseUrl;
@@ -164,13 +188,39 @@ class ApiClient {
     this.getToken = provider;
   }
 
-  /** Registers the handler invoked when the API returns 401. */
+  /** Registers the handler invoked when the API returns 401 and a silent refresh did not recover the session. */
   setUnauthorizedHandler(handler: UnauthorizedHandler | null): void {
     this.onUnauthorized = handler;
   }
 
+  /**
+   * Registers how to obtain a fresh access token (the AuthProvider calls `POST /auth/refresh`).
+   * Access tokens are short-lived (15 min on the server), so without this every user would be
+   * signed out mid-session.
+   */
+  setRefreshHandler(handler: RefreshHandler | null): void {
+    this.refreshHandler = handler;
+  }
+
   get<T>(path: string, options?: RequestOptions): Promise<T> {
     return this.request<T>('GET', path, undefined, options);
+  }
+
+  /** Like `get`, but keeps `meta` (pagination) instead of discarding it with the envelope. */
+  async getEnvelope<T>(path: string, options?: RequestOptions): Promise<Envelope<T>> {
+    const payload = await this.execute('GET', path, undefined, options);
+    return toEnvelope<T>(payload);
+  }
+
+  /** Like `post`/`patch`/..., but keeps the whole envelope (some endpoints return `message` + counts beside `data`). */
+  async sendEnvelope<T>(
+    method: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+    path: string,
+    body?: unknown,
+    options?: RequestOptions,
+  ): Promise<Envelope<T>> {
+    const payload = await this.execute(method, path, body, options);
+    return toEnvelope<T>(payload);
   }
 
   post<T>(path: string, body?: unknown, options?: RequestOptions): Promise<T> {
@@ -218,6 +268,64 @@ class ApiClient {
     body: unknown,
     options?: RequestOptions,
   ): Promise<T> {
+    return unwrapEnvelope<T>(await this.execute(method, path, body, options));
+  }
+
+  /** One refresh at a time; concurrent 401s all wait for the same attempt. */
+  private refreshOnce(): Promise<boolean> {
+    if (!this.refreshHandler) return Promise.resolve(false);
+    if (!this.refreshInFlight) {
+      this.refreshInFlight = this.refreshHandler()
+        .catch(() => false)
+        .finally(() => {
+          this.refreshInFlight = null;
+        });
+    }
+    return this.refreshInFlight;
+  }
+
+  /**
+   * Sends the request and returns the parsed body. On a 401 for an authenticated call it first tries a
+   * silent token refresh and replays the request once; only if that fails is the user signed out.
+   */
+  private async execute(
+    method: HttpMethod,
+    path: string,
+    body: unknown,
+    options?: RequestOptions,
+  ): Promise<unknown> {
+    try {
+      return await this.send(method, path, body, options);
+    } catch (error) {
+      const canRefresh =
+        error instanceof ApiError &&
+        error.status === HTTP_STATUS.UNAUTHORIZED &&
+        !options?.skipAuth &&
+        !options?.skipRefresh &&
+        this.refreshHandler !== null;
+
+      if (!canRefresh) {
+        if (error instanceof ApiError && error.status === HTTP_STATUS.UNAUTHORIZED && !options?.skipRefresh) {
+          this.onUnauthorized?.();
+        }
+        throw error;
+      }
+
+      if (await this.refreshOnce()) {
+        // New token is stored; buildHeaders reads it again. `skipRefresh` prevents an endless 401 loop.
+        return this.send(method, path, body, { ...options, skipRefresh: true });
+      }
+      this.onUnauthorized?.();
+      throw error;
+    }
+  }
+
+  private async send(
+    method: HttpMethod,
+    path: string,
+    body: unknown,
+    options?: RequestOptions,
+  ): Promise<unknown> {
     const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
     const timeoutController = new AbortController();
     const signal = composeSignals(timeoutController, options?.signal);
@@ -235,6 +343,8 @@ class ApiClient {
       const response = await fetch(buildUrl(this.baseUrl, path, options?.query), {
         method,
         signal,
+        // The refresh token is an httpOnly cookie; it must travel with the request (and be accepted back).
+        credentials: 'include',
         headers: this.buildHeaders(options, hasJsonBody),
         body:
           body === undefined
@@ -247,9 +357,6 @@ class ApiClient {
       const payload = await parseBody(response);
 
       if (!response.ok) {
-        if (response.status === HTTP_STATUS.UNAUTHORIZED) {
-          this.onUnauthorized?.();
-        }
         throw createHttpError(
           response.status,
           payload as ApiErrorPayload | undefined,
@@ -257,7 +364,7 @@ class ApiClient {
         );
       }
 
-      return unwrapEnvelope<T>(payload);
+      return payload;
     } catch (error) {
       // A timeout surfaces as an AbortError; distinguish it from a caller
       // cancellation so the user sees an accurate message.

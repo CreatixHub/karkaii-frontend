@@ -47,7 +47,7 @@ const routes = all_routes;
 
 /** Receipt body generated after a successful payment, as the script built it. */
 const receiptText = (label: string, amount: number, txn: string) =>
-  `PRESKOOL ACADEMY - PAYMENT RECEIPT
+  `KARKAII ACADEMY - PAYMENT RECEIPT
 ====================================
 Receipt No : ${txn}
 Student    : Janet Daniel (AD1256589) - Class III-A
@@ -81,7 +81,7 @@ const StudentDetails = () => {
     (name: string) => {
       downloadTextFile(
         `${name.replace(/[^a-z0-9]+/gi, '-')}.txt`,
-        `PRESKOOL ACADEMY\n${name}\nStudent: Janet Daniel (AD1256589)\n`,
+        `KARKAII ACADEMY\n${name}\nStudent: Janet Daniel (AD1256589)\n`,
       );
       push(`Downloading ${name}…`, 'success');
     },

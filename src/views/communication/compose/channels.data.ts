@@ -61,8 +61,8 @@ export const templateBodies: Record<string, { subject: string; body: string }> =
     body: 'The school will remain closed on 15 August for Independence Day. Classes resume on the following working day and buses run to the usual timetable.',
   },
   'Welcome Message': {
-    subject: 'Welcome to Preskool',
-    body: 'Welcome to Preskool. Your portal account is active — sign in to see the timetable, fee statement and school calendar for the term.',
+    subject: 'Welcome to Karkaii',
+    body: 'Welcome to Karkaii. Your portal account is active — sign in to see the timetable, fee statement and school calendar for the term.',
   },
 };
 

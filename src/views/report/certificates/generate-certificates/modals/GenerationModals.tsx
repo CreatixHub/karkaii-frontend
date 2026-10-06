@@ -627,7 +627,7 @@ const GenerationModals = ({
                 <span className={`avatar avatar-lg bg-${meta.tint}-transparent text-${meta.tint} rounded mb-2`}>
                   <i className={`${meta.icon} fs-20`} />
                 </span>
-                <h5 className="fs-15 mb-1">PreSkool School</h5>
+                <h5 className="fs-15 mb-1">Karkaii School</h5>
                 <span className="fs-12 text-muted">
                   {row.certificateType} · {ACADEMIC_YEAR}
                 </span>

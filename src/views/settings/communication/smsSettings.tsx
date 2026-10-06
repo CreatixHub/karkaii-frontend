@@ -1705,7 +1705,7 @@ const SmsSettings = () => {
                       </span>
                       <div className="flex-fill overflow-hidden">
                         <p className="sms-gw-name">Custom REST API</p>
-                        <p>sms.preskool.local/send</p>
+                        <p>sms.karkaii.local/send</p>
                       </div>
                     </div>
                     <div className="d-flex align-items-center gap-2 flex-wrap">
@@ -2044,7 +2044,7 @@ const SmsSettings = () => {
                           <code>
                             {"{"}date{"}"}
                           </code>
-                          . - Preskool
+                          . - Karkaii
                         </div>
                         <span className="sms-phone-time">09:14</span>
                       </div>
@@ -2108,8 +2108,8 @@ const SmsSettings = () => {
                           <code>
                             {"{"}otp{"}"}
                           </code>{" "}
-                          is your Preskool verification code. Valid for 10
-                          minutes. Do not share it. - Preskool
+                          is your Karkaii verification code. Valid for 10
+                          minutes. Do not share it. - Karkaii
                         </div>
                         <span className="sms-phone-time">09:41</span>
                       </div>
@@ -2179,7 +2179,7 @@ const SmsSettings = () => {
                             {"{"}student{"}"}
                           </code>{" "}
                           was marked absent today. Please contact the class
-                          teacher. - Preskool
+                          teacher. - Karkaii
                         </div>
                         <span className="sms-phone-time">11:00</span>
                       </div>
@@ -2256,7 +2256,7 @@ const SmsSettings = () => {
                           <code>
                             {"{"}date{"}"}
                           </code>
-                          . Pay at the portal or the counter. - Preskool
+                          . Pay at the portal or the counter. - Karkaii
                         </div>
                         <span className="sms-phone-time">10:00</span>
                       </div>
@@ -2328,7 +2328,7 @@ const SmsSettings = () => {
                           <code>
                             {"{"}date{"}"}
                           </code>
-                          . See the portal for the full schedule. - Preskool
+                          . See the portal for the full schedule. - Karkaii
                         </div>
                         <span className="sms-phone-time">16:30</span>
                       </div>
@@ -2402,7 +2402,7 @@ const SmsSettings = () => {
                             {"{"}marks{"}"}
                           </code>
                           . The full report card is on the parent portal. -
-                          Preskool
+                          Karkaii
                         </div>
                         <span className="sms-phone-time">17:00</span>
                       </div>
@@ -2475,7 +2475,7 @@ const SmsSettings = () => {
                           <code>
                             {"{"}date{"}"}
                           </code>
-                          . Details on the portal. - Preskool
+                          . Details on the portal. - Karkaii
                         </div>
                         <span className="sms-phone-time">17:00</span>
                       </div>
@@ -2545,7 +2545,7 @@ const SmsSettings = () => {
                             {"{"}reason{"}"}
                           </code>
                           . Classes resume as usual the following working day. -
-                          Preskool
+                          Karkaii
                         </div>
                         <span className="sms-phone-time">18:00</span>
                       </div>
@@ -2615,7 +2615,7 @@ const SmsSettings = () => {
                             {"{"}student{"}"}
                           </code>{" "}
                           from the main gate. Do not reply to this message. Call
-                          044 4000 1200. - Preskool
+                          044 4000 1200. - Karkaii
                         </div>
                         <span className="sms-phone-time">Any</span>
                       </div>
@@ -2680,8 +2680,8 @@ const SmsSettings = () => {
                           <code>
                             {"{"}student{"}"}
                           </code>
-                          ! Everyone at Preskool wishes you a wonderful year
-                          ahead. - Preskool
+                          ! Everyone at Karkaii wishes you a wonderful year
+                          ahead. - Karkaii
                         </div>
                         <span className="sms-phone-time">08:00</span>
                       </div>
@@ -3477,13 +3477,13 @@ const SmsSettings = () => {
                       <div className="sms-line">
                         <div className="sms-line-txt">
                           <strong>Callback URL</strong>
-                          <p>https://preskool.edu/hooks/sms/dlr</p>
+                          <p>https://karkaii.edu/hooks/sms/dlr</p>
                         </div>
                         <div className="sms-line-ctl">
                           <input
                             type="text"
                             className="sms-input is-mono"
-                            defaultValue="https://preskool.edu/hooks/sms/dlr"
+                            defaultValue="https://karkaii.edu/hooks/sms/dlr"
                             aria-label="Setting value"
                           />
                         </div>
@@ -4865,7 +4865,7 @@ const SmsSettings = () => {
                       <div className="sms-code">
                         Entity id&nbsp;&nbsp;1101459800000123456
                         <br />
-                        Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PRESKOOL
+                        Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KARKAII
                         INTERNATIONAL SCHOOL
                         <br />
                         Operator&nbsp;&nbsp;Vodafone Idea DLT
@@ -5015,7 +5015,7 @@ const SmsSettings = () => {
                         <div className="sms-line-txt">
                           <strong>Endpoint</strong>
                           <p className="sms-mono">
-                            https://preskool.edu/hooks/sms/dlr
+                            https://karkaii.edu/hooks/sms/dlr
                           </p>
                         </div>
                       </div>

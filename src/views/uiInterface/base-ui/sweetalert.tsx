@@ -114,7 +114,7 @@ const customImage = () =>
   Swal.fire({
     title: "Sweet!",
     text: "Modal with a custom image.",
-    imageUrl: "assets/img/logo-small.svg",
+    imageUrl: "assets/img/karkaii-logo.png",
     imageHeight: 40,
     customClass: { confirmButton: BTN.primary },
     buttonsStyling: false,

@@ -176,7 +176,7 @@ const DocumentModals = ({ active, onClose, onToast, onConfirmDelete }: DocumentM
             <input
               type="text"
               className="form-control"
-              defaultValue="https://preskool.app/d/AD283778"
+              defaultValue="https://karkaii.app/d/AD283778"
               readOnly
               id="share-link"
             />
@@ -184,7 +184,7 @@ const DocumentModals = ({ active, onClose, onToast, onConfirmDelete }: DocumentM
               className="btn btn-outline-light bg-white"
               type="button"
               onClick={() => {
-                navigator.clipboard?.writeText('https://preskool.app/d/AD283778');
+                navigator.clipboard?.writeText('https://karkaii.app/d/AD283778');
                 onToast('Link copied to clipboard');
               }}
             >

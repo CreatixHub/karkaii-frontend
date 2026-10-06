@@ -169,7 +169,7 @@ const SmsSettingsModal = () => {
                   <span className="sms-phone-from">PRSKOL · today 09:41</span>
                   <div className="sms-bubble">
                     Dear Mrs. Menon, fee of Rs 12,400 for Aarav K is due on 05
-                    Aug. Pay at the portal or the counter. - Preskool
+                    Aug. Pay at the portal or the counter. - Karkaii
                   </div>
                   <span className="sms-phone-time">09:41</span>
                 </div>
@@ -859,7 +859,7 @@ const SmsSettingsModal = () => {
                 id="t_body"
                 rows={4}
                 defaultValue={
-                  "Dear {guardian}, fee of Rs {amount} for {student} is due on {date}. Pay at the portal or the counter. - Preskool"
+                  "Dear {guardian}, fee of Rs {amount} for {student} is due on {date}. Pay at the portal or the counter. - Karkaii"
                 }
               />
             </div>

@@ -27,7 +27,7 @@ const AttendanceInsights = ({ onAction, onOpenModal }: AttendanceInsightsProps) 
       </div>
       <span className="status-chip is-violet">
         <i className="ti ti-robot" />
-        Preskool AI
+        Karkaii AI
       </span>
     </div>
 

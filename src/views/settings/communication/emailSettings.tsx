@@ -90,17 +90,17 @@ const EmailSettings = () => {
         <div className="eml-console">
           <div className="eml-console-head">
             <span className="eml-live" />
-            <strong>smtp.preskool.edu:587</strong>
+            <strong>smtp.karkaii.edu:587</strong>
             <span>last handshake</span>
           </div>
           <div className="eml-console-body">
             <div className="eml-console-line is-out">
               <span className="eml-console-dir">→</span>
-              <span>EHLO mail.preskool.edu</span>
+              <span>EHLO mail.karkaii.edu</span>
             </div>
             <div className="eml-console-line is-in">
               <span className="eml-console-dir">←</span>
-              <span>250-smtp.preskool.edu Hello [103.21.58.14]</span>
+              <span>250-smtp.karkaii.edu Hello [103.21.58.14]</span>
             </div>
             <div className="eml-console-line is-in">
               <span className="eml-console-dir">←</span>
@@ -124,7 +124,7 @@ const EmailSettings = () => {
             </div>
             <div className="eml-console-line is-out">
               <span className="eml-console-dir">→</span>
-              <span>MAIL FROM:&lt;noreply@preskool.edu&gt;</span>
+              <span>MAIL FROM:&lt;noreply@karkaii.edu&gt;</span>
             </div>
             <div className="eml-console-line is-in is-ok">
               <span className="eml-console-dir">←</span>
@@ -1133,7 +1133,7 @@ const EmailSettings = () => {
                         <div>
                           Sender address permitted
                           <span>
-                            noreply@preskool.edu is a verified identity on this
+                            noreply@karkaii.edu is a verified identity on this
                             account.
                           </span>
                         </div>
@@ -1429,7 +1429,7 @@ const EmailSettings = () => {
                           <div className="eml-hdr">
                             <span className="eml-hdr-key">Account</span>
                             <span className="eml-hdr-val eml-mono">
-                              mail-service@preskool.edu
+                              mail-service@karkaii.edu
                             </span>
                             <span className="eml-hdr-ctl" />
                           </div>
@@ -1480,7 +1480,7 @@ const EmailSettings = () => {
                           <div className="eml-hdr">
                             <span className="eml-hdr-key">Account</span>
                             <span className="eml-hdr-val eml-mono">
-                              noreply@preskool.edu
+                              noreply@karkaii.edu
                             </span>
                             <span className="eml-hdr-ctl" />
                           </div>
@@ -1589,9 +1589,9 @@ const EmailSettings = () => {
                       <span className="eml-ident-av">PS</span>
                       <div className="flex-fill overflow-hidden">
                         <p className="eml-ident-name">
-                          Preskool International School
+                          Karkaii International School
                         </p>
-                        <p>noreply@preskool.edu</p>
+                        <p>noreply@karkaii.edu</p>
                       </div>
                       <span className="eml-seal">
                         <i className="ti ti-discount" />
@@ -1602,20 +1602,20 @@ const EmailSettings = () => {
                       <div className="eml-hdr">
                         <span className="eml-hdr-key">Organisation</span>
                         <span className="eml-hdr-val">
-                          Preskool International School
+                          Karkaii International School
                         </span>
                         <span className="eml-hdr-ctl" />
                       </div>
                       <div className="eml-hdr">
                         <span className="eml-hdr-key">Reply-To</span>
                         <span className="eml-hdr-val eml-mono">
-                          office@preskool.edu
+                          office@karkaii.edu
                         </span>
                         <span className="eml-hdr-ctl" />
                       </div>
                     </div>
                     <div className="eml-ident-sig">
-                      <strong>Preskool International School</strong>Preskool
+                      <strong>Karkaii International School</strong>Karkaii
                       International School
                       <br />
                       12 Anna Salai, Chennai 600002
@@ -1631,7 +1631,7 @@ const EmailSettings = () => {
                         className="btn btn-sm btn-outline-light bg-white"
                         data-bs-toggle="offcanvas"
                         data-bs-target="#eml_workspace"
-                        aria-label="Open configuration workspace for Preskool International School"
+                        aria-label="Open configuration workspace for Karkaii International School"
                       >
                         Configure
                       </button>
@@ -1643,8 +1643,8 @@ const EmailSettings = () => {
                     <div className="eml-ident-top">
                       <span className="eml-ident-av">AC</span>
                       <div className="flex-fill overflow-hidden">
-                        <p className="eml-ident-name">Preskool Accounts</p>
-                        <p>fees@preskool.edu</p>
+                        <p className="eml-ident-name">Karkaii Accounts</p>
+                        <p>fees@karkaii.edu</p>
                       </div>
                       <span className="eml-seal">
                         <i className="ti ti-discount" />
@@ -1655,21 +1655,21 @@ const EmailSettings = () => {
                       <div className="eml-hdr">
                         <span className="eml-hdr-key">Organisation</span>
                         <span className="eml-hdr-val">
-                          Preskool International School
+                          Karkaii International School
                         </span>
                         <span className="eml-hdr-ctl" />
                       </div>
                       <div className="eml-hdr">
                         <span className="eml-hdr-key">Reply-To</span>
                         <span className="eml-hdr-val eml-mono">
-                          fees@preskool.edu
+                          fees@karkaii.edu
                         </span>
                         <span className="eml-hdr-ctl" />
                       </div>
                     </div>
                     <div className="eml-ident-sig">
-                      <strong>Preskool Accounts</strong>Accounts Office ·
-                      Preskool
+                      <strong>Karkaii Accounts</strong>Accounts Office ·
+                      Karkaii
                       <br />
                       Counter hours 9:00 – 15:00
                       <br />
@@ -1684,7 +1684,7 @@ const EmailSettings = () => {
                         className="btn btn-sm btn-outline-light bg-white"
                         data-bs-toggle="offcanvas"
                         data-bs-target="#eml_workspace"
-                        aria-label="Open configuration workspace for Preskool Accounts"
+                        aria-label="Open configuration workspace for Karkaii Accounts"
                       >
                         Configure
                       </button>
@@ -1697,7 +1697,7 @@ const EmailSettings = () => {
                       <span className="eml-ident-av">AD</span>
                       <div className="flex-fill overflow-hidden">
                         <p className="eml-ident-name">Admissions Office</p>
-                        <p>admissions@preskool.edu</p>
+                        <p>admissions@karkaii.edu</p>
                       </div>
                       <span className="eml-seal is-warn">
                         <i className="ti ti-clock" />
@@ -1708,21 +1708,21 @@ const EmailSettings = () => {
                       <div className="eml-hdr">
                         <span className="eml-hdr-key">Organisation</span>
                         <span className="eml-hdr-val">
-                          Preskool International School
+                          Karkaii International School
                         </span>
                         <span className="eml-hdr-ctl" />
                       </div>
                       <div className="eml-hdr">
                         <span className="eml-hdr-key">Reply-To</span>
                         <span className="eml-hdr-val eml-mono">
-                          admissions@preskool.edu
+                          admissions@karkaii.edu
                         </span>
                         <span className="eml-hdr-ctl" />
                       </div>
                     </div>
                     <div className="eml-ident-sig">
                       <strong>Admissions Office</strong>Admissions Office ·
-                      Preskool
+                      Karkaii
                       <br />
                       Enquiries answered within 2 working days
                     </div>
@@ -1758,7 +1758,7 @@ const EmailSettings = () => {
                       <div className="eml-hdr">
                         <span className="eml-hdr-key">Header logo</span>
                         <span className="eml-hdr-val">
-                          preskool-mail-logo.png · 320 × 80
+                          karkaii-mail-logo.png · 320 × 80
                         </span>
                         <span className="eml-hdr-ctl">
                           <button
@@ -1851,7 +1851,7 @@ const EmailSettings = () => {
                     </div>
                     <div className="eml-panel-body">
                       <div className="eml-hdr">
-                        <span className="eml-hdr-key">preskool.edu</span>
+                        <span className="eml-hdr-key">karkaii.edu</span>
                         <span className="eml-hdr-val">
                           Verified 02 Feb 2026 — primary sending domain
                         </span>
@@ -1863,7 +1863,7 @@ const EmailSettings = () => {
                         </span>
                       </div>
                       <div className="eml-hdr">
-                        <span className="eml-hdr-key">mail.preskool.edu</span>
+                        <span className="eml-hdr-key">mail.karkaii.edu</span>
                         <span className="eml-hdr-val">
                           Verified 02 Feb 2026 — used for bounce return path
                         </span>
@@ -1875,7 +1875,7 @@ const EmailSettings = () => {
                         </span>
                       </div>
                       <div className="eml-hdr">
-                        <span className="eml-hdr-key">preskool.org</span>
+                        <span className="eml-hdr-key">karkaii.org</span>
                         <span className="eml-hdr-val">
                           Awaiting the TXT record to appear in DNS
                         </span>
@@ -1974,7 +1974,7 @@ const EmailSettings = () => {
                         </button>
                       </div>
                       <span className="eml-tpl-sub">
-                        Welcome to Preskool, {"{"}student{"}"}
+                        Welcome to Karkaii, {"{"}student{"}"}
                       </span>
                       <div className="eml-tpl-lines">
                         <i />
@@ -2359,7 +2359,7 @@ const EmailSettings = () => {
                         </button>
                       </div>
                       <span className="eml-tpl-sub">
-                        Reset your Preskool password
+                        Reset your Karkaii password
                       </span>
                       <div className="eml-tpl-lines">
                         <i />
@@ -2414,7 +2414,7 @@ const EmailSettings = () => {
                         </button>
                       </div>
                       <span className="eml-tpl-sub">
-                        Invoice {"{"}number{"}"} from Preskool
+                        Invoice {"{"}number{"}"} from Karkaii
                       </span>
                       <div className="eml-tpl-lines">
                         <i />
@@ -2469,7 +2469,7 @@ const EmailSettings = () => {
                         </button>
                       </div>
                       <span className="eml-tpl-sub">
-                        Preskool monthly newsletter
+                        Karkaii monthly newsletter
                       </span>
                       <div className="eml-tpl-lines">
                         <i />
@@ -3219,13 +3219,13 @@ const EmailSettings = () => {
                       <div className="eml-hdr">
                         <span className="eml-hdr-key">Return path</span>
                         <span className="eml-hdr-val">
-                          bounce@mail.preskool.edu
+                          bounce@mail.karkaii.edu
                         </span>
                         <span className="eml-hdr-ctl">
                           <input
                             type="text"
                             className="eml-input is-mono"
-                            defaultValue="bounce@mail.preskool.edu"
+                            defaultValue="bounce@mail.karkaii.edu"
                             aria-label="Setting value"
                           />
                         </span>
@@ -3678,7 +3678,7 @@ const EmailSettings = () => {
                       <span className="eml-badge is-ok">250</span>
                     </span>
                     <span className="eml-log-msg">
-                      noreply@preskool.edu → r.menon@gmail.com · accepted, 142
+                      noreply@karkaii.edu → r.menon@gmail.com · accepted, 142
                       ms
                     </span>
                   </div>
@@ -3688,7 +3688,7 @@ const EmailSettings = () => {
                       <span className="eml-badge is-ok">250</span>
                     </span>
                     <span className="eml-log-msg">
-                      noreply@preskool.edu → 1,284 recipients · batch 2 of 7
+                      noreply@karkaii.edu → 1,284 recipients · batch 2 of 7
                       accepted
                     </span>
                   </div>
@@ -3707,7 +3707,7 @@ const EmailSettings = () => {
                       <span className="eml-badge is-ok">250</span>
                     </span>
                     <span className="eml-log-msg">
-                      fees@preskool.edu → k.subramanian@outlook.com · accepted,
+                      fees@karkaii.edu → k.subramanian@outlook.com · accepted,
                       118 ms
                     </span>
                   </div>
@@ -3727,7 +3727,7 @@ const EmailSettings = () => {
                       <span className="eml-badge is-ok">250</span>
                     </span>
                     <span className="eml-log-msg">
-                      admissions@preskool.edu → 34 recipients · accepted
+                      admissions@karkaii.edu → 34 recipients · accepted
                     </span>
                   </div>
                   <div className="eml-log is-warn">
@@ -3817,7 +3817,7 @@ const EmailSettings = () => {
                       </span>
                     </div>
                     <div className="eml-dns-rec">
-                      preskool._domainkey.preskool.edu TXT
+                      karkaii._domainkey.karkaii.edu TXT
                       <br />
                       v=DKIM1; k=rsa;
                       p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Xk…IDAQAB
@@ -3841,7 +3841,7 @@ const EmailSettings = () => {
                     <div className="eml-dns-top">
                       <h4 className="fs-15 fw-medium">SPF</h4>
                       <p className="flex-fill">
-                        Names the servers permitted to send as preskool.edu
+                        Names the servers permitted to send as karkaii.edu
                       </p>
                       <span className="eml-seal">
                         <i className="ti ti-check" />
@@ -3849,7 +3849,7 @@ const EmailSettings = () => {
                       </span>
                     </div>
                     <div className="eml-dns-rec">
-                      preskool.edu TXT
+                      karkaii.edu TXT
                       <br />
                       v=spf1 include:amazonses.com include:_spf.google.com ~all
                     </div>
@@ -3880,9 +3880,9 @@ const EmailSettings = () => {
                       </span>
                     </div>
                     <div className="eml-dns-rec">
-                      _dmarc.preskool.edu TXT
+                      _dmarc.karkaii.edu TXT
                       <br />
-                      v=DMARC1; p=quarantine; rua=mailto:dmarc@preskool.edu;
+                      v=DMARC1; p=quarantine; rua=mailto:dmarc@karkaii.edu;
                       pct=100
                     </div>
                     <div className="d-flex align-items-center justify-content-between gap-2 flex-wrap mt-2">
@@ -3914,7 +3914,7 @@ const EmailSettings = () => {
                       </span>
                     </div>
                     <div className="eml-dns-rec">
-                      _bimi.preskool.edu TXT
+                      _bimi.karkaii.edu TXT
                       <br />— no record published —
                     </div>
                     <div className="d-flex align-items-center justify-content-between gap-2 flex-wrap mt-2">
@@ -4166,12 +4166,12 @@ const EmailSettings = () => {
                   >
                     <div className="accordion-body">
                       <div className="eml-hdr">
-                        <span className="eml-hdr-key">X-Preskool-Env</span>
+                        <span className="eml-hdr-key">X-Karkaii-Env</span>
                         <span className="eml-hdr-val eml-mono">production</span>
                         <span className="eml-hdr-ctl" />
                       </div>
                       <div className="eml-hdr">
-                        <span className="eml-hdr-key">X-Preskool-Module</span>
+                        <span className="eml-hdr-key">X-Karkaii-Module</span>
                         <span className="eml-hdr-val eml-mono">
                           {"{"}module{"}"}
                         </span>
@@ -4180,7 +4180,7 @@ const EmailSettings = () => {
                       <div className="eml-hdr">
                         <span className="eml-hdr-key">List-Unsubscribe</span>
                         <span className="eml-hdr-val eml-mono">
-                          &lt;https://preskool.edu/u/{"{"}token{"}"}&gt;
+                          &lt;https://karkaii.edu/u/{"{"}token{"}"}&gt;
                         </span>
                         <span className="eml-hdr-ctl" />
                       </div>
@@ -4224,7 +4224,7 @@ const EmailSettings = () => {
                       <div className="eml-hdr">
                         <span className="eml-hdr-key">Endpoint</span>
                         <span className="eml-hdr-val eml-mono">
-                          https://preskool.edu/hooks/mail
+                          https://karkaii.edu/hooks/mail
                         </span>
                         <span className="eml-hdr-ctl" />
                       </div>
@@ -4450,7 +4450,7 @@ const EmailSettings = () => {
                       <strong>02 Feb 2026</strong>10:00
                     </div>
                     <div className="eml-audit-what">
-                      preskool.edu verified as a sending domain
+                      karkaii.edu verified as a sending domain
                       <span>System · DKIM, SPF and DMARC published</span>
                     </div>
                   </div>

@@ -721,7 +721,7 @@ const AcademicModals = ({
         <span className="acd-lbl">Preview</span>
         <div className="acd-preview mb-3">
           <div className="acd-preview-head">
-            <strong>PRESKOOL INTERNATIONAL SCHOOL</strong>
+            <strong>KARKAII INTERNATIONAL SCHOOL</strong>
             <span className="fs-12 text-muted d-block">
               How a mark would print · Term 2 · Class IX
             </span>

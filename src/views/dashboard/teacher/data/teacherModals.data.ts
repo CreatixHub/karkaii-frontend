@@ -111,7 +111,7 @@ export const profileDetails: InfoRow[] = [
   { id: 'pd1', icon: 'ti ti-id-badge-2', iconClass: 'bg-primary-transparent', title: 'Teacher ID', subtitle: 'TCH-1043' },
   { id: 'pd2', icon: 'ti ti-building', iconClass: 'bg-info-transparent', title: 'Department', subtitle: 'Science' },
   { id: 'pd3', icon: 'ti ti-home', iconClass: 'bg-teal-transparent', title: 'Homeroom', subtitle: 'Grade III-A' },
-  { id: 'pd4', icon: 'ti ti-mail', iconClass: 'bg-warning-transparent', title: 'Email', subtitle: 'teresa.susan@preskool.edu' },
+  { id: 'pd4', icon: 'ti ti-mail', iconClass: 'bg-warning-transparent', title: 'Email', subtitle: 'teresa.susan@karkaii.edu' },
   { id: 'pd5', icon: 'ti ti-phone', iconClass: 'bg-purple-transparent', title: 'Phone', subtitle: '+1 809 120 4045' },
 ];
 
@@ -133,7 +133,6 @@ export const quickActionTiles: QuickActionTile[] = [
   { id: 'homework', icon: 'ti ti-book', title: 'Homework', subtitle: 'Create', to: routes.classHomeWork },
   { id: 'lesson', icon: 'ti ti-notebook', title: 'Lesson Plan', subtitle: 'Manage', to: routes.classSyllabus },
   { id: 'material', icon: 'ti ti-files', title: 'Material', subtitle: 'Study files', to: routes.libraryBooks },
-  { id: 'message', icon: 'ti ti-message', title: 'Message', subtitle: 'Parents', to: routes.chat },
   { id: 'report', icon: 'ti ti-report-analytics', title: 'Report', subtitle: 'Generate', to: routes.studentPromotion },
   { id: 'calendar', icon: 'ti ti-calendar', title: 'Calendar', subtitle: 'Schedule', to: routes.calendar },
   { id: 'exams', icon: 'ti ti-hexagonal-prism-plus', title: 'Exams', subtitle: 'Schedule', to: routes.examSchedule },

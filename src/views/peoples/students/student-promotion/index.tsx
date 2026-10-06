@@ -118,7 +118,7 @@ const StudentPromotion = () => {
   const downloadList = useCallback(
     (prefix: string) => {
       const lines = [
-        `PRESKOOL ACADEMY - ${prefix.toUpperCase()}`,
+        `KARKAII ACADEMY - ${prefix.toUpperCase()}`,
         'Academic Year 2024-2025 -> 2025-2026',
         'Class Grade III-A -> Grade IV',
         '',

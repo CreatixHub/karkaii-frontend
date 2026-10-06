@@ -3,14 +3,14 @@
  * ------------------------------------------------------------------ */
 
 export const INSTALLATION = {
-  name: 'PreSkool',
-  url: 'https://preskool.edu',
+  name: 'Karkaii',
+  url: 'https://karkaii.edu',
   adminPath: '/admin',
-  support: 'it@preskool.edu',
+  support: 'it@karkaii.edu',
   id: 'PRSK-9F41-22A8',
   environment: 'Production',
   region: 'ap-south-1',
-  host: 'preskool-app-01',
+  host: 'karkaii-app-01',
   uptimeDays: 46,
   build: '4.8.2+2091',
   version: '4.8.2',
@@ -50,7 +50,7 @@ export const SERVICES: Service[] = [
     id: 'application',
     name: 'Application',
     icon: 'ti ti-app-window',
-    note: 'preskool-app-01 · php-fpm 8.3',
+    note: 'karkaii-app-01 · php-fpm 8.3',
     version: '4.8.2',
     state: 'Running',
     uptime: '100%',
@@ -119,7 +119,7 @@ export const SERVICES: Service[] = [
     id: 'storage',
     name: 'Object storage',
     icon: 'ti ti-cloud',
-    note: 'S3 · preskool-media',
+    note: 'S3 · karkaii-media',
     version: '—',
     state: 'Running',
     uptime: '100%',
@@ -194,7 +194,7 @@ export interface Partition {
   tone: string;
 }
 
-export const VOLUME_PATH = '/var/preskool';
+export const VOLUME_PATH = '/var/karkaii';
 export const VOLUME_GB = 500;
 
 export const PARTITIONS: Partition[] = [
@@ -703,7 +703,7 @@ export const STOPPED_INTEGRATIONS = INTEGRATIONS.length - CONNECTED_INTEGRATIONS
  * 11. Environment                                                    *
  * ------------------------------------------------------------------ */
 
-export const RUNTIME_COMMAND = 'preskool@app-01:~$ php artisan about';
+export const RUNTIME_COMMAND = 'karkaii@app-01:~$ php artisan about';
 
 export const RUNTIME = [
   ['Environment', 'production'],
@@ -726,7 +726,7 @@ export const runtimeLine = ([key, value]: string[]) =>
 export const ENV_VARS = [
   'APP_ENV=production',
   'APP_DEBUG=false',
-  'APP_URL=https://preskool.edu',
+  'APP_URL=https://karkaii.edu',
   'DB_CONNECTION=mysql',
   'CACHE_STORE=redis',
   'QUEUE_CONNECTION=redis',

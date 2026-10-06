@@ -988,7 +988,7 @@ const SecuritySettingsModal = () => {
               type="email"
               className="form-control"
               id="r_mail"
-              placeholder="A personal address, outside preskool.edu"
+              placeholder="A personal address, outside karkaii.edu"
             />
             <p className="fs-12 text-muted mb-0 mt-1">
               An address on the school domain cannot recover an account that is

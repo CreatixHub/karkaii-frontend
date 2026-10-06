@@ -462,7 +462,7 @@ export const STORAGE_CARDS: Card[] = [
       {
         id: 'media',
         label: 'Media',
-        note: 'S3 · preskool-media · ap-south-1',
+        note: 'S3 · karkaii-media · ap-south-1',
         control: choose('Amazon S3', 'Local disk', 'Google Cloud Storage'),
       },
       {
@@ -1096,7 +1096,7 @@ export const ENVIRONMENTS_CARD: Card = {
     {
       id: 'staging',
       label: 'Staging',
-      note: 'staging.preskool.edu · a copy refreshed weekly',
+      note: 'staging.karkaii.edu · a copy refreshed weekly',
       control: plain('Non-live'),
     },
     {
@@ -1138,19 +1138,19 @@ export const INFRASTRUCTURE_CARD: Card = {
     {
       id: 'db-host',
       label: 'Database host',
-      note: 'preskool-db-01 · managed, daily snapshot',
+      note: 'karkaii-db-01 · managed, daily snapshot',
       control: { kind: 'none' },
     },
     {
       id: 'cache-host',
       label: 'Cache host',
-      note: 'preskool-cache-01 · Redis 7.2',
+      note: 'karkaii-cache-01 · Redis 7.2',
       control: { kind: 'none' },
     },
     {
       id: 'object-storage',
       label: 'Object storage',
-      note: 'S3 · preskool-media · versioned',
+      note: 'S3 · karkaii-media · versioned',
       control: { kind: 'none' },
     },
     {

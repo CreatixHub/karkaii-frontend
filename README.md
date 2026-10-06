@@ -1,6 +1,6 @@
-# Preskool — School Management Admin Dashboard (React)
+# Karkaii — School Management Admin Dashboard (React)
 
-Preskool is a school-management admin template: dashboards for admin, teacher,
+Karkaii is a school-management admin template: dashboards for admin, teacher,
 student and parent roles, plus Academic, HRM, Finance, Attendance, Library,
 Transport, Hostel, Communication and Settings modules.
 

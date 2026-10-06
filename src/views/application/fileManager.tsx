@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { img_path } from "@/environment";
 import { Link } from "react-router-dom";
 import { all_routes } from "@/routes/all_routes";
 import TooltipOption from "../../core/common/tooltipOption";
@@ -1424,7 +1425,7 @@ const FileManager = () => {
                   className="js-player w-100"
                   crossOrigin=""
                   playsInline={true}
-                  poster="/assets/img/file-manager/video1.jpg"
+                  poster={`${img_path}assets/img/file-manager/video1.jpg`}
                 >
                   <source
                     src="https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4"
@@ -1518,7 +1519,7 @@ const FileManager = () => {
                   className="js-player w-100"
                   crossOrigin=""
                   playsInline={true}
-                  poster="/assets/img/file-manager/video2.jpg"
+                  poster={`${img_path}assets/img/file-manager/video2.jpg`}
                 >
                   <source
                     src="https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4"
@@ -1612,7 +1613,7 @@ const FileManager = () => {
                   className="js-player w-100"
                   crossOrigin=""
                   playsInline={true}
-                  poster="/assets/img/file-manager/video3.jpg"
+                  poster={`${img_path}assets/img/file-manager/video3.jpg`}
                 >
                   <source
                     src="https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4"

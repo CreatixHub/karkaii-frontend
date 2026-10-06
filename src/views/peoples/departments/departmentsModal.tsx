@@ -191,7 +191,7 @@ const DepartmentsModal = () => {
             </li>
             <li className="d-flex justify-content-between py-1 fs-13">
               <span className="text-muted">Department Email</span>
-              <span className="text-dark">admin@preskool.com</span>
+              <span className="text-dark">admin@karkaii.com</span>
             </li>
           </ul>
         </div>
