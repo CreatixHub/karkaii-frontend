@@ -1454,6 +1454,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "System",
         icon: "ti ti-server-cog",
@@ -1496,6 +1497,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
     ],
   },
   {
@@ -1508,6 +1510,7 @@ export const SidebarData = [
         submenu: false,
         link: routes.pages,
       },
+      /*
       {
         label: "Blog",
         icon: "ti ti-brand-blogger",
@@ -1535,6 +1538,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
       {
         label: "Location",
         icon: "ti ti-map-pin-search",
@@ -1557,12 +1561,14 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Testimonials",
         icon: "ti ti-quote",
         submenu: false,
         link: routes.testimonials,
       },
+      */
       {
         label: "FAQ",
         icon: "ti ti-help-circle",
@@ -1743,6 +1749,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Error Pages",
         icon: "ti ti-error-404",
@@ -1770,6 +1777,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
     ],
   },
   {
