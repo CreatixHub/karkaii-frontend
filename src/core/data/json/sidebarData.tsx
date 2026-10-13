@@ -424,6 +424,7 @@ export const SidebarData = [
     label: "HRM",
     submenuHdr: "HRM",
     submenuItems: [
+      /*
       {
         label: "HR & Payroll",
         icon: "ti ti-briefcase",
@@ -456,6 +457,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
       {
         label: "Holidays",
         icon: "ti ti-calendar-event",
@@ -738,6 +740,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Hostel",
         icon: "ti ti-building-fortress",
@@ -780,6 +783,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
       {
         label: "Cafeteria",
         icon: "ti ti-chef-hat",
@@ -1002,6 +1006,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Automation",
         icon: "ti ti-bolt",
@@ -1024,6 +1029,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
     ],
   },
   {
