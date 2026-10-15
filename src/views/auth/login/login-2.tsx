@@ -60,39 +60,15 @@ const Login2 = () => {
                           </div>
                           <div className="mt-4">
                             <div className="d-flex align-items-center justify-content-center flex-wrap">
-                              <div className="text-center me-2 flex-fill">
-                                <Link
-                                  to="#"
-                                  className="bg-primary br-10 p-2 btn btn-primary  d-flex align-items-center justify-content-center"
-                                >
-                                  <ImageWithBasePath
-                                    className="img-fluid m-1"
-                                    src="assets/img/icons/facebook-logo.svg"
-                                    alt="Facebook"
-                                  />
-                                </Link>
-                              </div>
-                              <div className="text-center me-2 flex-fill">
-                                <Link
-                                  to="#"
-                                  className=" br-10 p-2 btn btn-outline-light  d-flex align-items-center justify-content-center"
-                                >
-                                  <ImageWithBasePath
-                                    className="img-fluid  m-1"
-                                    src="assets/img/icons/google-logo.svg"
-                                    alt="Facebook"
-                                  />
-                                </Link>
-                              </div>
                               <div className="text-center flex-fill">
                                 <Link
                                   to="#"
-                                  className="bg-dark br-10 p-2 btn btn-dark d-flex align-items-center justify-content-center"
+                                  className="br-10 p-2 btn btn-outline-light d-flex align-items-center justify-content-center"
                                 >
                                   <ImageWithBasePath
-                                    className="img-fluid  m-1"
-                                    src="assets/img/icons/apple-logo.svg"
-                                    alt="Apple"
+                                    className="img-fluid m-1"
+                                    src="assets/img/icons/google-logo.svg"
+                                    alt="Google"
                                   />
                                 </Link>
                               </div>

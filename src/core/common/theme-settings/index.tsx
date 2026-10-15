@@ -13,9 +13,13 @@ import { Link } from "react-router-dom";
 import ImageWithBasePath from "../imageWithBasePath";
 
 const ThemeSettings = () => {
-  const buyNow = () => {
-    window.open('https://1.envato.market/52Ndo','_blank')
-  }
+  const handleSetTheme = () => {
+    dispatch(setDataColor(dataColor));
+    dispatch(setDataTheme(dataTheme));
+    dispatch(setDataLayout(dataLayout));
+    dispatch(setDataSidebar(dataSidebar));
+    dispatch(setTopBarColor(dataTopBar));
+  };
   const dispatch = useDispatch();
   const dataLayout = useSelector((state: any) => state.themeSetting.dataLayout);
   const dataTopBar = useSelector((state: any) => state.themeSetting.dataTopBar);
@@ -386,12 +390,16 @@ const ThemeSettings = () => {
                         type="radio"
                         name="sidebar"
                         id="lightSidebar"
-                        defaultValue="light"
-                        defaultChecked
+                        value="light"
+                        checked={dataSidebar === "default_data_sidebar"}
+                        onChange={() =>
+                          handleDataSidebarChange("default_data_sidebar")
+                        }
                       />
                       <label
                         htmlFor="lightSidebar"
                         className="d-block rounded mb-2"
+                        style={{ backgroundColor: "#FFFFFF", cursor: "pointer" }}
                       ></label>
                     </div>
                     <div
@@ -406,11 +414,16 @@ const ThemeSettings = () => {
                         type="radio"
                         name="sidebar"
                         id="darkSidebar"
-                        defaultValue="dark"
+                        value="dark"
+                        checked={dataSidebar === "dark_data_sidebar"}
+                        onChange={() =>
+                          handleDataSidebarChange("dark_data_sidebar")
+                        }
                       />
                       <label
                         htmlFor="darkSidebar"
                         className="d-block rounded bg-dark mb-2"
+                        style={{ cursor: "pointer" }}
                       ></label>
                     </div>
                     <div
@@ -425,11 +438,16 @@ const ThemeSettings = () => {
                         type="radio"
                         name="sidebar"
                         id="primarySidebar"
-                        defaultValue="primary"
+                        value="primary"
+                        checked={dataSidebar === "primary_data_sidebar"}
+                        onChange={() =>
+                          handleDataSidebarChange("primary_data_sidebar")
+                        }
                       />
                       <label
                         htmlFor="primarySidebar"
                         className="d-block rounded bg-primary mb-2"
+                        style={{ cursor: "pointer" }}
                       ></label>
                     </div>
                     <div
@@ -444,11 +462,16 @@ const ThemeSettings = () => {
                         type="radio"
                         name="sidebar"
                         id="darkblackSidebar"
-                        defaultValue="darkblack"
+                        value="darkblack"
+                        checked={dataSidebar === "darkblack_data_sidebar"}
+                        onChange={() =>
+                          handleDataSidebarChange("darkblack_data_sidebar")
+                        }
                       />
                       <label
                         htmlFor="darkblackSidebar"
                         className="d-block rounded bg-darkblack mb-2"
+                        style={{ cursor: "pointer" }}
                       ></label>
                     </div>
                     <div
@@ -463,11 +486,16 @@ const ThemeSettings = () => {
                         type="radio"
                         name="sidebar"
                         id="darkblueSidebar"
-                        defaultValue="darkblue"
+                        value="darkblue"
+                        checked={dataSidebar === "darkblue_data_sidebar"}
+                        onChange={() =>
+                          handleDataSidebarChange("darkblue_data_sidebar")
+                        }
                       />
                       <label
                         htmlFor="darkblueSidebar"
                         className="d-block rounded bg-darkblue mb-2"
+                        style={{ cursor: "pointer" }}
                       ></label>
                     </div>
                   </div>
@@ -505,10 +533,17 @@ const ThemeSettings = () => {
                         type="radio"
                         name="color"
                         id="primaryColor"
-                        defaultValue="primary"
-                        defaultChecked
+                        value="primary"
+                        checked={dataColor === "default_data_color"}
+                        onChange={() =>
+                          handleDataColorChange("default_data_color")
+                        }
                       />
-                      <label htmlFor="primaryColor" className="primary-clr" />
+                      <label
+                        htmlFor="primaryColor"
+                        className="primary-clr"
+                        style={{ backgroundColor: "#3D5EE1", cursor: "pointer" }}
+                      />
                     </div>
                     <div
                       className={`custom-themecolor custom-themecolor-rounded me-3 mb-2 ${
@@ -520,9 +555,17 @@ const ThemeSettings = () => {
                         type="radio"
                         name="color"
                         id="violetColor"
-                        defaultValue="violet"
+                        value="violet"
+                        checked={dataColor === "violet_data_color"}
+                        onChange={() =>
+                          handleDataColorChange("violet_data_color")
+                        }
                       />
-                      <label htmlFor="violetColor" className="violet-clr" />
+                      <label
+                        htmlFor="violetColor"
+                        className="violet-clr"
+                        style={{ backgroundColor: "#673AB7", cursor: "pointer" }}
+                      />
                     </div>
                     <div
                       className={`custom-themecolor custom-themecolor-rounded me-3 mb-2 ${
@@ -534,9 +577,17 @@ const ThemeSettings = () => {
                         type="radio"
                         name="color"
                         id="pinkColor"
-                        defaultValue="pink"
+                        value="pink"
+                        checked={dataColor === "pink_data_color"}
+                        onChange={() =>
+                          handleDataColorChange("pink_data_color")
+                        }
                       />
-                      <label htmlFor="pinkColor" className="pink-clr" />
+                      <label
+                        htmlFor="pinkColor"
+                        className="pink-clr"
+                        style={{ backgroundColor: "#E83E8C", cursor: "pointer" }}
+                      />
                     </div>
                     <div
                       className={`custom-themecolor custom-themecolor-rounded me-3 mb-2 ${
@@ -548,9 +599,17 @@ const ThemeSettings = () => {
                         type="radio"
                         name="color"
                         id="orangeColor"
-                        defaultValue="orange"
+                        value="orange"
+                        checked={dataColor === "orange_data_color"}
+                        onChange={() =>
+                          handleDataColorChange("orange_data_color")
+                        }
                       />
-                      <label htmlFor="orangeColor" className="orange-clr" />
+                      <label
+                        htmlFor="orangeColor"
+                        className="orange-clr"
+                        style={{ backgroundColor: "#FD7E14", cursor: "pointer" }}
+                      />
                     </div>
                     <div
                       className={`custom-themecolor custom-themecolor-rounded me-3 mb-2 ${
@@ -562,9 +621,17 @@ const ThemeSettings = () => {
                         type="radio"
                         name="color"
                         id="greenColor"
-                        defaultValue="green"
+                        value="green"
+                        checked={dataColor === "green_data_color"}
+                        onChange={() =>
+                          handleDataColorChange("green_data_color")
+                        }
                       />
-                      <label htmlFor="greenColor" className="green-clr" />
+                      <label
+                        htmlFor="greenColor"
+                        className="green-clr"
+                        style={{ backgroundColor: "#2CA87F", cursor: "pointer" }}
+                      />
                     </div>
                     <div
                       className={`custom-themecolor custom-themecolor-rounded me-3 mb-2 ${
@@ -576,9 +643,17 @@ const ThemeSettings = () => {
                         type="radio"
                         name="color"
                         id="redColor"
-                        defaultValue="red"
+                        value="red"
+                        checked={dataColor === "red_data_color"}
+                        onChange={() =>
+                          handleDataColorChange("red_data_color")
+                        }
                       />
-                      <label htmlFor="redColor" className="red-clr" />
+                      <label
+                        htmlFor="redColor"
+                        className="red-clr"
+                        style={{ backgroundColor: "#DC2626", cursor: "pointer" }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -599,13 +674,16 @@ const ThemeSettings = () => {
               </Link>
             </div>
             <div className="col-6">
-              <Link onClick={buyNow}
+              <Link
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSetTheme();
+                }}
                 to="#"
-                target="_blank"
                 className="btn btn-primary w-100"
                 data-bs-dismiss="offcanvas"
               >
-                Buy Now
+                Set Theme
               </Link>
             </div>
           </div>
