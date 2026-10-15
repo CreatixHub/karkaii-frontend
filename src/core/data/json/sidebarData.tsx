@@ -424,6 +424,7 @@ export const SidebarData = [
     label: "HRM",
     submenuHdr: "HRM",
     submenuItems: [
+      /*
       {
         label: "HR & Payroll",
         icon: "ti ti-briefcase",
@@ -456,6 +457,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
       {
         label: "Holidays",
         icon: "ti ti-calendar-event",
@@ -738,6 +740,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Hostel",
         icon: "ti ti-building-fortress",
@@ -780,6 +783,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
       {
         label: "Cafeteria",
         icon: "ti ti-chef-hat",
@@ -1002,6 +1006,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Automation",
         icon: "ti ti-bolt",
@@ -1024,6 +1029,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
     ],
   },
   {
@@ -1448,6 +1454,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "System",
         icon: "ti ti-server-cog",
@@ -1490,6 +1497,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
     ],
   },
   {
@@ -1502,6 +1510,7 @@ export const SidebarData = [
         submenu: false,
         link: routes.pages,
       },
+      /*
       {
         label: "Blog",
         icon: "ti ti-brand-blogger",
@@ -1529,6 +1538,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
       {
         label: "Location",
         icon: "ti ti-map-pin-search",
@@ -1551,12 +1561,14 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Testimonials",
         icon: "ti ti-quote",
         submenu: false,
         link: routes.testimonials,
       },
+      */
       {
         label: "FAQ",
         icon: "ti ti-help-circle",
@@ -1737,6 +1749,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Error Pages",
         icon: "ti ti-error-404",
@@ -1764,6 +1777,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
     ],
   },
   {
