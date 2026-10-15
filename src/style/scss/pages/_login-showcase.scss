@@ -1,0 +1,305 @@
+// Animated left-hand panel of the login page  ->  src/views/auth/login/LoginShowcase.tsx
+// Only `transform`, `opacity` and background-position are animated. `prefers-reduced-motion` switches it all off (bottom).
+
+.kk-showcase {
+  position: relative;
+  isolation: isolate;
+  height: 100vh;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(135deg, #081650 0%, #1a37b0 48%, #3d5ee1 100%);
+  background-size: 180% 180%;
+  animation: kk-gradient 18s ease-in-out infinite;
+}
+
+// ---- backdrop ---------------------------------------------------------------------------------------------------
+.kk-aurora {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.kk-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.55;
+  will-change: transform;
+  &--1 {
+    width: 420px; height: 420px; top: -120px; left: -100px;
+    background: radial-gradient(circle, #22d3ee 0%, transparent 70%);
+    animation: kk-drift-1 22s ease-in-out infinite alternate;
+  }
+  &--2 {
+    width: 480px; height: 480px; bottom: -160px; right: -120px;
+    background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+    animation: kk-drift-2 26s ease-in-out infinite alternate;
+  }
+  &--3 {
+    width: 300px; height: 300px; top: 45%; left: 55%;
+    background: radial-gradient(circle, #38bdf8 0%, transparent 70%);
+    animation: kk-drift-3 19s ease-in-out infinite alternate;
+  }
+}
+.kk-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1.2px);
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+}
+
+// ---- layout -----------------------------------------------------------------------------------------------------
+.kk-content {
+  width: min(560px, 86%);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.9rem, 2.4vh, 1.6rem);
+}
+.kk-rise {
+  opacity: 0;
+  animation: kk-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; // per-element delay is set inline
+}
+
+.kk-eyebrow {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.kk-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  animation: kk-pulse 2s ease-out infinite;
+}
+
+.kk-title {
+  margin: 0;
+  font-size: clamp(1.9rem, 3.4vw, 2.8rem);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+.kk-shimmer {
+  color: #bae6fd; // fallback when background-clip:text is unsupported
+  background: linear-gradient(90deg, #7dd3fc, #c4b5fd, #7dd3fc);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: kk-shine 6s linear infinite;
+}
+
+// ---- preview card + floating chips ------------------------------------------------------------------------------
+.kk-stage {
+  position: relative;
+  height: clamp(250px, 38vh, 340px);
+}
+.kk-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: 310px;
+  padding: 1.1rem 1.25rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 60px rgba(4, 12, 60, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  animation: kk-float 7s ease-in-out infinite;
+}
+.kk-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kk-card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.kk-live {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.18);
+}
+.kk-card-body {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin-top: 0.9rem;
+}
+
+.kk-ring {
+  position: relative;
+  flex: none;
+  width: 112px;
+  height: 112px;
+  svg { display: block; transform: rotate(-90deg); }
+}
+.kk-ring-track,
+.kk-ring-value {
+  fill: none;
+  stroke-width: 9;
+}
+.kk-ring-track { stroke: rgba(255, 255, 255, 0.18); }
+.kk-ring-value {
+  stroke: url(#kk-ring-grad);
+  stroke-linecap: round;
+  stroke-dasharray: 327; // 2 * pi * 52
+  stroke-dashoffset: 327;
+  animation: kk-ring 2s 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; // draws once, up to 94%
+}
+.kk-ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+  font-weight: 700;
+  small { font-size: 0.9rem; margin-left: 1px; opacity: 0.85; }
+}
+
+.kk-bars {
+  flex: 1;
+  height: 92px;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+.kk-bar {
+  flex: 1;
+  border-radius: 6px 6px 3px 3px;
+  background: linear-gradient(180deg, #bae6fd, rgba(165, 180, 252, 0.55));
+  transform-origin: bottom;
+  animation: kk-bar 3.2s ease-in-out infinite;
+}
+
+.kk-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(4, 12, 60, 0.3);
+  i { font-size: 1rem; }
+  &--a { top: 4%;    left: 0;   animation: kk-float 6s ease-in-out infinite; }
+  &--b { top: 8%;    right: 0;  animation: kk-float 8s ease-in-out -2s infinite; }
+  &--c { bottom: 10%; left: 2%;  animation: kk-float 7s ease-in-out -4s infinite; }
+  &--d { bottom: 2%;  right: 4%; animation: kk-float 9s ease-in-out -1s infinite; }
+}
+
+// ---- rotating feature highlight ---------------------------------------------------------------------------------
+.kk-feature {
+  min-height: 118px;
+  padding: 1rem 1.2rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.kk-feature-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  animation: kk-swap 0.6s ease both;
+}
+.kk-feature-icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 1.4rem;
+  background: rgba(255, 255, 255, 0.16);
+}
+.kk-feature-title {
+  margin: 0 0 0.2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+}
+.kk-feature-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.85);
+}
+.kk-dotnav {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+.kk-dotnav-btn {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  transition: width 0.3s ease, background 0.3s ease;
+  &::after { content: ""; position: absolute; inset: -8px -4px; } // bigger click target
+  &.is-active { width: 26px; background: #fff; }
+  &:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+}
+
+// short laptop screens: keep everything inside one screen
+@media (max-height: 740px) {
+  .kk-stage { height: 240px; }
+  .kk-chip--c, .kk-chip--d { display: none; }
+  .kk-title { font-size: 1.8rem; }
+}
+
+// ---- keyframes --------------------------------------------------------------------------------------------------
+@keyframes kk-gradient { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes kk-drift-1 { to { transform: translate3d(140px, 110px, 0) scale(1.15); } }
+@keyframes kk-drift-2 { to { transform: translate3d(-150px, -90px, 0) scale(1.1); } }
+@keyframes kk-drift-3 { to { transform: translate3d(-120px, 80px, 0) scale(0.85); } }
+@keyframes kk-shine   { to { background-position: 200% center; } }
+@keyframes kk-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); }
+  70%, 100% { box-shadow: 0 0 0 9px rgba(74, 222, 128, 0); }
+}
+@keyframes kk-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes kk-swap { from { opacity: 0; transform: translateY(8px); }  to { opacity: 1; transform: none; } }
+@keyframes kk-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes kk-ring  { to { stroke-dashoffset: 20; } } // 327 * (1 - 0.94)
+@keyframes kk-bar   { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.72); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .kk-showcase, .kk-showcase *, .kk-showcase *::before, .kk-showcase *::after { animation: none !important; }
+  .kk-rise { opacity: 1; }
+  .kk-ring-value { stroke-dashoffset: 20; }
+}
