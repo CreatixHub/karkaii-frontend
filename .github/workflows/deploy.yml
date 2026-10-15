@@ -1,0 +1,103 @@
+name: Deploy frontend
+
+# Every push to main (merged PR) builds the app and publishes it at http://<droplet>/app/
+# One-time setup for the secrets below:  bash deploy/scripts/setup-ci-deploy.sh   (in the karkaii monorepo, see DEPLOY.md)
+# Re-deploy without a new commit: GitHub -> Actions -> "Deploy frontend" -> Run workflow.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Two quick pushes must not deploy at the same time; the second waits for the first.
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  SITE_DIR: /var/www/karkaii-site          # nginx `root`; the app is served from $SITE_DIR/app
+  STAGE_DIR: /var/www/karkaii-site.deploy  # where the new build is uploaded first (outside the web root)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build            # tsc + vite; a type error stops the deploy here
+        env:
+          VITE_BASE_PATH: /app/
+
+      - name: Check the build is complete
+        run: test -f dist/index.html
+
+      - name: Set up SSH
+        env:
+          DO_SSH_KEY: ${{ secrets.DO_SSH_KEY }}
+          DO_KNOWN_HOSTS: ${{ secrets.DO_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DO_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DO_KNOWN_HOSTS" > ~/.ssh/known_hosts   # pinned host key: no trust-on-first-use
+
+      - name: Upload to the staging folder
+        env:
+          REMOTE: ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }}
+        run: |
+          SSH="ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes"
+          $SSH "$REMOTE" "rm -rf '$STAGE_DIR/app.new'"
+          # --link-dest: files that did not change are hard-linked from the live copy, so only the delta is sent
+          rsync -az --delete --link-dest="$SITE_DIR/app" -e "$SSH" dist/ "$REMOTE:$STAGE_DIR/app.new/"
+
+      - name: Publish (swap, check, roll back if broken)
+        env:
+          REMOTE: ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }}
+        run: |
+          ssh -i "$HOME/.ssh/deploy_key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "$REMOTE" bash -s -- "$SITE_DIR" "$STAGE_DIR" <<'REMOTE_SCRIPT'
+          set -euo pipefail
+          SITE="$1"; STAGE="$2"
+
+          [ -f "$STAGE/app.new/index.html" ] || { echo "Upload is incomplete - live site untouched." >&2; exit 1; }
+          chmod -R a+rX "$STAGE/app.new"
+
+          # swap: live -> app.prev, new -> live   (two renames; the site is never half-updated)
+          rm -rf "$STAGE/app.prev"
+          if [ -d "$SITE/app" ]; then mv "$SITE/app" "$STAGE/app.prev"; fi
+          mv "$STAGE/app.new" "$SITE/app"
+
+          # ask nginx for what a visitor would request (not the disk)
+          smoke() {
+            local home deep
+            home="$(curl -fsS --max-time 15 http://127.0.0.1/app/)" || return 1
+            grep -qi 'karkaii' <<<"$home" || return 1
+            deep="$(curl -fsS --max-time 15 -o /dev/null -w '%{http_code}' http://127.0.0.1/app/students)" || return 1
+            [ "$deep" = 200 ]
+          }
+
+          if smoke; then
+            echo "Released. Previous build kept in $STAGE/app.prev"
+          else
+            echo "New build fails the check - rolling back." >&2
+            rm -rf "$SITE/app"
+            if [ -d "$STAGE/app.prev" ]; then mv "$STAGE/app.prev" "$SITE/app"; fi
+            exit 1
+          fi
+          REMOTE_SCRIPT
+
+      - name: Clean up the key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
