@@ -39,6 +39,9 @@ jobs:
         run: npm run build            # tsc + vite; a type error stops the deploy here
         env:
           VITE_BASE_PATH: /app/
+          # Prototype mode (sample data, no login). To use the real API later, change these and add VITE_API_BASE_URL: /api
+          VITE_USE_MOCK_API: 'true'
+          VITE_AUTH_ENABLED: 'false'
 
       - name: Check the build is complete
         run: test -f dist/index.html
