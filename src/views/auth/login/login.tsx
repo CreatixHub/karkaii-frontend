@@ -3,6 +3,7 @@ import ImageWithBasePath from "../../../core/common/imageWithBasePath";
 import { Link, Navigate } from "react-router-dom";
 import { all_routes } from "@/routes/all_routes";
 import CopyrightLine from "../CopyrightLine";
+import LoginShowcase from "./LoginShowcase";
 import { env } from "@config/env";
 import { useAuth } from "@hooks/useAuth";
 import { useLogin } from "@features/auth";
@@ -31,76 +32,7 @@ const Login = () => {
       <div className="w-100 overflow-hidden position-relative flex-wrap d-block vh-100">
         <div className="row">
           <div className="col-lg-6">
-            <div className="login-background d-lg-flex align-items-center justify-content-center d-lg-block d-none flex-wrap vh-100 overflowy-auto">
-              <div>
-                <ImageWithBasePath
-                  src="assets/img/authentication/authentication-02.jpg"
-                  alt=""
-                />
-              </div>
-              <div className="authen-overlay-item  w-100 p-4">
-                <h4 className="text-white mb-3">What's New on Karkaii !!!</h4>
-                <div className="d-flex align-items-center flex-row mb-3 justify-content-between p-3 br-5 gap-3 card">
-                  <div>
-                    <h6>Summer Vacation Holiday Homework</h6>
-                    <p className="mb-0 text-truncate">
-                      The school will remain closed from April 20th to June...
-                    </p>
-                  </div>
-                  <Link to="#">
-                    <i className="ti ti-chevrons-right" />
-                  </Link>
-                </div>
-                <div className="d-flex align-items-center flex-row mb-3 justify-content-between p-3 br-5 gap-3 card">
-                  <div>
-                    <h6>New Academic Session Admission Start(2024-25)</h6>
-                    <p className="mb-0 text-truncate">
-                      An academic term is a portion of an academic year, the
-                      time ....
-                    </p>
-                  </div>
-                  <Link to="#">
-                    <i className="ti ti-chevrons-right" />
-                  </Link>
-                </div>
-                <div className="d-flex align-items-center flex-row mb-3 justify-content-between p-3 br-5 gap-3 card">
-                  <div>
-                    <h6>Date sheet Final Exam Nursery to Sr.Kg</h6>
-                    <p className="mb-0 text-truncate">
-                      Dear Parents, As the final examination for the session
-                      2024-25 is ...
-                    </p>
-                  </div>
-                  <Link to="#">
-                    <i className="ti ti-chevrons-right" />
-                  </Link>
-                </div>
-                <div className="d-flex align-items-center flex-row mb-3 justify-content-between p-3 br-5 gap-3 card">
-                  <div>
-                    <h6>Annual Day Function</h6>
-                    <p className="mb-0 text-truncate">
-                      Annual functions provide a platform for students to
-                      showcase their...
-                    </p>
-                  </div>
-                  <Link to="#">
-                    <i className="ti ti-chevrons-right" />
-                  </Link>
-                </div>
-                <div className="d-flex align-items-center flex-row mb-0 justify-content-between p-3 br-5 gap-3 card">
-                  <div>
-                    <h6>Summer Vacation Holiday Homework</h6>
-                    <p className="mb-0 text-truncate">
-                      The school will remain closed from April 20th to June 15th
-                      for summer...
-                    </p>
-                  </div>
-                  <Link to="#">
-                    <i className="ti ti-chevrons-right" />
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <LoginShowcase />
           </div>
           <div className="col-lg-6 col-md-12 col-sm-12">
             <div className="row justify-content-center align-items-center vh-100 overflow-auto flex-wrap ">
