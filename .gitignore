@@ -7,9 +7,6 @@ logs
 .env
 .env.*
 !.env.example
-# These two hold public VITE_* settings only (no secrets) and must be present for builds on any machine.
-!.env.development
-!.env.production
 .vscode/*
 !.vscode/extensions.json
 .idea
