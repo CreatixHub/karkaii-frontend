@@ -1,0 +1,103 @@
+/*-----------------
+    Dashboard Shell
+
+    The design tokens the dashboard components read (timetable, heatstrip,
+    eventrow, skeleton, qa-toggle). Set once on the page's `.dashboard` root
+    so every component and every modal inside it resolves the same palette.
+-----------------*/
+.dashboard {
+	--avatar-accent: var(--bs-primary);
+	--avatar-accent-soft: var(--tint-primary);
+	color: var(--bs-body-color, #374151);
+}
+
+/*-----------------
+    Hero banner
+    The greeting card that anchors a dashboard. Faint radial brand tints sit
+    in opposite corners — matched to index2's welcome banner — so the hero
+    reads as the page's focal point without a heavy gradient panel.
+-----------------*/
+.dashboard .dash-hero {
+	position: relative;
+	overflow: hidden;
+}
+.dashboard .dash-hero::before {
+	content: "";
+	position: absolute;
+	inset-inline-end: -70px;
+	top: -90px;
+	width: 300px;
+	height: 300px;
+	border-radius: 50%;
+	background: radial-gradient(circle, var(--tint-primary), transparent 68%);
+	pointer-events: none;
+}
+.dashboard .dash-hero::after {
+	content: "";
+	position: absolute;
+	inset-inline-start: -90px;
+	bottom: -120px;
+	width: 260px;
+	height: 260px;
+	border-radius: 50%;
+	background: radial-gradient(circle, var(--tint-teal), transparent 70%);
+	opacity: 0.7;
+	pointer-events: none;
+}
+.dashboard .dash-hero .card-body { position: relative; z-index: 1; }
+.dashboard .dash-hero h2 { font-weight: 800; letter-spacing: -0.02em; }
+
+/*-----------------
+    Spotlight panel
+    A soft accent-washed panel that gives a headline figure (a GPA dial, a
+    balance, a score) a home instead of floating it on the white card. The
+    wash follows whatever `.accent-*` sits on the element, so one panel serves
+    every tone. Meant to hold a gauge — the dial's punched-out centre stays
+    on the card surface token so it reads cleanly against the tint.
+-----------------*/
+.dashboard .dash-spotlight {
+	position: relative;
+	overflow: hidden;
+	border-radius: var(--radius);
+	border: 1px solid var(--bs-border-color);
+	padding: 1.25rem;
+	background:
+		radial-gradient(120% 90% at 50% -10%, var(--tint-primary), transparent 70%),
+		var(--bs-body-bg);
+}
+.dashboard .dash-spotlight .gauge { --gauge-surface: var(--bs-body-bg); }
+.dashboard .dash-spotlight-divider {
+	height: 1px;
+	background: var(--bs-border-color);
+	margin: 1rem -1.25rem;
+}
+
+/*-----------------
+    Spacing rhythm
+    Dashboards breathe more than form pages: roomier card and stat-tile
+    padding, aligned to index2's shell.
+-----------------*/
+.dashboard .card > .card-body { padding: 1.5rem; }
+.dashboard .card > .card-header { padding: 1.1rem 1.5rem; }
+.dashboard .stat-tile { padding: 0.9rem 1rem; }
+
+/* Inside a dashboard the plain tile drops its grey fill and reads as a
+   hairline-bordered box — the calmer look these figure groups had before, and
+   a better match for the card surface they sit on. (index2's stat-grid keeps
+   the filled variant, since it isn't a `.dashboard`.) */
+.dashboard .stat-tile.stat-tile-plain {
+	background: transparent;
+	border: 1px solid var(--bs-border-color);
+}
+@media (max-width: 767.98px) {
+	.dashboard .card > .card-body { padding: 1.15rem; }
+	.dashboard .card > .card-header { padding: 1rem 1.15rem; }
+	.dashboard .stat-tile { padding: 0.75rem 0.85rem; }
+}
+
+/* The global `.accent-*` utility (see _avatar.scss) already declares the
+   avatar token pair. Mirroring it onto the dashboard pair means one accent
+   class colours avatars, timetable rails, event tiles and meters alike, so a
+   page never has to carry both vocabularies on the same element. */
+.dashboard [class*="accent-"] {
+}

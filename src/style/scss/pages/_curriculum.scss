@@ -1,0 +1,94 @@
+/* ============================================================
+   Curriculum — Premium Academic Curriculum Management Workspace
+   Three-panel layout helpers. Everything visual that Bootstrap
+   utilities + existing Karkaii components already cover is NOT
+   redefined here — this partial only adds the sticky panels,
+   the nav rail, the animated progress and a couple of tiles.
+   ============================================================ */
+
+.curriculum-page {
+
+	/* ---- Sticky side panels (desktop only) ---- */
+	@media (min-width: 992px) {
+		.curriculum-sticky {
+			position: sticky;
+			top: 1rem;
+			max-height: calc(100vh - 9rem);
+			overflow-y: auto;
+			overflow-x: hidden;
+		}
+	}
+
+	/* thin, unobtrusive scrollbar for the rails */
+	.curriculum-sticky::-webkit-scrollbar { width: 6px; }
+	.curriculum-sticky::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .12); border-radius: 20px; }
+
+	/* ---- Left navigation rail ---- */
+	.curriculum-nav-title {
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: .04em;
+		text-transform: uppercase;
+	}
+	.curriculum-nav .list-group-item {
+		border: 0;
+		padding: .45rem .65rem;
+		border-radius: .5rem;
+		font-size: 13px;
+		cursor: pointer;
+		transition: background-color .2s ease, color .2s ease;
+	}
+	.curriculum-nav .list-group-item .curriculum-nav-icon { width: 18px; text-align: center; }
+
+	/* ---- Explorer cards ---- */
+	.curriculum-card {
+		cursor: pointer;
+		transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+	}
+	.curriculum-card.active {
+		border-color: var(--bs-primary);
+		box-shadow: 0 0 0 1px var(--bs-primary);
+	}
+	.curriculum-card .curriculum-card-extra { transition: max-height .25s ease, opacity .2s ease; }
+
+	/* Grid / list view of the explorer */
+	.curriculum-explorer.is-list .col-cur { width: 100%; flex: 0 0 100%; max-width: 100%; }
+	.curriculum-explorer.is-list .curriculum-card .card-body { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+	.curriculum-explorer.is-list .curriculum-card .curriculum-card-extra { display: none !important; }
+
+	/* ---- Animated progress ---- */
+	.curriculum-progress .progress-bar {
+		transition: width 1s cubic-bezier(.25, .8, .25, 1);
+	}
+
+	/* ---- Resource tile ---- */
+	.resource-row {
+		transition: border-color .2s ease, background-color .2s ease;
+	}
+	.resource-row:hover { border-color: var(--bs-primary) !important; }
+	.resource-row .resource-actions { opacity: 0; transition: opacity .2s ease; }
+	.resource-row:hover .resource-actions { opacity: 1; }
+
+	@media (max-width: 767.98px) {
+		.resource-row .resource-actions { opacity: 1; }
+	}
+
+	/* ---- Structure accordion progress ---- */
+	.structure-row .accordion-button { font-size: 13px; font-weight: 600; }
+	.structure-row .accordion-button:not(.collapsed) { background: var(--bs-primary-bg-subtle, rgba(63, 81, 181, .08)); }
+	.structure-row .structure-meta { font-size: 12px; }
+
+	/* ---- Empty state ---- */
+	.curriculum-empty { padding: 3rem 1rem; }
+	.curriculum-empty .curriculum-empty-icon {
+		width: 84px;
+		height: 84px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+	}
+}
+
+/* ---- Dark theme niceties ---- */
+[data-theme="dark"] .curriculum-page .curriculum-sticky::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .16); }

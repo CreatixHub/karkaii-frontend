@@ -1,0 +1,70 @@
+@use "../utils/variables";
+
+/*-----------------
+    Sparkline
+
+    A trend indicator small enough to sit inside a table cell or a list row.
+    Two forms share the class: an inline bar chart built from `<i>` elements,
+    and an SVG line drawn with `<path class="line">`.
+
+        <span class="sparkline">
+            <i style="height:60%"></i><i style="height:84%"></i><i style="height:100%"></i>
+        </span>
+
+        <svg class="sparkline sparkline-line" viewBox="0 0 100 40">
+            <path class="line" d="…" stroke="currentColor"></path>
+        </svg>
+
+    Bars take their colour from `--sparkline-fill`, or from a background
+    utility on each bar when a row mixes colours.
+-----------------*/
+.sparkline {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: var(--sparkline-height, 1.5rem);
+    flex: 1 1 auto;
+
+    > i {
+        flex: 1 1 auto;
+        min-height: 3px;
+        border-radius: 2px 2px 0 0;
+        opacity: 0.85;
+        background: var(--sparkline-fill, #{variables.$primary});
+    }
+
+    /*----- the SVG line form -----*/
+    &.sparkline-line {
+        display: block;
+        width: 100%;
+        height: 2.5rem;
+        overflow: visible;
+
+        path.line {
+            fill: none;
+            stroke-width: 2.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    }
+
+    /*----- heights -----*/
+    &.sparkline-sm { --sparkline-height: 1.125rem; }
+
+    &.sparkline-lg { --sparkline-height: 2.5rem; }
+}
+
+/*-----------------
+    Sparkline tones — set the fill once on the chart, not on every bar
+-----------------*/
+.sparkline-primary { --sparkline-fill: #{variables.$primary}; }
+.sparkline-secondary { --sparkline-fill: #{variables.$secondary}; }
+.sparkline-success { --sparkline-fill: #{variables.$success}; }
+.sparkline-info { --sparkline-fill: #{variables.$info}; }
+.sparkline-warning { --sparkline-fill: #{variables.$warning}; }
+.sparkline-danger { --sparkline-fill: #{variables.$danger}; }
+.sparkline-purple { --sparkline-fill: #{variables.$purple}; }
+
+/* an intermediate height, between the inline default and `.sparkline-lg` */
+.sparkline.sparkline-md { --sparkline-height: 2rem; }
+.sparkline-pink { --sparkline-fill: #{variables.$pink}; }

@@ -1,0 +1,290 @@
+/* ============================================================
+   Class Routine — weekly schedule workspace
+   A day × time grid of subject cards, plus the mobile agenda.
+   Scoped to .rt-* so it never touches the rest of the app.
+   ============================================================ */
+
+@use "../utils/mixins";
+@use "../utils/variables";
+
+
+.rt-grid {
+
+	// the grid scrolls sideways on its own; the page never does
+	table {
+		width: 100%;
+		border-collapse: separate;
+		border-spacing: 0;
+		min-width: 940px;
+	}
+
+	thead th {
+		position: sticky;
+		top: 0;
+		z-index: 3;
+		background: var(--bs-secondary-bg);
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: .04em;
+		text-transform: uppercase;
+		color: var(--bs-secondary-color);
+		padding: 12px 10px;
+		text-align: left;
+		border-bottom: 1px solid var(--bs-border-color, #e6e9f0);
+		white-space: nowrap;
+	}
+
+	// sticky time column (top-left corner sits above everything)
+	thead th:first-child {
+		left: 0;
+		z-index: 4;
+	}
+
+	tbody td.rt-time {
+		position: sticky;
+		left: 0;
+		z-index: 2;
+		background: var(--bs-body-bg);
+	}
+
+	tbody td {
+		padding: 8px;
+		vertical-align: top;
+		min-width: 156px;
+		border-bottom: 1px solid var(--bs-border-color, #e6e9f0);
+	}
+
+	.rt-day-h {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.rt-day-h b {
+		color: var(--bs-heading-color, #111827);
+		text-transform: none;
+		font-size: 13px;
+	}
+}
+
+.rt-time {
+	width: 104px;
+	min-width: 104px;
+	font-size: 12.5px;
+	font-weight: 600;
+	color: #374151;
+
+	small {
+		display: block;
+		color: #9ca3af;
+		font-weight: 500;
+		margin-top: 2px;
+	}
+
+	.rt-pnum {
+		display: inline-block;
+		font-size: 11px;
+		color: var(--bs-primary, #3D5EE1);
+		font-weight: 600;
+	}
+}
+
+.rt-card {
+	position: relative;
+	border: 1px solid var(--bs-border-color, #e6e9f0);
+	border-radius: 10px;
+	padding: 10px 10px 8px 16px;
+	background: #fff;
+	transition: box-shadow .18s ease, transform .18s ease;
+
+	&:hover {
+		box-shadow: 0 8px 20px rgba(17, 24, 39, .10);
+		transform: translateY(-2px);
+	}
+
+	&.is-selected {
+		box-shadow: 0 0 0 2px var(--bs-primary, #3D5EE1) inset;
+	}
+
+	.rt-accent {
+		position: absolute;
+		left: 0;
+		top: 8px;
+		bottom: 8px;
+		width: 4px;
+		border-radius: 0 4px 4px 0;
+	}
+
+	.rt-title {
+		font-size: 13.5px;
+		font-weight: 600;
+		color: #111827;
+		line-height: 1.2;
+	}
+
+	.rt-sub {
+		font-size: 11.5px;
+		color: #6b7280;
+	}
+
+	.dt-pill {
+		padding: 3px 8px;
+		font-size: 11px;
+	}
+
+	// hover-revealed quick strip (lesson plan / homework at a glance)
+	.rt-hover {
+		max-height: 0;
+		overflow: hidden;
+		opacity: 0;
+		transition: max-height .2s ease, opacity .2s ease, margin .2s ease;
+	}
+
+	&:hover .rt-hover {
+		max-height: 60px;
+		opacity: 1;
+		margin-top: 6px;
+	}
+}
+
+// expandable period detail (lives inside the card)
+.rt-detail {
+	display: none;
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px dashed var(--bs-border-color, #e6e9f0);
+}
+
+.rt-card.is-open .rt-detail {
+	display: block;
+}
+
+.rt-card.is-open .rt-hover {
+	display: none;
+}
+
+// break / lunch band
+td.rt-break {
+	text-align: center;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: .03em;
+	color: var(--bs-secondary-color);
+	background: repeating-linear-gradient(45deg, #f8f9fc, #f8f9fc 10px, #f2f3f8 10px, #f2f3f8 20px);
+}
+
+// free slot
+.rt-free {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 56px;
+	color: #c0c6d2;
+	font-size: 12px;
+	border: 1px dashed var(--bs-border-color, #e6e9f0);
+	border-radius: 10px;
+}
+
+// colour + status legend
+.rt-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+}
+
+.rt-legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--bs-secondary-color);
+}
+
+.rt-legend-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 3px;
+	flex-shrink: 0;
+}
+
+// AI insight rows
+.rt-insight {
+	display: flex;
+	gap: 12px;
+	align-items: flex-start;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--bs-border-color, #e6e9f0);
+	@include mixins.respond-below(sm) {
+		flex-direction: column; 
+	}
+}
+
+.rt-insight:last-child {
+	border-bottom: 0;
+}
+
+.rt-insight-ic {
+	width: 38px;
+	height: 38px;
+	border-radius: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	font-size: 18px;
+}
+
+// mobile agenda timeline
+.rt-agenda-day {
+	margin-bottom: 18px;
+}
+
+.rt-agenda-day>h6 {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background: var(--bs-body-bg);
+	padding: 8px 0;
+	margin: 0 0 8px;
+	border-bottom: 1px solid var(--bs-border-color, #e6e9f0);
+}
+
+.rt-agenda-item {
+	display: flex;
+	gap: 12px;
+	padding: 6px 0;
+	@include mixins.respond-below(sm) {
+		flex-direction: column; 
+	}
+}
+
+.rt-agenda-time {
+	width: 74px;
+	flex-shrink: 0;
+	font-size: 12px;
+	font-weight: 600;
+	color: #374151;
+}
+
+.rt-agenda-time small {
+	display: block;
+	color: #9ca3af;
+	font-weight: 500;
+}
+
+// Day / Week / Agenda view switch — force the agenda list visible for the
+// agenda and day modes; week keeps the responsive grid default.
+#classWorkspace[data-view="agenda"] .rt-grid,
+#classWorkspace[data-view="day"] .rt-grid {
+	display: none !important;
+}
+
+#classWorkspace[data-view="agenda"] .rt-agenda,
+#classWorkspace[data-view="day"] .rt-agenda {
+	display: block !important;
+}
+
+.rounded-circle {
+	border-radius: 50% !important; 
+}

@@ -1,0 +1,43 @@
+/*-----------------
+    Dashboard Widgets
+
+    The pieces of the dashboard shell still in service: the attendance
+    heatmap strip and the calendar event row. Both read the `--dash-*`
+    tokens declared on the `.dashboard` root.
+-----------------*/
+
+/*----- attendance heatmap -----*/
+.heatstrip { display: grid; grid-template-columns: repeat(auto-fill, minmax(16px, 1fr)); gap: 4px; }
+.heatstrip span { aspect-ratio: 1; border-radius: 4px; background: var(--bs-secondary-bg); }
+.heatstrip span.l1 { background: rgba(22,163,74,.25); }
+.heatstrip span.l2 { background: rgba(22,163,74,.45); }
+.heatstrip span.l3 { background: rgba(22,163,74,.68); }
+.heatstrip span.l4 { background: rgba(22,163,74,.9); }
+.heatstrip span.ab { background: rgba(220,38,38,.55); }
+.heatstrip-legend { display: flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--bs-secondary-color); margin-top: 8px; }
+.heatstrip-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; background: var(--bs-secondary-bg); }
+/* legend swatches carry the same level classes as the cells they explain, so
+   the key can never drift out of step with the strip */
+.heatstrip-legend i.l1 { background: rgba(22,163,74,.25); }
+.heatstrip-legend i.l2 { background: rgba(22,163,74,.45); }
+.heatstrip-legend i.l3 { background: rgba(22,163,74,.68); }
+.heatstrip-legend i.l4 { background: rgba(22,163,74,.9); }
+.heatstrip-legend i.ab { background: rgba(220,38,38,.55); }
+
+/*----- calendar events -----*/
+.eventrow { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--bs-border-color); }
+.eventrow:last-child { border-bottom: 0; }
+.eventrow-date { width: 48px; flex-shrink: 0; text-align: center; border-radius: 10px; padding: 6px 0; background: var(--tint-primary); color: var(--bs-primary); }
+.eventrow-date b { display: block; font-size: 17px; font-weight: 800; line-height: 1; }
+.eventrow-date span { font-size: 9.5px; text-transform: uppercase; }
+.eventrow-body b { font-size: 12.5px; color: var(--bs-emphasis-color); display: block; }
+.eventrow-body span { font-size: 11px; color: var(--bs-secondary-color); }
+
+
+/*-----------------
+	Dashboard widgets — merged in from the former
+	components/_ui-dashboard-widgets.scss. These are generic, reusable
+	components; they live with their own kind rather than in a page-shaped file.
+-----------------*/
+#tdQaList .info-list-item { cursor: pointer; }
+#tdQaList .info-list-item[data-att="absent"] { border-color: var(--tone-danger); background: var(--tone-danger-soft); }

@@ -1,0 +1,364 @@
+@use "../utils/variables";
+
+/*-----------------
+    Invoice Details & Billing Workspace
+
+    A premium single-invoice review workspace scoped to #invoiceWorkspace:
+    a sticky action bar, an invoice header, a two-column body (billing detail
+    on the left, student + financial summary + quick actions on the right),
+    fee breakdown, payment/activity timelines, attachments and modals.
+    Deliberately distinct from the tabular workspace / data-table and master-detail .exp-*
+    workspaces. Uses only tokens + Bootstrap utilities — no palette changes.
+-----------------*/
+
+#invoiceWorkspace {
+
+	/* ---------- Sticky action bar ---------- */
+	.iv-actionbar {
+		position: sticky;
+		top: 0;
+		z-index: 5;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: .75rem;
+		background: color-mix(in srgb, var(--bs-body-bg) 82%, transparent);
+		backdrop-filter: blur(10px);
+		border: 1px solid var(--bs-border-color) !important;
+		box-shadow: 0 8px 24px -16px rgba(27, 36, 54, .3);
+	}
+	.iv-ab-title { font-size: 16px; font-weight: 700; color: var(--bs-emphasis-color); line-height: 1.1; }
+	.iv-ab-sub { font-size: 11.5px; color: var(--bs-secondary-color); }
+	.iv-ab-actions { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+
+	/* ---------- Section heads ---------- */
+	.iv-cardhead {
+		display: flex;
+		align-items: center;
+		gap: .6rem;
+		margin-bottom: 1rem;
+	}
+	.iv-cardhead-ic {
+		width: 38px; height: 38px; flex: 0 0 auto;
+		border-radius: 11px;
+		display: inline-flex; align-items: center; justify-content: center;
+		font-size: 18px;
+		color: var(--bs-primary);
+		background: linear-gradient(135deg, color-mix(in srgb, var(--bs-primary) 18%, transparent), color-mix(in srgb, var(--bs-primary) 7%, transparent));
+		box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bs-primary) 14%, transparent);
+	}
+	.iv-cardhead-title { font-size: 14.5px; font-weight: 600; color: var(--bs-emphasis-color); line-height: 1.15; }
+	.iv-cardhead-sub { font-size: 11.5px; color: var(--bs-secondary-color); }
+
+	/* ---------- Invoice hero ---------- */
+	.iv-hero {
+		position: relative;
+		overflow: hidden;
+		border-radius: 20px;
+		padding: 1.5rem 1.6rem;
+		background:
+			radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--bs-primary) 16%, transparent) 0%, transparent 55%),
+			linear-gradient(135deg, color-mix(in srgb, var(--bs-primary) 8%, var(--bs-body-bg)) 0%, var(--bs-body-bg) 60%);
+		border: 1px solid color-mix(in srgb, var(--bs-primary) 14%, var(--bs-border-color));
+		box-shadow: 0 18px 40px -22px color-mix(in srgb, var(--bs-primary) 55%, transparent);
+	}
+	.iv-hero-glow {
+		position: absolute;
+		top: -70px; right: -40px;
+		width: 240px; height: 240px;
+		border-radius: 50%;
+		background: radial-gradient(circle, color-mix(in srgb, var(--bs-primary) 22%, transparent), transparent 70%);
+		pointer-events: none;
+	}
+	.iv-hero-grid {
+		position: relative;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: stretch;
+		justify-content: space-between;
+		gap: 1.4rem;
+	}
+	.iv-hero-left { flex: 1 1 340px; min-width: 0; }
+	.iv-hero-brand { display: flex; align-items: center; gap: .9rem; margin-bottom: 1.25rem; }
+	.iv-hero-logo {
+		width: 54px; height: 54px; flex: 0 0 auto;
+		border-radius: 15px;
+		display: inline-flex; align-items: center; justify-content: center;
+		font-size: 26px;
+		color: #fff;
+		background: linear-gradient(135deg, var(--bs-primary), color-mix(in srgb, var(--bs-primary) 55%, #7b61ff));
+		box-shadow: 0 10px 22px -8px color-mix(in srgb, var(--bs-primary) 70%, transparent);
+	}
+	.iv-hero-eyebrow { display: block; font-size: 11.5px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase; color: var(--bs-secondary-color); }
+	.iv-hero-no { font-size: 24px; font-weight: 800; letter-spacing: -.5px; color: var(--bs-emphasis-color); line-height: 1.1; }
+	.iv-hero-status {
+		display: inline-flex; align-items: center; gap: .35rem;
+		font-size: 12px; font-weight: 600;
+		padding: .3rem .7rem;
+		border-radius: 30px;
+		color: var(--bs-warning);
+		background: color-mix(in srgb, var(--bs-warning) 15%, transparent);
+	}
+	.iv-hero-meta {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+		gap: .9rem 1.2rem;
+	}
+	.iv-hero-mi {
+		.iv-hero-mi-label { display: flex; align-items: center; gap: .35rem; font-size: 11px; color: var(--bs-secondary-color); margin-bottom: .15rem; i { font-size: 13px; } }
+		.iv-hero-mi-val { font-size: 13.5px; font-weight: 700; color: var(--bs-emphasis-color); }
+	}
+	.iv-hero-due {
+		flex: 0 1 260px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: .35rem;
+		padding: 1.15rem 1.25rem;
+		border-radius: 16px;
+		color: #fff;
+		background: linear-gradient(150deg, color-mix(in srgb, var(--bs-primary) 92%, #000) 0%, var(--bs-primary) 55%, color-mix(in srgb, var(--bs-primary) 60%, #7b61ff) 100%);
+		box-shadow: 0 16px 34px -14px color-mix(in srgb, var(--bs-primary) 75%, transparent);
+	}
+	.iv-hero-due-label { font-size: 11.5px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; opacity: .85; }
+	.iv-hero-due-val { font-size: 30px; font-weight: 800; letter-spacing: -.5px; line-height: 1; }
+	.iv-hero-due-bar { height: 6px; border-radius: 20px; background: rgba(255, 255, 255, .28); overflow: hidden; margin: .5rem 0 .1rem; }
+	.iv-hero-due-fill { display: block; height: 100%; width: 0; border-radius: 20px; background: #fff; transition: width .9s cubic-bezier(.4, 0, .2, 1); }
+	.iv-hero-due-sub { font-size: 11.5px; opacity: .85; }
+	.iv-hero-due-actions { display: flex; gap: .5rem; margin-top: .65rem; }
+
+	/* ---------- Student profile ---------- */
+	.iv-profile { display: flex; align-items: center; gap: .85rem; }
+	.iv-profile-info {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: .75rem 1rem;
+	}
+	.iv-info-item {
+		.iv-info-label { display: block; font-size: 11px; color: var(--bs-secondary-color); margin-bottom: .1rem; }
+		.iv-info-val { font-size: 13px; font-weight: 500; color: var(--bs-emphasis-color); word-break: break-word; }
+	}
+	.iv-info-full { grid-column: 1 / -1; }
+
+	/* ---------- Financial summary ---------- */
+	.iv-sum { list-style: none; margin: 0; padding: 0; }
+	.iv-sum-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: .5rem 0;
+		font-size: 13px;
+		color: var(--bs-emphasis-color);
+		border-bottom: 1px dashed var(--bs-border-color);
+		&:last-child { border-bottom: 0; }
+		.iv-sum-label { color: var(--bs-secondary-color); display: inline-flex; align-items: center; gap: .4rem; }
+		.iv-sum-val { font-weight: 600; }
+		&.is-minus .iv-sum-val { color: var(--bs-success); }
+		&.is-add .iv-sum-val { color: var(--bs-danger); }
+	}
+	.iv-sum-total {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-top: .35rem;
+		padding: .95rem 1.1rem;
+		border-radius: 14px;
+		color: #fff;
+		background: linear-gradient(135deg, color-mix(in srgb, var(--bs-primary) 90%, #000), var(--bs-primary));
+		box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--bs-primary) 75%, transparent);
+		.iv-sum-total-label { font-size: 12.5px; font-weight: 600; opacity: .9; }
+		.iv-sum-total-val { font-size: 23px; font-weight: 800; letter-spacing: -.5px; line-height: 1; }
+	}
+	.iv-paybar {
+		height: 8px;
+		border-radius: 20px;
+		background: var(--bs-secondary-bg);
+		overflow: hidden;
+	}
+	.iv-paybar-fill {
+		height: 100%;
+		border-radius: 20px;
+		background: var(--bs-success);
+		width: 0;
+		transition: width .8s cubic-bezier(.4, 0, .2, 1);
+	}
+
+	/* ---------- Fee breakdown table ---------- */
+	.iv-fee-table {
+		border-collapse: separate;
+		border-spacing: 0;
+		thead th {
+			font-size: 11px; text-transform: uppercase; letter-spacing: .3px; color: var(--bs-secondary-color); font-weight: 600;
+			background: var(--bs-secondary-bg);
+			border-top: 1px solid var(--bs-border-color);
+			border-bottom: 1px solid var(--bs-border-color);
+			padding-top: .65rem; padding-bottom: .65rem;
+			&:first-child { border-left: 1px solid var(--bs-border-color); border-top-left-radius: 11px; }
+			&:last-child { border-right: 1px solid var(--bs-border-color); border-top-right-radius: 11px; }
+		}
+		tbody td { vertical-align: middle; font-size: 13px; color: var(--bs-emphasis-color); border-bottom: 1px solid var(--bs-border-color); }
+		tbody tr { transition: background .14s ease; }
+		tbody tr:hover td { background: color-mix(in srgb, var(--bs-primary) 4%, transparent); }
+		tfoot td { font-weight: 600; border-top: 1px solid var(--bs-border-color); background: var(--bs-secondary-bg); }
+		.iv-fee-cat { font-weight: 600; }
+		.iv-fee-desc { font-size: 11.5px; color: var(--bs-secondary-color); }
+	}
+
+	/* ---------- Timelines (payment + activity) ---------- */
+	.iv-tl { list-style: none; margin: 0; padding: 0; }
+	.iv-tl-step {
+		position: relative;
+		display: flex;
+		gap: .85rem;
+		padding-bottom: 1.15rem;
+		&:last-child { padding-bottom: 0; }
+	}
+	.iv-tl-ic {
+		width: 34px; height: 34px; flex: 0 0 auto; z-index: 1;
+		border-radius: 50%;
+		display: inline-flex; align-items: center; justify-content: center;
+		font-size: 16px;
+		background: var(--bs-secondary-bg);
+		color: var(--bs-secondary-color);
+		border: 2px solid var(--bs-body-bg);
+		box-shadow: 0 0 0 1px var(--bs-border-color);
+	}
+	.iv-tl-step:not(:last-child) .iv-tl-ic::after {
+		content: "";
+		position: absolute;
+		left: 16px;
+		top: 34px;
+		bottom: 0;
+		width: 2px;
+		background: var(--bs-border-color);
+	}
+	.iv-tl-step.is-done .iv-tl-ic { background: var(--bs-success); color: #fff; box-shadow: 0 0 0 1px var(--bs-success); }
+	.iv-tl-step.is-current .iv-tl-ic { background: var(--bs-primary); color: #fff; box-shadow: 0 0 0 1px var(--bs-primary); animation: ivPulse 1.8s ease-in-out infinite; }
+	.iv-tl-step.is-muted { opacity: .55; }
+	.iv-tl-body { padding-top: .1rem; }
+	.iv-tl-title { font-size: 13px; font-weight: 600; color: var(--bs-emphasis-color); }
+	.iv-tl-meta { font-size: 11.5px; color: var(--bs-secondary-color); }
+	@keyframes ivPulse {
+		0%, 100% { box-shadow: 0 0 0 1px var(--bs-primary); }
+		50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--bs-primary) 30%, transparent); }
+	}
+
+	/* ---------- Quick actions ---------- */
+	.iv-qa {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: .65rem .4rem;
+	}
+	.iv-qa-btn {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: .35rem;
+		text-decoration: none;
+		color: var(--bs-secondary-color);
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+		&:hover .iv-qa-ic {
+			color: #fff;
+			border-color: transparent;
+			background: linear-gradient(135deg, var(--bs-primary), color-mix(in srgb, var(--bs-primary) 55%, #7b61ff));
+			transform: translateY(-3px);
+			box-shadow: 0 12px 22px -8px color-mix(in srgb, var(--bs-primary) 70%, transparent);
+		}
+		&:hover .iv-qa-lbl { color: var(--bs-emphasis-color); }
+	}
+	.iv-qa-ic {
+		width: 48px; height: 48px;
+		border-radius: 15px;
+		display: inline-flex; align-items: center; justify-content: center;
+		font-size: 21px;
+		background: var(--bs-secondary-bg);
+		border: 1px solid var(--bs-border-color);
+		color: var(--bs-emphasis-color);
+		transition: border-color .16s ease, color .16s ease, transform .16s ease, box-shadow .16s ease, background .16s ease;
+	}
+	.iv-qa-lbl { font-size: 10.5px; font-weight: 500; text-align: center; line-height: 1.2; transition: color .16s ease; }
+
+	/* ---------- Attachments ---------- */
+	.iv-file {
+		display: flex;
+		align-items: center;
+		gap: .7rem;
+		border: 1px solid var(--bs-border-color);
+		border-radius: 12px;
+		padding: .7rem .8rem;
+		background: var(--bs-body-bg);
+		transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+		&:hover { border-color: color-mix(in srgb, var(--bs-primary) 30%, var(--bs-border-color)); box-shadow: 0 8px 18px rgba(27, 36, 54, .07); transform: translateY(-1px); }
+	}
+	.iv-file-ic {
+		width: 42px; height: 42px; flex: 0 0 auto;
+		border-radius: 10px;
+		display: inline-flex; align-items: center; justify-content: center;
+		font-size: 19px;
+		background: color-mix(in srgb, var(--bs-danger) 12%, transparent);
+		color: var(--bs-danger);
+		&.is-pdf { background: color-mix(in srgb, var(--bs-danger) 12%, transparent); color: var(--bs-danger); }
+		&.is-img { background: color-mix(in srgb, var(--bs-primary) 12%, transparent); color: var(--bs-primary); }
+		&.is-doc { background: color-mix(in srgb, var(--bs-success) 12%, transparent); color: var(--bs-success); }
+	}
+	.iv-file-name { font-size: 12.5px; font-weight: 600; color: var(--bs-emphasis-color); }
+	.iv-file-meta { font-size: 11px; color: var(--bs-secondary-color); }
+
+	/* ---------- Cards: hover lift ---------- */
+	.iv-card {
+		transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+		&:hover {
+			box-shadow: 0 16px 38px -20px rgba(27, 36, 54, .28);
+			border-color: color-mix(in srgb, var(--bs-primary) 18%, var(--bs-border-color));
+		}
+	}
+
+	/* ---------- Skeleton loader ---------- */
+	.skeleton-loader { display: none; }
+	&.is-loading .skeleton-loader { display: block; }
+	&.is-loading .iv-live { display: none; }
+	/* shared primitive from components/_ui-skeleton.scss, workspace tone */
+	.skeleton {
+		border-radius: 8px;
+		background: var(--bs-secondary-bg);
+		&::after { background: linear-gradient(90deg, transparent, color-mix(in srgb, #fff 65%, transparent), transparent); }
+	}
+	.skeleton-line { height: 12px; margin-bottom: .6rem; }
+	.skeleton-block { height: 120px; }
+	.skeleton-btn { height: 40px; width: 110px; display: inline-block; border-radius: 8px; }
+	.skeleton-circle { width: 46px; height: 46px; border-radius: 50%; display: inline-block; }
+
+	/* ---------- Empty state ---------- */
+	.iv-empty {
+		display: none;
+		text-align: center;
+		padding: 3.5rem 1rem;
+	}
+	&.is-empty .iv-empty { display: block; }
+	&.is-empty .iv-live, &.is-empty .skeleton-loader { display: none; }
+	.iv-empty-ic {
+		width: 78px; height: 78px;
+		border-radius: 50%;
+		display: inline-flex; align-items: center; justify-content: center;
+		font-size: 34px;
+		background: var(--bs-secondary-bg);
+		color: var(--bs-secondary-color);
+	}
+
+	/* ---------- Responsive ---------- */
+	@media (max-width: 991.98px) {
+		.iv-detail-sticky { position: static; }
+	}
+	@media (max-width: 575.98px) {
+		.iv-profile-info { grid-template-columns: 1fr; }
+	}
+	.iv-detail-sticky { position: sticky; top: 64px; }
+}
+
+/* ---------- Dark mode ---------- */
+[data-theme="dark"] #invoiceWorkspace,
+[data-layout-mode="dark"] #invoiceWorkspace {
+	.skeleton::after { background: linear-gradient(90deg, transparent, color-mix(in srgb, #fff 12%, transparent), transparent); }
+}

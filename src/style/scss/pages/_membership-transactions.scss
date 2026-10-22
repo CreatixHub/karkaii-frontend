@@ -1,0 +1,258 @@
+/* ============================================================
+   Membership Transactions — Billing & Transaction Management
+   Page-scoped styles for membership-transactions.html (.mt-* / .pay-badge).
+   Relocated here from _parent-portal.scss (migration artifact).
+   ============================================================ */
+:root {
+	--mt-line: #e9edf5;
+	--mt-soft: #f6f7fb;
+	--mt-ink: #1b2559;
+	--mt-mut: var(--bs-secondary-color);
+}
+[data-bs-theme="dark"] {
+	--mt-line: rgba(255,255,255,.09);
+	--mt-soft: rgba(255,255,255,.04);
+	--mt-ink: #e6e9f5;
+	--mt-mut: #9aa3b8;
+}
+
+/* ---------- Financial insights strip (KPI mini widgets) ---------- */
+.mt-kpis {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 14px;
+}
+.mt-kpi {
+	position: relative;
+	background: var(--bs-card-bg, var(--bs-body-bg));
+	border: 1px solid var(--mt-line);
+	border-radius: 14px;
+	padding: 14px 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	overflow: hidden;
+	transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.mt-kpi:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 12px 26px rgba(30, 41, 89, .09);
+	border-color: transparent;
+}
+.mt-kpi-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+.mt-kpi-lbl {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--mt-mut);
+	letter-spacing: .01em;
+}
+.mt-kpi-ic {
+	width: 30px; height: 30px;
+	border-radius: 9px;
+	display: grid; place-items: center;
+	font-size: 16px;
+	flex: none;
+}
+.mt-kpi-val {
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1.1;
+	color: var(--mt-ink);
+	margin: 0;
+}
+.mt-kpi-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	font-size: 11.5px;
+	font-weight: 600;
+}
+.mt-trend { display: inline-flex; align-items: center; gap: 3px; }
+.mt-trend.up { color: #16b364; }
+.mt-trend.down { color: #f04438; }
+.mt-trend.flat { color: var(--mt-mut); }
+.mt-spark { display: flex; align-items: flex-end; gap: 3px; height: 26px; }
+.mt-spark i {
+	width: 5px;
+	border-radius: 3px;
+	background: currentColor;
+	opacity: .28;
+	display: block;
+}
+.mt-spark i.hi { opacity: .9; }
+.mt-kpi-bar {
+	height: 6px;
+	border-radius: 6px;
+	background: var(--mt-soft);
+	overflow: hidden;
+}
+.mt-kpi-bar > span {
+	display: block;
+	height: 100%;
+	border-radius: 6px;
+	background: currentColor;
+}
+.mt-i-primary { color: var(--bs-primary); }
+.mt-i-success { color: #16b364; }
+.mt-i-amber { color: #f79009; }
+.mt-i-rose { color: #f04438; }
+.mt-i-purple { color: #7a5af8; }
+.mt-i-cyan { color: #06aed4; }
+.mt-i-slate { color: #64748b; }
+.mt-kpi-ic.mt-i-primary { background: rgba(61,94,225,.12); }
+.mt-kpi-ic.mt-i-success { background: rgba(22,179,100,.12); }
+.mt-kpi-ic.mt-i-amber { background: rgba(247,144,9,.12); }
+.mt-kpi-ic.mt-i-rose { background: rgba(240,68,56,.12); }
+.mt-kpi-ic.mt-i-purple { background: rgba(122,90,248,.12); }
+.mt-kpi-ic.mt-i-cyan { background: rgba(6,174,212,.12); }
+.mt-kpi-ic.mt-i-slate { background: rgba(100,116,139,.12); }
+.mt-spark-h { height: 6px; } /* keep sparkline heights via classes below */
+
+/* sparkline bar heights (avoids inline styles) */
+.sh-30 { height: 30%; } .sh-40 { height: 40%; } .sh-45 { height: 45%; }
+.sh-50 { height: 50%; } .sh-55 { height: 55%; } .sh-58 { height: 58%; }
+.sh-60 { height: 60%; } .sh-62 { height: 62%; } .sh-65 { height: 65%; }
+.sh-68 { height: 68%; } .sh-70 { height: 70%; } .sh-72 { height: 72%; }
+.sh-75 { height: 75%; } .sh-78 { height: 78%; } .sh-80 { height: 80%; }
+.sh-85 { height: 85%; } .sh-90 { height: 90%; } .sh-100 { height: 100%; }
+
+/* ---------- Subscriber cell ---------- */
+.mt-sub { display: flex; align-items: center; gap: 10px; }
+.mt-sub-av {
+	width: 38px; height: 38px;
+	border-radius: 10px;
+	object-fit: cover;
+	flex: none;
+	border: 1px solid var(--mt-line);
+}
+.mt-sub-name { font-weight: 600; color: var(--mt-ink); display: block; }
+.mt-sub-name:hover { color: var(--bs-primary); }
+.mt-sub-meta { font-size: 11.5px; color: var(--mt-mut); display: block; line-height: 1.5; }
+
+/* ---------- Payment method badges ---------- */
+.pay-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	border-radius: 8px;
+	font-size: 12px;
+	font-weight: 600;
+	background: var(--mt-soft);
+	color: var(--mt-ink);
+	border: 1px solid var(--mt-line);
+	white-space: nowrap;
+}
+.pay-badge i { font-size: 14px; }
+.pay-badge.pm-card { color: var(--bs-primary); }
+.pay-badge.pm-debit { color: #06aed4; }
+.pay-badge.pm-bank { color: #64748b; }
+.pay-badge.pm-upi { color: #7a5af8; }
+.pay-badge.pm-paypal { color: #1546a0; }
+.pay-badge.pm-stripe { color: #635bff; }
+.pay-badge.pm-razorpay { color: #0c6dfd; }
+.pay-badge.pm-cash { color: #16b364; }
+.pay-badge.pm-wallet { color: #f79009; }
+
+.mt-amt { font-weight: 700; color: var(--mt-ink); }
+.mt-tax, .mt-disc { color: var(--mt-mut); font-size: 12.5px; }
+.mt-disc.has { color: #16b364; font-weight: 600; }
+
+/* ---------- Slide-over (offcanvas) transaction details ---------- */
+.mt-drawer { width: 460px; max-width: 92vw; }
+.mt-dh {
+	display: flex; align-items: center; gap: 12px;
+	padding: 18px 20px;
+	border-bottom: 1px solid var(--mt-line);
+}
+.mt-dh-ic {
+	width: 44px; height: 44px; border-radius: 12px;
+	display: grid; place-items: center; font-size: 22px;
+	background: rgba(61,94,225,.12); color: var(--bs-primary); flex: none;
+}
+.mt-dh h5 { margin: 0; font-size: 16px; }
+.mt-dh .mt-dh-sub { font-size: 12.5px; color: var(--mt-mut); }
+.mt-sec { padding: 16px 20px; border-bottom: 1px solid var(--mt-line); }
+.mt-sec-title {
+	font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+	font-weight: 700; color: var(--mt-mut); margin-bottom: 12px;
+	display: flex; align-items: center; gap: 6px;
+}
+.mt-dl { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+.mt-dl .k { font-size: 11.5px; color: var(--mt-mut); display: block; }
+.mt-dl .v { font-size: 13px; font-weight: 600; color: var(--mt-ink); }
+.mt-dl .span-2 { grid-column: 1 / -1; }
+.mt-invoice {
+	background: var(--mt-soft); border: 1px solid var(--mt-line);
+	border-radius: 12px; padding: 14px 16px;
+}
+.mt-invoice .r { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+.mt-invoice .r.total { border-top: 1px dashed var(--mt-line); margin-top: 6px; padding-top: 10px; font-weight: 700; font-size: 15px; }
+
+/* ---------- Vertical timeline ---------- */
+.mt-tl { position: relative; padding-left: 26px; }
+.mt-tl::before {
+	content: ""; position: absolute; left: 9px; top: 4px; bottom: 4px;
+	width: 2px; background: var(--mt-line);
+}
+.mt-tl-item { position: relative; padding-bottom: 16px; }
+.mt-tl-item:last-child { padding-bottom: 0; }
+.mt-tl-dot {
+	position: absolute; left: -26px; top: 1px;
+	width: 20px; height: 20px; border-radius: 50%;
+	display: grid; place-items: center; font-size: 11px; color: var(--bs-body-bg);
+	background: #16b364; box-shadow: 0 0 0 3px rgba(22,179,100,.15);
+}
+.mt-tl-dot.pending { background: var(--mt-mut); box-shadow: 0 0 0 3px rgba(107,114,128,.15); }
+.mt-tl-t { font-weight: 600; font-size: 13px; color: var(--mt-ink); }
+.mt-tl-m { font-size: 11.5px; color: var(--mt-mut); }
+
+/* ---------- Right sidebar / analytics lists ---------- */
+.mt-side-item {
+	display: flex; align-items: center; gap: 10px;
+	padding: 10px 0; border-bottom: 1px solid var(--mt-line);
+}
+.mt-side-item:last-child { border-bottom: 0; }
+.mt-side-ic {
+	width: 34px; height: 34px; border-radius: 9px; flex: none;
+	display: grid; place-items: center; font-size: 16px;
+	background: var(--mt-soft);
+}
+.mt-side-body { flex: 1 1 auto; min-width: 0; }
+.mt-side-t { font-weight: 600; font-size: 13px; color: var(--mt-ink); display: block; }
+.mt-side-t:hover { color: var(--bs-primary); }
+.mt-side-s { font-size: 11.5px; color: var(--mt-mut); }
+.mt-side-amt { font-weight: 700; font-size: 13px; color: var(--mt-ink); white-space: nowrap; }
+
+/* ---------- Analytics rows (revenue by plan / method distribution) ---------- */
+.mt-ana-row { margin-bottom: 14px; }
+.mt-ana-row:last-child { margin-bottom: 0; }
+.mt-ana-top { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
+.mt-ana-top .l { font-weight: 600; color: var(--mt-ink); }
+.mt-ana-top .r { color: var(--mt-mut); font-weight: 600; }
+.mt-ana-bar { height: 8px; border-radius: 6px; background: var(--mt-soft); overflow: hidden; }
+.mt-ana-bar > span { display: block; height: 100%; border-radius: 6px; }
+.mt-w-40 { width: 40%; } .mt-w-55 { width: 55%; } .mt-w-62 { width: 62%; }
+.mt-w-70 { width: 70%; } .mt-w-78 { width: 78%; } .mt-w-85 { width: 85%; } .mt-w-92 { width: 92%; }
+.mt-bg-primary { background: var(--bs-primary); } .mt-bg-success { background: #16b364; }
+.mt-bg-amber { background: #f79009; } .mt-bg-purple { background: #7a5af8; }
+.mt-bg-rose { background: #f04438; } .mt-bg-cyan { background: #06aed4; }
+
+@media (max-width: 1199px) { .mt-kpis { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 575px) { .mt-kpis { grid-template-columns: 1fr; } }
+
+/* Shared bulk-action bar (.bulk-selection) borrows --cls-* vars defined on the
+   classes workspace; provide them on the transactions workspace so its
+   floating pill keeps the dark background and readable text. */
+.data-workspace.mt {
+	--cls-border: var(--bs-border-color, #e9edf4);
+	--cls-heading: var(--bs-heading-color, #202c4b);
+	--cls-inset: var(--bs-tertiary-bg, #f5f6f9);
+	--cls-primary: var(--bs-primary, var(--bs-primary));
+}

@@ -1,0 +1,1021 @@
+@use "sass:color";
+@use "../utils/variables";
+
+/*-----------------
+    Notifications — reusable notification centre components
+
+    A shared vocabulary for notification surfaces anywhere in the product,
+    not styles for one page. Class prefix `ntf-`.
+
+    The language here is an inbox rather than a workspace: date dividers,
+    an unread rail down the left of each row, category chips, priority
+    ribs and a sticky filter bar. Nothing here depends on the AI families
+    in `_ai-insights.scss` and nothing overrides them.
+
+    Contents
+      1.  Tokens
+      2.  Hero
+      3.  Sticky filter toolbar
+      4.  Feed — groups, rows, states
+      5.  Category cards
+      6.  Priority cards
+      7.  Quick actions
+      8.  Timeline
+      9.  Insights + announcements
+      10. Preferences
+      11. Offcanvas + modal + empty state
+-----------------*/
+
+/* ============================================================
+   1. TOKENS
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+	[class*="ntf-"],
+	[class*="ntf-"]::before,
+	[class*="ntf-"]::after {
+		animation: none !important;
+		transition: none !important;
+	}
+}
+
+/* ---- shared small pieces ---------------------------------------------- */
+.ntf-lbl {
+	display: block;
+	font-size: 10.5px;
+	font-weight: 600;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+	color: var(--bs-secondary-color);
+}
+
+/* category chip — a coloured dot and a name */
+.ntf-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 10px;
+	border-radius: 999px;
+	background: var(--bs-secondary-bg);
+	border: 1px solid var(--bs-border-color);
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--bs-emphasis-color);
+	white-space: nowrap;
+
+	&::before {
+		content: "";
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--bs-primary);
+	}
+
+	&.is-academic::before { background: #{variables.$primary}; }
+	&.is-attendance::before { background: #{variables.$info}; }
+	&.is-fees::before { background: #{variables.$success}; }
+	&.is-exams::before { background: #{variables.$purple}; }
+	&.is-library::before { background: #{variables.$teal}; }
+	&.is-transport::before { background: #{variables.$warning}; }
+	&.is-hostel::before { background: #{variables.$secondary}; }
+	&.is-medical::before { background: #{variables.$danger}; }
+	&.is-hr::before { background: #{variables.$pink}; }
+	&.is-security::before { background: #{variables.$dark}; }
+	&.is-system::before { background: #{variables.$text-muted}; }
+
+	/* a plain variant with no dot, for counts and meta */
+	&.is-plain {
+		&::before { display: none; }
+	}
+}
+
+/* priority badge — a small rib rather than a pill */
+.ntf-pri {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .04em;
+	text-transform: uppercase;
+	color: var(--bs-secondary-color);
+
+	&::before {
+		content: "";
+		width: 3px;
+		height: 12px;
+		border-radius: 2px;
+		background: var(--bs-tertiary-bg);
+	}
+
+	&.is-critical { color: #{variables.$danger}; &::before { background: #{variables.$danger}; } }
+	&.is-high { color: #{variables.$warning}; &::before { background: #{variables.$warning}; } }
+	&.is-medium { color: #{variables.$info}; &::before { background: #{variables.$info}; } }
+	&.is-low { color: #{variables.$success}; &::before { background: #{variables.$success}; } }
+}
+
+/* an unread count bubble */
+.ntf-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 22px;
+	height: 22px;
+	padding: 0 7px;
+	border-radius: 999px;
+	background: var(--bs-primary);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+
+	&.is-quiet {
+		background: var(--bs-secondary-bg);
+		border: 1px solid var(--bs-border-color);
+		color: var(--bs-secondary-color);
+	}
+
+	&.is-alert { background: #{variables.$danger}; }
+}
+
+/* ============================================================
+   2. HERO
+   ============================================================ */
+.ntf-hero {
+	position: relative;
+	overflow: hidden;
+	border-radius: var(--radius);
+	background:
+		radial-gradient(70% 130% at 100% 0%, #{variables.$primary-transparent} 0%, transparent 58%),
+		var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	box-shadow: var(--shadow);
+}
+
+/* a stack of faint envelopes in the corner, the only decoration */
+.ntf-hero::after {
+	content: "";
+	position: absolute;
+	right: 34px;
+	top: -30px;
+	width: 150px;
+	height: 150px;
+	border-radius: 26px;
+	border: 1px solid var(--bs-border-color);
+	transform: rotate(24deg);
+	opacity: .5;
+	pointer-events: none;
+}
+
+.ntf-hero-inner {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 26px;
+	padding: 26px 28px;
+
+	@media (max-width: 575.98px) { padding: 22px; }
+}
+
+.ntf-hero-title {
+	margin: 12px 0 8px;
+	font-size: 27px;
+	font-weight: 600;
+	letter-spacing: -.02em;
+	line-height: 1.2;
+	color: var(--bs-emphasis-color);
+
+	@media (max-width: 767.98px) { font-size: 22px; }
+}
+
+/* the readouts sit on one ruled line, no boxes */
+.ntf-hero-rail {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px 30px;
+	margin-top: 18px;
+	padding-top: 16px;
+	border-top: 1px solid var(--bs-border-color);
+}
+
+.ntf-stat {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	line-height: 1.25;
+
+	b {
+		font-size: 19px;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		color: var(--bs-emphasis-color);
+
+		small { font-size: 12px; font-weight: 500; color: var(--bs-secondary-color); }
+	}
+}
+
+/* ============================================================
+   3. STICKY FILTER TOOLBAR
+   ============================================================ */
+.ntf-bar {
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	padding: 14px 16px;
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	box-shadow: var(--shadow);
+
+	@media (max-width: 991.98px) { position: static; }
+}
+
+/* the quick filters read as a segmented row of pills */
+.ntf-quick {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 7px;
+	padding-top: 12px;
+	margin-top: 12px;
+	border-top: 1px solid var(--bs-border-color);
+}
+
+.ntf-tab { 
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding: 6px 13px;
+	border-radius: 999px;
+	background: var(--bs-secondary-bg);
+	border: 1px solid transparent;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--bs-secondary-color);
+	transition: var(--transition); 
+	white-space: nowrap; 
+
+	i { font-size: 14px; }
+
+	&:hover {
+		background: var(--bs-tertiary-bg);
+		color: var(--bs-emphasis-color);
+	}
+
+	&.active {
+		background: var(--tint-primary);
+		border-color: rgba(61, 94, 225, .24);
+		color: var(--bs-primary);
+	}
+}
+
+/* ============================================================
+   4. FEED
+   ============================================================ */
+.ntf-feed {
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	overflow: hidden;
+}
+
+/* a sticky date divider between groups */
+.ntf-group {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 11px 18px;
+	background: var(--bs-secondary-bg);
+	border-bottom: 1px solid var(--bs-border-color);
+
+	+ .ntf-row { border-top: 0; }
+
+	span:first-child {
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+		color: var(--bs-emphasis-color);
+	}
+}
+
+/* a notification row */
+.ntf-row {
+	position: relative;
+	display: grid;
+	grid-template-columns: 46px minmax(0, 1fr) auto;
+	gap: 14px;
+	padding: 16px 18px 16px 22px;
+	border-top: 1px solid var(--bs-border-color);
+	transition: var(--transition);
+
+	&:first-child { border-top: 0; }
+
+	/* the unread rail down the left edge */
+	&::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 3px;
+		background: transparent;
+		transition: var(--transition);
+	}
+
+	&:hover {
+		background: var(--bs-secondary-bg);
+
+		.ntf-row-tools { opacity: 1; transform: translateX(0); }
+	}
+
+	/* unread rows are tinted and carry the rail */
+	&.is-unread {
+		background: var(--tint-primary);
+
+		&::before { background: var(--bs-primary); }
+
+		&:hover { background: #{variables.$primary-100}; }
+
+		.ntf-row-title { font-weight: 600; }
+	}
+
+	&.is-critical::before { background: #{variables.$danger}; }
+
+	/* a pinned row keeps a marker whatever its read state */
+	&.is-pinned::after {
+		content: "\ea5f";
+		position: absolute;
+		left: 8px;
+		top: 18px;
+		font-family: "tabler-icons" !important;
+		font-size: 11px;
+		color: var(--bs-primary);
+	}
+
+	@media (max-width: 767.98px) {
+		grid-template-columns: 40px minmax(0, 1fr);
+		row-gap: 10px;
+	}
+}
+
+/* the avatar column, with a small module glyph pinned to it */
+.ntf-ava {
+	position: relative;
+	width: 46px;
+	height: 46px;
+
+	img, > .avatar {
+		width: 100%;
+		height: 100%;
+		border-radius: 12px;
+		object-fit: cover;
+	}
+
+	@media (max-width: 767.98px) { width: 40px; height: 40px; }
+}
+
+.ntf-ava-badge {
+	position: absolute;
+	right: -5px;
+	bottom: -5px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 21px;
+	height: 21px;
+	border-radius: 50%;
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	box-shadow: var(--shadow);
+	font-size: 11px;
+	color: var(--bs-primary);
+}
+
+/* a glyph-only avatar for system notifications */
+.ntf-ava-sys {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	border-radius: 12px;
+	background: var(--bs-secondary-bg);
+	border: 1px solid var(--bs-border-color);
+	color: var(--bs-primary);
+	font-size: 20px;
+}
+
+.ntf-row-title {
+	margin: 0 0 3px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--bs-emphasis-color);
+
+	b { font-weight: 600; }
+}
+
+.ntf-row-txt {
+	margin: 0 0 8px;
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--bs-secondary-color);
+}
+
+.ntf-row-meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 12px;
+	font-size: 11.5px;
+	color: var(--bs-secondary-color);
+}
+
+/* an attachment pill */
+.ntf-file {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	border-radius: var(--radius-sm);
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	font-size: 11.5px;
+	color: var(--bs-emphasis-color);
+
+	i { font-size: 14px; color: var(--bs-secondary-color); }
+}
+
+/* a quoted preview of the underlying record */
+.ntf-preview {
+	margin: 10px 0 0;
+	padding: 10px 13px;
+	border-radius: var(--radius-sm);
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	border-left: 3px solid var(--bs-tertiary-bg);
+	font-size: 12.5px;
+	line-height: 1.6;
+	color: var(--bs-secondary-color);
+}
+
+/* the right column: time above, tools that appear on hover */
+.ntf-row-side {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 10px;
+	white-space: nowrap;
+
+	@media (max-width: 767.98px) {
+		grid-column: 1 / -1;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+}
+
+.ntf-row-tools {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	opacity: 0;
+	transform: translateX(6px);
+	transition: var(--transition);
+
+	@media (max-width: 991.98px) {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+.ntf-tool {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border-radius: var(--radius-sm);
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	color: var(--bs-secondary-color);
+	font-size: 15px;
+	transition: var(--transition);
+
+	&:hover {
+		background: var(--tint-primary);
+		border-color: var(--bs-primary);
+		color: var(--bs-primary);
+	}
+}
+
+/* the foot of the feed */
+.ntf-feed-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+	padding: 14px 18px;
+	background: var(--bs-secondary-bg);
+	border-top: 1px solid var(--bs-border-color);
+}
+
+/* ============================================================
+   5. CATEGORY CARDS
+   ============================================================ */
+.ntf-cat {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	height: 100%;
+	padding: 16px;
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	transition: var(--transition);
+
+	&:hover {
+		border-color: rgba(61, 94, 225, .3);
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+	}
+}
+
+.ntf-cat-ic {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 12px;
+	background: var(--bs-secondary-bg);
+	border: 1px solid var(--bs-border-color);
+	color: var(--bs-primary);
+	font-size: 19px;
+}
+
+.ntf-cat-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--bs-emphasis-color);
+}
+
+/* ============================================================
+   6. PRIORITY CARDS — a thick rib along the top edge
+   ============================================================ */
+.ntf-prio {
+	position: relative;
+	height: 100%;
+	padding: 20px 18px 18px;
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	overflow: hidden;
+	transition: var(--transition);
+
+	&::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		height: 4px;
+		background: var(--bs-tertiary-bg);
+	}
+
+	&.is-critical::before { background: #{variables.$danger}; }
+	&.is-high::before { background: #{variables.$warning}; }
+	&.is-medium::before { background: #{variables.$info}; }
+	&.is-low::before { background: #{variables.$success}; }
+
+	&:hover { box-shadow: var(--shadow-lift); }
+}
+
+.ntf-prio-fig {
+	display: block;
+	margin: 10px 0 4px;
+	font-size: 30px;
+	font-weight: 700;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -.02em;
+	color: var(--bs-emphasis-color);
+}
+
+.ntf-prio-latest {
+	margin-top: 14px;
+	padding-top: 14px;
+	border-top: 1px dashed var(--bs-border-color);
+}
+
+/* ============================================================
+   7. QUICK ACTIONS
+   ============================================================ */
+.ntf-act {
+	display: flex;
+	align-items: center;
+	gap: 13px;
+	height: 100%;
+	padding: 15px 16px;
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	transition: var(--transition);
+
+	&:hover {
+		border-color: rgba(61, 94, 225, .3);
+		background: var(--tint-primary);
+
+		.ntf-act-ic { background: var(--bs-primary); border-color: var(--bs-primary); color: #fff; }
+	}
+}
+
+.ntf-act-ic {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 11px;
+	background: var(--bs-secondary-bg);
+	border: 1px solid var(--bs-border-color);
+	color: var(--bs-primary);
+	font-size: 17px;
+	transition: var(--transition);
+}
+
+/* ============================================================
+   8. TIMELINE — a horizontal delivery track
+   ============================================================ */
+.ntf-track-flow {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 10px;
+
+	@media (max-width: 991.98px) { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 22px; }
+	@media (max-width: 480px) { grid-template-columns: minmax(0, 1fr); }
+}
+
+.ntf-step {
+	position: relative;
+	padding-top: 40px;
+	text-align: center;
+
+	&::before {
+		content: "";
+		position: absolute;
+		left: calc(50% + 18px);
+		right: calc(-50% + 18px);
+		top: 15px;
+		height: 2px;
+		background: var(--bs-tertiary-bg);
+	}
+
+	&:last-child::before { display: none; }
+	&.is-done::before { background: #{variables.$success}; }
+
+	&::after {
+		content: "";
+		position: absolute;
+		left: 50%;
+		top: 0;
+		transform: translateX(-50%);
+		width: 32px;
+		height: 32px;
+		border-radius: 10px;
+		background: var(--bs-body-bg);
+		border: 2px solid var(--bs-tertiary-bg);
+	}
+
+	&.is-done::after { background: #{variables.$success}; border-color: #{variables.$success}; }
+
+	&.is-now::after {
+		border-color: var(--bs-primary);
+		box-shadow: 0 0 0 4px var(--tint-primary);
+	}
+
+	@media (max-width: 991.98px) {
+		&::before { display: none; }
+	}
+}
+
+.ntf-step-ic {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	transform: translateX(-50%);
+	z-index: 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	font-size: 15px;
+	color: var(--bs-secondary-color);
+
+	.ntf-step.is-done & { color: #fff; }
+	.ntf-step.is-now & { color: var(--bs-primary); }
+}
+
+.ntf-step-title {
+	margin: 0 0 3px;
+	font-size: 13.5px;
+	font-weight: 600;
+	color: var(--bs-emphasis-color);
+}
+
+/* ============================================================
+   9. INSIGHTS + ANNOUNCEMENTS
+   ============================================================ */
+.ntf-note {
+	display: flex;
+	align-items: flex-start;
+	gap: 13px;
+	height: 100%;
+	padding: 16px 18px;
+	border-radius: var(--radius);
+	background: var(--bs-secondary-bg);
+	border: 1px solid transparent;
+	transition: var(--transition);
+
+	&:hover {
+		background: var(--bs-body-bg);
+		border-color: var(--bs-border-color);
+		box-shadow: var(--shadow);
+	}
+}
+
+.ntf-note-ic {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 11px;
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	color: var(--bs-primary);
+	font-size: 17px;
+}
+
+.ntf-note-title {
+	margin: 0 0 3px;
+	font-size: 13.5px;
+	font-weight: 600;
+	color: var(--bs-emphasis-color);
+}
+
+/* announcement cards carry a tinted head strip */
+.ntf-ann {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	overflow: hidden;
+	transition: var(--transition);
+
+	&:hover {
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+	}
+}
+
+.ntf-ann-head {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	padding: 13px 16px;
+	background: var(--tint-primary);
+
+	&.is-warn { background: #{variables.$warning-transparent}; }
+	&.is-alert { background: #{variables.$danger-transparent}; }
+	&.is-good { background: #{variables.$success-transparent}; }
+	&.is-info { background: #{variables.$info-transparent}; }
+}
+
+.ntf-ann-body {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	flex: 1 1 auto;
+	padding: 16px;
+}
+
+.ntf-ann-title {
+	margin: 0;
+	font-size: 14.5px;
+	font-weight: 600;
+	color: var(--bs-emphasis-color);
+}
+
+.ntf-ann-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin-top: auto;
+	padding-top: 12px;
+	border-top: 1px solid var(--bs-border-color);
+}
+
+/* ============================================================
+   10. PREFERENCES
+   ============================================================ */
+.ntf-pref {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	height: 100%;
+	padding: 16px;
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	transition: var(--transition);
+
+	&:hover { box-shadow: var(--shadow); }
+}
+
+.ntf-pref-ic {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 42px;
+	height: 42px;
+	border-radius: 50%;
+	background: var(--bs-secondary-bg);
+	border: 1px solid var(--bs-border-color);
+	color: var(--bs-primary);
+	font-size: 19px;
+}
+
+.ntf-pref-title {
+	margin: 0 0 2px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--bs-emphasis-color);
+}
+
+/* ============================================================
+   11. OFFCANVAS + MODAL + EMPTY STATE
+   ============================================================ */
+.offcanvas.offcanvas-end.ntf-panel {
+	width: 88% !important;
+	max-width: 1400px !important;
+
+	@media (max-width: 991.98px) { width: 100% !important; }
+
+	.offcanvas-body { padding: 22px; }
+}
+
+.ntf-panel-head {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	flex-wrap: wrap;
+	padding: 22px;
+	background:
+		radial-gradient(60% 130% at 100% 0%, #{variables.$primary-transparent} 0%, transparent 60%),
+		var(--bs-body-bg);
+	border-bottom: 1px solid var(--bs-border-color);
+}
+
+.ntf-box {
+	height: 100%;
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	overflow: hidden;
+}
+
+.ntf-box-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 13px 16px;
+	background: var(--bs-secondary-bg);
+	border-bottom: 1px solid var(--bs-border-color);
+
+	h6 {
+		margin: 0;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--bs-emphasis-color);
+	}
+}
+
+.ntf-box-body { padding: 16px; }
+
+.ntf-line {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 9px 0;
+	font-size: 13px;
+	color: var(--bs-emphasis-color);
+
+	+ .ntf-line { border-top: 1px dashed var(--bs-border-color); }
+
+	b { font-weight: 600; }
+}
+
+/* a comment thread inside the panel */
+.ntf-comment {
+	display: flex;
+	gap: 12px;
+	padding: 12px 0;
+
+	+ .ntf-comment { border-top: 1px solid var(--bs-border-color); }
+
+	p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--bs-secondary-color); }
+}
+
+/* an audit line */
+.ntf-audit {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 8px 0;
+	font-size: 12.5px;
+	color: var(--bs-secondary-color);
+
+	+ .ntf-audit { border-top: 1px dotted var(--bs-border-color); }
+
+	time {
+		flex-shrink: 0;
+		width: 96px;
+		font-variant-numeric: tabular-nums;
+	}
+
+	b { font-weight: 600; color: var(--bs-emphasis-color); }
+}
+
+.ntf-modal {
+	.modal-content { border-radius: var(--radius); border: 0; }
+
+	.modal-header {
+		align-items: flex-start;
+		padding: 20px 22px;
+		border-bottom: 1px solid var(--bs-border-color);
+	}
+
+	.modal-body { padding: 22px; }
+
+	.modal-footer { padding: 16px 22px; border-top: 1px solid var(--bs-border-color); }
+}
+
+.ntf-empty {
+	padding: 48px 24px;
+	text-align: center;
+	border-radius: var(--radius);
+	background: var(--bs-secondary-bg);
+	border: 1px dashed var(--bs-border-color);
+}
+
+.ntf-empty-ic {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 60px;
+	height: 60px;
+	margin-bottom: 14px;
+	border-radius: 18px;
+	background: var(--bs-body-bg);
+	border: 1px solid var(--bs-border-color);
+	box-shadow: var(--shadow);
+	color: var(--bs-primary);
+	font-size: 26px;
+}
+
+.ntf-empty-title {
+	margin: 0 0 4px;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--bs-emphasis-color);
+}
+
+
+/*-----------------
+	Dashboard widgets — merged in from the former
+	components/_ui-dashboard-widgets.scss. These are generic, reusable
+	components; they live with their own kind rather than in a page-shaped file.
+-----------------*/
+/* ---------- TOASTS ---------- */
+#tdToasts { position: fixed; top: 76px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
+#tdToasts .toast { min-width: 250px; }

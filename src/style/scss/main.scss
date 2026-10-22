@@ -1,0 +1,234 @@
+/*---------------------------------------------------------------------------------
+
+    Template Name: Karkaii - School Management Admin Dashboard Template
+    Version      : 2.0
+    Template URI: https://preclinic.dreamstechnologies.com/
+    Author: Dreams Technologies
+    Author URI: https://themeforest.net/user/dreamstechnologies
+
+-----------------------------------------------------------------------------------
+
+/*============================
+[Table of CSS]
+
+variables
+switcher
+accordion
+alerts
+badge
+breadcrumb
+buttons
+cards
+dropdown
+forms
+input_group
+list_group
+modals
+navbar
+navs_tabs
+pagination
+popovers
+progress
+tables
+toast
+tooltips
+authentication
+
+1. General
+    variables
+    switcher
+    base
+    Typography
+2. Components
+3. Layout
+4. Plugins
+5. Pages
+
+
+
+
+
+
+1. General
+2. Table
+3. Helper Class
+4. Bootstrap Classes
+5. Header
+6. Sidebar
+7. Content
+8. Login
+9. Dashboard
+10. Activity
+11. Select2
+12. Nav tabs
+13. Holidays
+14. Edit Profile
+15. Chat
+16. Focus Label
+17. Leave
+18. Employee
+19. Events
+20. Profile
+21. Notifications
+22. Roles & Permissions
+23. Chat Right Sidebar
+24. Invoice
+25. Doctors
+26. Add Doctor
+27. Payslip
+28. Attendance
+29. Inbox
+30. Mail View
+31. Blog
+32. Blog View
+33. UI Kit
+34. Error
+35. Lock Screen
+36. Voice call
+37. Video Call
+38. Incoming call
+39. Notification settings
+40. Chat Sidebar
+41. Gallery
+42. Settings
+43. Responsive
+72. Box layout
+73. RTL
+74. Responsive
+
+========================================*/
+
+
+/****** Utils ******/
+@use "utils/design-tokens";
+@use "utils/variables";
+@use "utils/mixins";
+
+/******* Base *******/
+@use "base/base";
+@use "base/background";
+
+/****** Layout ******/
+@use "layout/common";
+@use "layout/content";
+@use "layout/header";
+@use "layout/sidebar";
+@use "layout/notification";
+@use "layout/theme-settings";
+
+/******* Components ******/
+@use "components/avatar";
+@use "components/boostrap";
+@use "components/button";
+@use "components/badge";
+@use "components/border";
+@use "components/calendar";
+@use "components/chart";
+@use "pages/call";
+@use "pages/chat";
+@use "components/dropdown";
+@use "pages/email";
+@use "pages/file-manager";
+@use "components/file-upload";
+@use "components/icons";
+@use "components/progress";
+@use "components/pagination";
+@use "components/font";
+@use "components/typography";
+@use "components/alerts";
+@use "components/popovers";
+@use "components/forms";
+@use "pages/notes";
+@use "pages/todo";
+@use "components/tables";
+@use "components/accordion";
+@use "components/breadcrumb";
+@use "components/cards";
+@use "components/tooltips";
+@use "components/navs-tabs";
+@use "components/ui-pages";
+@use "components/popup";
+@use "components/grid";
+@use "components/sweetalert";
+
+/* index2 shell + widgets — extracted from app-new.css */
+@use "components/data-table";
+@use "pages/routine";
+
+/* dashboard primitives — reusable across every page */
+@use "components/chip";
+@use "components/status-dot";
+@use "components/data-list";
+@use "components/stat";
+@use "components/meter";
+@use "components/gauge";
+@use "components/sparkline";
+@use "components/activity-feed";
+@use "pages/route-map";
+
+/* dashboard components — moved out of app-new.css */
+@use "pages/dashboard-shell";
+@use "pages/dashboard-classcard";
+@use "pages/dashboard-controls";
+@use "pages/dashboard-widgets";
+
+@use "components/widget";
+@use "pages/holiday-calendar";
+@use "pages/expense-workspace";
+@use "pages/category-workspace";
+@use "pages/invoice-view";
+@use "pages/notice-board";
+@use "pages/events-workspace";
+
+/******* Pages ******/
+@use "pages/student";
+@use "pages/student-details";
+@use "pages/events";
+@use "pages/blog";
+@use "pages/dashboard";
+@use "pages/login";
+@use "pages/login-showcase";
+@use "pages/error";
+@use "pages/invoice";
+@use "pages/parent-dashboard";
+@use "pages/student-attendance";
+@use "pages/classes";
+@use "pages/custom-reports";
+@use "pages/roles";
+@use "pages/delete-account";
+@use "pages/membership";
+@use "pages/addons";
+@use "pages/class-timetable";
+@use "pages/curriculum";
+@use "pages/themes";
+
+
+/******* Vendors ******/
+@use "vendors/select2";
+@use "vendors/datatables";
+@use "vendors/rangepicker-plugin";
+@use "vendors/simplebar";
+@use "vendors/dragula";
+@use "vendors/sweetalert2";
+@use "vendors/choices";
+/* PrimeReact skin - last in this block so it wins over the partials above. */
+@use "vendors/primereact";
+
+/******* Migrated from app-new.css (kept last to preserve cascade order) ******/
+@use "components/stats-card";
+@use "components/status-card";
+@use "pages/stat-card-skins";
+@use "components/ui-skeleton";
+@use "components/workspace";
+@use "pages/student-promotion";
+@use "pages/fee-collection";
+@use "pages/parent-portal";
+@use "pages/membership-transactions";
+@use "pages/academic-calendar";
+@use "pages/ai";
+@use "components/notifications";
+@use "pages/settings";
+@use "pages/communications";
+@use "pages/automation";
+@use "pages/alumni";
+@use "components/width-helpers";

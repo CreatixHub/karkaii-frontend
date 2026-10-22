@@ -1,0 +1,1085 @@
+@use "../utils/variables";
+@use "../utils/mixins";
+
+/*-----------------
+	PrimeReact skin
+
+	PrimeReact ships prebuilt themes (lara, saga, ...) but they are light-only
+	and carry their own palette, so none of them is loaded. Only
+	`primereact/resources/primereact.css` -- the structural CSS that positions
+	and animates the overlays -- comes from the package. Everything visual is here.
+
+	The controls must be indistinguishable from `.form-control`
+	(components/_forms.scss): 38px tall, 5px radius, $input-border, 14px text.
+	Dark mode uses the $dark-* ramp rather than the --surface token, because that
+	is what pages/_themes.scss gives `.form-control`; a control skinned from
+	--surface would sit a different shade from the input beside it.
+-----------------*/
+
+$prime-height: 38px;
+$prime-radius: 5px;
+
+/* ===== shared input shell ===== */
+.p-inputtext,
+.p-dropdown,
+.p-multiselect,
+.p-chips .p-chips-multiple-container {
+	background-color: variables.$form-control-bg;
+	border: 1px solid variables.$input-border;
+	@include mixins.rounded($prime-radius);
+	color: variables.$gray-900;
+	font-family: variables.$font-family-primary;
+	font-size: variables.$font-size-14;
+	font-weight: variables.$font-weight-normal;
+	line-height: 1.6;
+	padding: 0.5rem 0.625rem;
+	transition: all 0.5s;
+	width: 100%;
+
+	&:enabled:hover,
+	&:not(.p-disabled):hover {
+		border-color: variables.$input-border;
+	}
+
+	&:enabled:focus,
+	&:not(.p-disabled).p-focus {
+		border-color: variables.$primary;
+		box-shadow: none;
+		outline: 0;
+	}
+
+	&.p-disabled,
+	&:disabled {
+		background-color: variables.$light;
+		color: variables.$text-color;
+		opacity: 1;
+	}
+}
+
+.p-inputtext::placeholder {
+	color: variables.$gray-400;
+}
+
+/* The wrappers PrimeReact puts around an input must not add a second box. */
+.p-calendar,
+.p-inputwrapper {
+	width: 100%;
+}
+
+/* ===== Dropdown (default select) ===== */
+.p-dropdown {
+	align-items: center;
+	display: flex;
+	height: $prime-height;
+	padding: 0 0.625rem;
+
+	.p-dropdown-label.p-inputtext {
+		background: transparent;
+		border: 0;
+		color: variables.$gray-900;
+		font-size: variables.$font-size-14;
+		line-height: 36px;
+		overflow: hidden;
+		padding: 0;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		&.p-placeholder {
+			color: variables.$gray-400;
+		}
+	}
+
+	.p-dropdown-trigger {
+		color: variables.$gray-700;
+		width: 1.25rem;
+
+		svg {
+			height: 13px;
+			width: 13px;
+		}
+	}
+
+	.p-dropdown-clear-icon {
+		color: variables.$gray-500;
+		right: 1.75rem;
+	}
+}
+
+/* The selected value must read as body text, not as a placeholder -- otherwise
+   a chosen option looks like nothing was chosen. `-webkit-text-fill-color` is
+   pinned alongside `color` because it is inherited and, once set anywhere up
+   the tree, paints the text regardless of how specific the `color` rule is. */
+.p-dropdown > .p-dropdown-label.p-inputtext:not(.p-placeholder),
+.p-multiselect > .p-multiselect-label.p-inputtext:not(.p-placeholder) {
+	color: variables.$gray-900;
+	-webkit-text-fill-color: variables.$gray-900;
+}
+
+.p-dropdown > .p-dropdown-label.p-inputtext.p-placeholder,
+.p-multiselect > .p-multiselect-label.p-inputtext.p-placeholder {
+	color: variables.$gray-400;
+	-webkit-text-fill-color: variables.$gray-400;
+}
+
+/* ===== MultiSelect ===== */
+.p-multiselect {
+	align-items: center;
+	display: flex;
+	min-height: $prime-height;
+	padding: 0 0.625rem;
+
+	.p-multiselect-label.p-inputtext {
+		color: variables.$gray-900;
+		font-size: variables.$font-size-14;
+		gap: 4px;
+		padding: 0;
+
+		&.p-placeholder {
+			color: variables.$gray-400;
+			line-height: 36px;
+		}
+	}
+
+	.p-multiselect-trigger {
+		color: variables.$gray-700;
+		width: 1.25rem;
+
+		svg {
+			height: 13px;
+			width: 13px;
+		}
+	}
+
+	/* the selection chips -- the template draws these light, not brand-filled */
+	.p-multiselect-token {
+		background: variables.$light-600;
+		border: 1px solid variables.$input-border;
+		@include mixins.rounded(4px);
+		color: variables.$gray-700;
+		font-size: variables.$font-size-12;
+		margin: 3px 4px 3px 0;
+		padding: 1px 7px;
+
+		.p-multiselect-token-icon {
+			color: variables.$gray-600;
+			height: 11px;
+			margin-left: 5px;
+			width: 11px;
+		}
+	}
+}
+
+/* ===== Chips (tag input) ===== */
+.p-chips {
+	width: 100%;
+
+	.p-chips-multiple-container {
+		align-items: center;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+		max-height: $prime-height;
+		min-height: $prime-height;
+		overflow-y: auto;
+		padding: 0.25rem 0.625rem;
+
+		.p-chips-token {
+			background: variables.$light;
+			@include mixins.rounded($prime-radius);
+			color: variables.$gray-700;
+			font-size: variables.$font-size-14;
+			margin: 0;
+			padding: 0 5px;
+
+			.p-chips-token-icon {
+				color: variables.$gray-900;
+				font-size: 10px;
+				margin-left: 5px;
+			}
+		}
+
+		.p-chips-input-token {
+			margin: 0;
+			padding: 0;
+
+			input {
+				color: variables.$gray-900;
+				font-family: variables.$font-family-primary;
+				font-size: variables.$font-size-14;
+			}
+		}
+	}
+}
+
+/* ===== overlay panels: dropdown, multiselect, calendar ===== */
+.p-dropdown-panel,
+.p-multiselect-panel,
+.p-datepicker:not(.p-datepicker-inline),
+.p-overlaypanel {
+	background: variables.$white;
+	border: 1px solid variables.$input-border;
+	@include mixins.rounded($prime-radius);
+	box-shadow: variables.$box-shadow-sm;
+	color: variables.$gray-900;
+	font-family: variables.$font-family-primary;
+}
+
+.p-dropdown-items,
+.p-multiselect-items {
+	padding: 4px;
+
+	.p-dropdown-item,
+	.p-multiselect-item {
+		@include mixins.rounded(4px);
+		color: variables.$gray-700;
+		font-size: variables.$font-size-14;
+		padding: 6px 10px;
+		transition: all 0.2s;
+
+		&:not(.p-highlight):not(.p-disabled):hover {
+			background: variables.$light-600;
+			color: variables.$gray-900;
+		}
+
+		&.p-highlight {
+			background: variables.$primary;
+			color: variables.$white;
+		}
+
+		&.p-focus:not(.p-highlight) {
+			background: variables.$light-600;
+		}
+	}
+
+	.p-dropdown-item-group,
+	.p-multiselect-item-group {
+		color: variables.$gray-500;
+		font-size: variables.$font-size-12;
+		font-weight: variables.$font-weight-semibold;
+		padding: 8px 10px 4px;
+		text-transform: uppercase;
+	}
+}
+
+.p-dropdown-filter-container,
+.p-multiselect-filter-container {
+	.p-inputtext {
+		height: 34px;
+		padding: 0.35rem 2rem 0.35rem 0.625rem;
+	}
+
+	.p-dropdown-filter-icon,
+	.p-multiselect-filter-icon {
+		color: variables.$gray-500;
+	}
+}
+
+.p-dropdown-header,
+.p-multiselect-header {
+	background: transparent;
+	border-bottom: 1px solid variables.$input-border;
+	padding: 8px;
+}
+
+.p-dropdown-empty-message,
+.p-multiselect-empty-message {
+	color: variables.$gray-500;
+	font-size: variables.$font-size-14;
+	padding: 10px;
+}
+
+/* ===== Calendar / date picker ===== */
+.p-datepicker {
+	padding: 10px;
+
+	table {
+		font-size: variables.$font-size-14;
+		margin: 0;
+
+		th {
+			color: variables.$gray-900;
+			font-weight: variables.$font-weight-medium;
+			padding: 4px;
+
+			> span {
+				height: 32px;
+				width: 32px;
+			}
+		}
+
+		td {
+			padding: 2px;
+
+			> span {
+				@include mixins.rounded(4px);
+				color: variables.$gray-700;
+				font-size: variables.$font-size-14;
+				height: 32px;
+				width: 32px;
+
+				&:not(.p-highlight):not(.p-disabled):hover {
+					background: variables.$light-600;
+				}
+
+				&.p-highlight {
+					background: variables.$primary;
+					color: variables.$white;
+				}
+
+				&:focus {
+					box-shadow: none;
+				}
+			}
+
+			&.p-datepicker-today > span {
+				background: transparent;
+				border: 1px solid variables.$primary;
+				color: variables.$gray-900;
+
+				&.p-highlight {
+					background: variables.$primary;
+					color: variables.$white;
+				}
+			}
+		}
+	}
+
+	.p-datepicker-header {
+		background: transparent;
+		border-bottom: 0;
+		padding: 0 0 8px;
+
+		.p-datepicker-title {
+			line-height: normal;
+
+			.p-datepicker-year,
+			.p-datepicker-month {
+				color: variables.$gray-900;
+				font-size: variables.$font-size-14;
+				font-weight: variables.$font-weight-medium;
+			}
+		}
+
+		/* the template 24px circular nav arrows */
+		.p-datepicker-prev,
+		.p-datepicker-next {
+			border: 1px solid variables.$input-border;
+			@include mixins.rounded(50%);
+			color: variables.$gray-900;
+			height: 24px;
+			padding: 6px;
+			width: 24px;
+
+			svg,
+			.p-icon,
+			.p-datepicker-prev-icon,
+			.p-datepicker-next-icon {
+				color: variables.$gray-900;
+				fill: currentColor;
+			}
+
+			&:enabled:hover {
+				background: variables.$gray-900;
+				border-color: variables.$gray-900;
+				color: variables.$white;
+
+				svg,
+				.p-icon,
+				.p-datepicker-prev-icon,
+				.p-datepicker-next-icon {
+					color: variables.$white;
+				}
+			}
+
+			&:focus {
+				box-shadow: none;
+			}
+		}
+	}
+
+	.p-monthpicker .p-monthpicker-month,
+	.p-yearpicker .p-yearpicker-year {
+		@include mixins.rounded(4px);
+		color: variables.$gray-700;
+		font-size: variables.$font-size-14;
+
+		&.p-highlight {
+			background: variables.$primary;
+			color: variables.$white;
+		}
+	}
+
+	.p-timepicker {
+		border-top: 1px solid variables.$input-border;
+		padding-top: 8px;
+
+		span {
+			color: variables.$gray-900;
+			font-size: variables.$font-size-14;
+		}
+
+		button {
+			color: variables.$gray-700;
+
+			&:enabled:hover {
+				color: variables.$primary;
+			}
+
+			&:focus {
+				box-shadow: none;
+			}
+		}
+	}
+
+	.p-datepicker-buttonbar {
+		border-top: 1px solid variables.$input-border;
+		padding: 8px 0 0;
+
+		.p-button,
+		.p-button.p-button-text,
+		.p-button.p-button-link {
+			background: transparent;
+			border-color: transparent;
+			color: variables.$primary;
+			font-size: variables.$font-size-14;
+			font-weight: variables.$font-weight-medium;
+			padding: 4px 8px;
+			width: auto;
+
+			&:enabled:hover,
+			&:not(:disabled):hover {
+				background: variables.$primary-100;
+				border-color: transparent;
+				color: variables.$primary;
+			}
+
+			&:focus {
+				box-shadow: none;
+			}
+
+			.p-button-label {
+				font-weight: variables.$font-weight-medium;
+			}
+		}
+	}
+
+	/* an inline calendar is a page element, not a popup */
+	&.p-datepicker-inline {
+		border: 0;
+		box-shadow: none;
+		padding: 0;
+		width: 100%;
+	}
+}
+
+/* the preset range control rendered by components/ui/DateRangePicker */
+.custome-range-picker {
+	align-items: center;
+	background: variables.$form-control-bg;
+	border: 1px solid variables.$input-border;
+	@include mixins.rounded($prime-radius);
+	color: variables.$gray-900;
+	cursor: pointer;
+	display: flex;
+	font-size: variables.$font-size-14;
+	height: $prime-height;
+	padding: 0.5rem 0.625rem;
+	width: 100%;
+
+	i {
+		color: variables.$gray-700;
+	}
+
+	input {
+		background: none;
+		border: 0;
+		color: inherit;
+		cursor: pointer;
+		font-family: variables.$font-family-primary;
+		font-size: variables.$font-size-14;
+		min-width: 175px;
+		padding: 0 0 0 10px;
+		width: 100%;
+
+		&:focus {
+			box-shadow: none;
+			outline: 0;
+		}
+	}
+}
+
+.range-picker-panel {
+	padding: 0;
+
+	.p-overlaypanel-content {
+		padding: 6px;
+	}
+
+	&::before,
+	&::after {
+		display: none;
+	}
+
+	.range-picker-presets {
+		list-style: none;
+		margin: 0;
+		min-width: 170px;
+		padding: 0;
+
+		button {
+			background: none;
+			border: 0;
+			@include mixins.rounded(4px);
+			color: variables.$gray-700;
+			display: block;
+			font-size: variables.$font-size-14;
+			padding: 6px 10px;
+			text-align: left;
+			width: 100%;
+
+			&:hover,
+			&.is-active {
+				background: variables.$light-600;
+				color: variables.$gray-900;
+			}
+		}
+	}
+
+	.range-picker-divider {
+		background: variables.$input-border;
+		height: 1px;
+		margin: 4px 0;
+	}
+}
+
+/* ===== Button =====
+	PrimeReact draws real buttons inside the calendar button bar, the overlay
+	panels and the editor. The prebuilt theme used to style them; match the
+	template's `.btn` / `.btn-primary` instead. */
+.p-button {
+	background: variables.$primary;
+	border: 1px solid variables.$primary;
+	@include mixins.rounded($prime-radius);
+	color: variables.$white;
+	font-family: variables.$font-family-primary;
+	font-size: variables.$font-size-14;
+	font-weight: variables.$font-weight-medium;
+	gap: 6px;
+	line-height: 1.6;
+	padding: 0.5rem 0.85rem;
+	transition: all 0.5s;
+
+	&:enabled:hover,
+	&:not(:disabled):hover {
+		background: variables.$primary-hover;
+		border-color: variables.$primary-hover;
+		color: variables.$white;
+	}
+
+	&:focus,
+	&:focus-visible {
+		box-shadow: none;
+		outline: 0;
+	}
+
+	&:disabled,
+	&.p-disabled {
+		opacity: 0.65;
+	}
+
+	.p-button-icon {
+		font-size: variables.$font-size-14;
+	}
+
+	/* text / link buttons - the calendar button bar and panel actions */
+	&.p-button-text,
+	&.p-button-link {
+		background: transparent;
+		border-color: transparent;
+		color: variables.$primary;
+
+		&:enabled:hover,
+		&:not(:disabled):hover {
+			background: variables.$primary-100;
+			border-color: transparent;
+			color: variables.$primary;
+		}
+	}
+
+	&.p-button-outlined {
+		background: transparent;
+		border-color: variables.$input-border;
+		color: variables.$gray-700;
+
+		&:enabled:hover,
+		&:not(:disabled):hover {
+			background: variables.$light-600;
+			border-color: variables.$input-border;
+			color: variables.$gray-900;
+		}
+	}
+
+	&.p-button-secondary {
+		background: variables.$secondary;
+		border-color: variables.$secondary;
+	}
+
+	&.p-button-sm {
+		font-size: variables.$font-size-12;
+		padding: 0.25rem 0.8rem;
+	}
+
+	&.p-button-icon-only {
+		height: $prime-height;
+		padding: 0;
+		width: $prime-height;
+	}
+
+	/* the calendar's own trigger button, when `showIcon` is on */
+	&.p-datepicker-trigger {
+		background: transparent;
+		border: 1px solid variables.$input-border;
+		border-left: 0;
+		border-radius: 0 $prime-radius $prime-radius 0;
+		color: variables.$gray-700;
+		width: 2.5rem;
+
+		&:enabled:hover {
+			background: variables.$light-600;
+			color: variables.$gray-900;
+		}
+	}
+}
+
+/* the small round close/clear buttons PrimeReact puts on panels */
+.p-overlaypanel .p-overlaypanel-close {
+	background: variables.$primary;
+	color: variables.$white;
+
+	&:enabled:hover {
+		background: variables.$primary-hover;
+		color: variables.$white;
+	}
+}
+
+/* ===== Tooltip ===== */
+.p-tooltip {
+	.p-tooltip-text {
+		background: variables.$gray-900;
+		@include mixins.rounded(4px);
+		box-shadow: none;
+		color: variables.$white;
+		font-family: variables.$font-family-primary;
+		font-size: variables.$font-size-12;
+		padding: 5px 10px;
+	}
+
+	&.p-tooltip-top .p-tooltip-arrow {
+		border-top-color: variables.$gray-900;
+	}
+
+	&.p-tooltip-bottom .p-tooltip-arrow {
+		border-bottom-color: variables.$gray-900;
+	}
+
+	&.p-tooltip-left .p-tooltip-arrow {
+		border-left-color: variables.$gray-900;
+	}
+
+	&.p-tooltip-right .p-tooltip-arrow {
+		border-right-color: variables.$gray-900;
+	}
+}
+
+/* ===== Checkbox (used inside MultiSelect panels) ===== */
+.p-checkbox {
+	height: 0.9rem;
+	width: 0.9rem;
+
+	.p-checkbox-box {
+		background: variables.$white;
+		border: 1px solid variables.$input-border;
+		@include mixins.rounded(3px);
+		height: 0.9rem;
+		width: 0.9rem;
+
+		&.p-highlight {
+			background: variables.$primary;
+			border-color: variables.$primary;
+		}
+
+		&:focus,
+		&.p-focus {
+			box-shadow: none;
+		}
+
+		.p-checkbox-icon {
+			font-size: 9px;
+			height: 9px;
+			width: 9px;
+		}
+	}
+}
+
+/* ===== Editor (Quill) -- the prebuilt theme used to style this ===== */
+.p-editor-container {
+	.p-editor-toolbar {
+		background: variables.$light-600;
+		border: 1px solid variables.$input-border;
+		border-radius: $prime-radius $prime-radius 0 0;
+
+		&.ql-snow {
+			border-color: variables.$input-border;
+
+			.ql-stroke {
+				stroke: variables.$gray-700;
+			}
+
+			.ql-fill {
+				fill: variables.$gray-700;
+			}
+
+			.ql-picker .ql-picker-label {
+				color: variables.$gray-700;
+			}
+
+			.ql-picker-options {
+				background: variables.$white;
+				border-color: variables.$input-border;
+			}
+		}
+	}
+
+	.p-editor-content {
+		border: 1px solid variables.$input-border;
+		border-radius: 0 0 $prime-radius $prime-radius;
+		border-top: 0;
+
+		&.ql-snow {
+			border-color: variables.$input-border;
+		}
+
+		.ql-editor {
+			background: variables.$form-control-bg;
+			border-radius: 0 0 $prime-radius $prime-radius;
+			color: variables.$gray-900;
+			font-family: variables.$font-family-primary;
+			font-size: variables.$font-size-14;
+		}
+	}
+}
+
+/*-----------------
+	Dark mode
+
+	One block, keyed to the attribute MainLayout writes on <html>. The overlay
+	panels mount on <body>, which is inside <html>, so they are covered too.
+-----------------*/
+[data-theme="dark"] {
+	.p-inputtext,
+	.p-dropdown,
+	.p-multiselect,
+	.p-chips .p-chips-multiple-container,
+	.custome-range-picker {
+		background-color: variables.$dark-800;
+		border-color: variables.$dark-700;
+		color: variables.$dark-300;
+
+		&:enabled:hover,
+		&:not(.p-disabled):hover {
+			border-color: variables.$dark-700;
+		}
+
+		&.p-disabled,
+		&:disabled {
+			background-color: variables.$dark-700;
+			color: variables.$dark-400;
+		}
+	}
+
+	.p-inputtext::placeholder,
+	.custome-range-picker input::placeholder {
+		color: variables.$dark-300;
+	}
+
+	.custome-range-picker {
+		i,
+		input {
+			color: variables.$dark-300;
+		}
+	}
+
+	.p-dropdown .p-dropdown-label.p-inputtext {
+		color: variables.$dark-100;
+
+		&.p-placeholder {
+			color: variables.$dark-300;
+		}
+	}
+
+	.p-dropdown > .p-dropdown-label.p-inputtext:not(.p-placeholder),
+	.p-multiselect > .p-multiselect-label.p-inputtext:not(.p-placeholder) {
+		color: variables.$dark-100;
+		-webkit-text-fill-color: variables.$dark-100;
+	}
+
+	.p-dropdown > .p-dropdown-label.p-inputtext.p-placeholder,
+	.p-multiselect > .p-multiselect-label.p-inputtext.p-placeholder {
+		color: variables.$dark-300;
+		-webkit-text-fill-color: variables.$dark-300;
+	}
+
+	.p-dropdown .p-dropdown-trigger,
+	.p-multiselect .p-multiselect-trigger {
+		color: variables.$dark-300;
+	}
+
+	.p-multiselect .p-multiselect-label.p-inputtext {
+		color: variables.$dark-100;
+
+		&.p-placeholder {
+			color: variables.$dark-300;
+		}
+	}
+
+	.p-multiselect .p-multiselect-token,
+	.p-chips .p-chips-multiple-container .p-chips-token {
+		background: variables.$dark-700;
+		border-color: variables.$dark-600;
+		color: variables.$dark-100;
+
+		.p-multiselect-token-icon,
+		.p-chips-token-icon {
+			color: variables.$dark-300;
+		}
+	}
+
+	.p-chips .p-chips-multiple-container .p-chips-input-token input {
+		color: variables.$dark-100;
+	}
+
+	.p-dropdown-panel,
+	.p-multiselect-panel,
+	.p-datepicker:not(.p-datepicker-inline),
+	.p-overlaypanel {
+		background: variables.$dark-800;
+		border-color: variables.$dark-700;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+		color: variables.$dark-100;
+	}
+
+	.p-dropdown-items,
+	.p-multiselect-items {
+		.p-dropdown-item,
+		.p-multiselect-item {
+			color: variables.$dark-300;
+
+			&:not(.p-highlight):not(.p-disabled):hover,
+			&.p-focus:not(.p-highlight) {
+				background: variables.$dark-700;
+				color: variables.$dark-100;
+			}
+
+			&.p-highlight {
+				background: variables.$primary;
+				color: variables.$white;
+			}
+		}
+
+		.p-dropdown-item-group,
+		.p-multiselect-item-group {
+			color: variables.$dark-300;
+		}
+	}
+
+	.p-dropdown-header,
+	.p-multiselect-header,
+	.p-datepicker .p-timepicker,
+	.p-datepicker .p-datepicker-buttonbar {
+		border-color: variables.$dark-700;
+	}
+
+	.p-datepicker .p-datepicker-buttonbar {
+		.p-button,
+		.p-button.p-button-text,
+		.p-button.p-button-link {
+			background: transparent;
+			border-color: transparent;
+			color: variables.$dark-100;
+
+			&:enabled:hover,
+			&:not(:disabled):hover {
+				background: variables.$dark-700;
+				border-color: transparent;
+				color: variables.$dark-100;
+			}
+		}
+	}
+
+	.p-datepicker {
+		table {
+			th {
+				color: variables.$dark-100;
+			}
+
+			td > span {
+				color: variables.$dark-300;
+
+				&:not(.p-highlight):not(.p-disabled):hover {
+					background: variables.$dark-700;
+				}
+
+				&.p-disabled {
+					color: rgba(185, 183, 192, 0.3);
+				}
+			}
+
+			td.p-datepicker-today > span {
+				color: variables.$dark-100;
+			}
+		}
+
+		.p-datepicker-header {
+			.p-datepicker-title .p-datepicker-year,
+			.p-datepicker-title .p-datepicker-month {
+				color: variables.$dark-100;
+			}
+
+			.p-datepicker-prev,
+			.p-datepicker-next {
+				background: transparent;
+				border-color: variables.$dark-700;
+				color: variables.$dark-300;
+
+				svg,
+				.p-icon,
+				.p-datepicker-prev-icon,
+				.p-datepicker-next-icon {
+					color: variables.$dark-300;
+					fill: currentColor;
+				}
+
+				&:enabled:hover {
+					background: variables.$dark-700;
+					border-color: variables.$dark-600;
+					color: variables.$dark-100;
+
+					svg,
+					.p-icon,
+					.p-datepicker-prev-icon,
+					.p-datepicker-next-icon {
+						color: variables.$dark-100;
+					}
+				}
+			}
+		}
+
+		.p-monthpicker .p-monthpicker-month,
+		.p-yearpicker .p-yearpicker-year {
+			color: variables.$dark-300;
+
+			&:not(.p-highlight):hover {
+				background: variables.$dark-700;
+			}
+		}
+
+		.p-timepicker span {
+			color: variables.$dark-100;
+		}
+	}
+
+	.range-picker-panel {
+		.range-picker-presets button {
+			color: variables.$dark-300;
+
+			&:hover,
+			&.is-active {
+				background: variables.$dark-700;
+				color: variables.$dark-100;
+			}
+		}
+
+		.range-picker-divider {
+			background: variables.$dark-700;
+		}
+	}
+
+	.p-button {
+		&.p-button-text,
+		&.p-button-link {
+			color: variables.$dark-100;
+
+			&:enabled:hover,
+			&:not(:disabled):hover {
+				background: variables.$dark-700;
+				color: variables.$dark-100;
+			}
+		}
+
+		&.p-button-outlined {
+			border-color: variables.$dark-700;
+			color: variables.$dark-300;
+
+			&:enabled:hover,
+			&:not(:disabled):hover {
+				background: variables.$dark-700;
+				color: variables.$dark-100;
+			}
+		}
+
+		&.p-datepicker-trigger {
+			border-color: variables.$dark-700;
+			color: variables.$dark-300;
+
+			&:enabled:hover {
+				background: variables.$dark-700;
+				color: variables.$dark-100;
+			}
+		}
+	}
+
+	.p-checkbox .p-checkbox-box {
+		background: variables.$dark-700;
+		border-color: variables.$dark-600;
+
+		&.p-highlight {
+			background: variables.$primary;
+			border-color: variables.$primary;
+		}
+	}
+
+	.p-editor-container {
+		.p-editor-toolbar,
+		.p-editor-toolbar.ql-snow {
+			background: variables.$dark-700;
+			border-color: variables.$dark-700;
+
+			.ql-stroke {
+				stroke: variables.$dark-300;
+			}
+
+			.ql-fill {
+				fill: variables.$dark-300;
+			}
+
+			.ql-picker .ql-picker-label {
+				color: variables.$dark-300;
+			}
+
+			.ql-picker-options {
+				background: variables.$dark-800;
+				border-color: variables.$dark-700;
+			}
+		}
+
+		.p-editor-content,
+		.p-editor-content.ql-snow {
+			border-color: variables.$dark-700;
+		}
+
+		.p-editor-content .ql-editor {
+			background: variables.$dark-800;
+			color: variables.$dark-100;
+		}
+	}
+}

@@ -1,0 +1,435 @@
+/* ============================================================
+   STATUS CARD design system — migrated from app-new.css
+   ============================================================ */
+/* ============================================================
+   STATUS CARD — Design System (v2.0)
+   Distinct, premium statistic-card styles per module. Not the
+   dashboard widget style. Light + Dark (data-theme="dark").
+   Usage:  <div class="status-card status-card-students primary"> … </div>
+   Layouts: -students -teachers -fees -exams -library -transport -hostel -hr
+   Accents: primary | success | info | warning | danger | secondary | purple | teal
+   ============================================================ */
+
+/* ---- Accent tokens ---- */
+.status-card.primary {
+   --sc-accent: #3577f1;
+   --sc-accent-rgb: 53, 119, 241;
+}
+
+.status-card.success {
+   --sc-accent: #0ca678;
+   --sc-accent-rgb: 12, 166, 120;
+}
+
+.status-card.info {
+   --sc-accent: #3b7ddd;
+   --sc-accent-rgb: 59, 125, 221;
+}
+
+.status-card.warning {
+   --sc-accent: #f39c12;
+   --sc-accent-rgb: 243, 156, 18;
+}
+
+.status-card.danger {
+   --sc-accent: #e7515a;
+   --sc-accent-rgb: 231, 81, 90;
+}
+
+.status-card.secondary {
+   --sc-accent: #6c757d;
+   --sc-accent-rgb: 108, 117, 125;
+}
+
+.status-card.purple {
+   --sc-accent: #7c3aed;
+   --sc-accent-rgb: 124, 58, 237;
+}
+
+.status-card.teal {
+   --sc-accent: #12b3b3;
+   --sc-accent-rgb: 18, 179, 179;
+}
+
+/* ---- Shared base ---- */
+.status-card {
+   position: relative;
+   background: var(--bs-body-bg);
+   border: 1px solid var(--bs-border-color);
+   border-radius: 16px;
+   padding: 1.15rem 1.25rem;
+   width: 100%;
+   overflow: hidden;
+   transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.status-card:hover {
+   transform: translateY(-4px);
+   box-shadow: 0 .75rem 1.5rem rgba(17, 24, 39, .10);
+}
+
+.status-card .status-card-label {
+   color: var(--bs-secondary-color);
+   font-size: .8125rem;
+   margin: 0;
+}
+
+.status-card .status-card-value {
+   color: var(--bs-body-color);
+   font-size: 1.6rem;
+   font-weight: 700;
+   line-height: 1.1;
+   margin: .15rem 0 0;
+}
+
+.status-card .status-card-icon {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 22px;
+}
+
+.status-card .status-card-trend {
+   display: inline-flex;
+   align-items: center;
+   gap: .2rem;
+   font-size: .6875rem;
+   font-weight: 600;
+   padding: .15rem .45rem;
+   border-radius: 50rem;
+}
+
+.status-card .status-card-trend.up {
+   color: #0ca678;
+   background: rgba(12, 166, 120, .12);
+}
+
+.status-card .status-card-trend.down {
+   color: #e7515a;
+   background: rgba(231, 81, 90, .12);
+}
+
+.status-card .status-card-trend.flat {
+   color: #6c757d;
+   background: rgba(108, 117, 125, .12);
+}
+
+/* ============================================================
+   1. STUDENTS — gradient top band + overlapping circular icon
+   ============================================================ */
+.status-card-students {
+   padding-top: 2.6rem;
+}
+
+.status-card-students::before {
+   content: "";
+   position: absolute;
+   inset: 0 0 auto 0;
+   height: 52px;
+   background: linear-gradient(135deg, var(--bs-primary), rgba(var(--sc-accent-rgb), .6));
+}
+
+.status-card-students .status-card-icon {
+   position: relative;
+   z-index: 2;
+   width: 54px;
+   height: 54px;
+   border-radius: 16px;
+   background: #fff;
+   color: var(--bs-primary);
+   box-shadow: 0 .35rem .75rem rgba(var(--sc-accent-rgb), .35);
+   margin-top: -.4rem;
+   margin-bottom: .5rem;
+}
+
+.status-card-students .status-card-value {
+   font-size: 1.7rem;
+}
+
+.status-card-students .status-card-trend {
+   margin-top: .5rem;
+}
+
+/* ============================================================
+   2. TEACHERS — split card: colored left rail with icon
+   ============================================================ */
+.status-card-teachers {
+   display: flex;
+   align-items: stretch;
+   padding: 0;
+}
+
+.status-card-teachers .status-card-rail {
+   flex: 0 0 66px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 26px;
+   color: #fff;
+   background: linear-gradient(160deg, var(--bs-primary), rgba(var(--sc-accent-rgb), .75));
+}
+
+.status-card-teachers .status-card-body {
+   padding: 1.1rem 1.2rem;
+}
+
+.status-card-teachers .status-card-value {
+   font-size: 1.55rem;
+}
+
+/* ============================================================
+   3. FEES / FINANCE — conic progress ring around the value
+   ============================================================ */
+.status-card-fees {
+   display: flex;
+   align-items: center;
+   gap: 1rem;
+}
+
+.status-card-fees .status-card-ring {
+   flex: 0 0 64px;
+   width: 64px;
+   height: 64px;
+   border-radius: 50%;
+   background: conic-gradient(var(--bs-primary) calc(var(--sc-pct, 70)*1%), rgba(var(--sc-accent-rgb), .15) 0);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+.status-card-fees .status-card-ring::before {
+   content: "";
+   position: absolute;
+   width: 48px;
+   height: 48px;
+   border-radius: 50%;
+   background: var(--bs-body-bg);
+}
+
+.status-card-fees .status-card-ring .status-card-icon {
+   position: relative;
+   z-index: 2;
+   color: var(--bs-primary);
+   font-size: 20px;
+}
+
+.status-card-fees .status-card-value {
+   font-size: 1.5rem;
+}
+
+/* ============================================================
+   4. EXAMS — value + CSS mini bar sparkline
+   ============================================================ */
+.status-card-exams .status-card-top {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+}
+
+.status-card-exams .status-card-icon {
+   width: 44px;
+   height: 44px;
+   border-radius: 12px;
+   background: rgba(var(--sc-accent-rgb), .12);
+   color: var(--bs-primary);
+}
+
+.status-card-exams .status-card-spark {
+   display: flex;
+   align-items: flex-end;
+   gap: 4px;
+   height: 34px;
+   margin-top: .75rem;
+}
+
+.status-card-exams .status-card-spark span {
+   flex: 1;
+   border-radius: 3px 3px 0 0;
+   background: rgba(var(--sc-accent-rgb), .25);
+}
+
+.status-card-exams .status-card-spark span:last-child {
+   background: var(--bs-primary);
+}
+
+/* ============================================================
+   5. LIBRARY — minimalist outlined,
+top-centered soft icon
+   ============================================================ */
+.status-card-library {
+   text-align: center;
+   border: 1.5px solid rgba(var(--sc-accent-rgb), .25);
+   box-shadow: none;
+}
+
+.status-card-library:hover {
+   border-color: var(--bs-primary);
+}
+
+.status-card-library .status-card-icon {
+   width: 52px;
+   height: 52px;
+   border-radius: 50%;
+   background: rgba(var(--sc-accent-rgb), .1);
+   color: var(--bs-primary);
+   margin: 0 auto .6rem;
+}
+
+.status-card-library .status-card-value {
+   font-size: 1.6rem;
+}
+
+/* ============================================================
+   6. TRANSPORT — diagonal corner accent + icon badge
+   ============================================================ */
+.status-card-transport::after {
+   content: "";
+   position: absolute;
+   top: -30px;
+   right: -30px;
+   width: 90px;
+   height: 90px;
+   border-radius: 20px;
+   transform: rotate(45deg);
+   background: linear-gradient(135deg, var(--bs-primary), rgba(var(--sc-accent-rgb), .5));
+   opacity: .14;
+}
+
+.status-card-transport .status-card-icon {
+   width: 46px;
+   height: 46px;
+   border-radius: 12px;
+   background: var(--bs-primary);
+   color: #fff;
+   margin-bottom: .6rem;
+   box-shadow: 0 .35rem .75rem rgba(var(--sc-accent-rgb), .3);
+}
+
+.status-card-transport .status-card-value {
+   font-size: 1.6rem;
+}
+
+/* ============================================================
+   7. HOSTEL — dotted pattern + soft glass panel
+   ============================================================ */
+.status-card-hostel {
+   background-image: radial-gradient(rgba(var(--sc-accent-rgb), .14) 1.4px, transparent 1.4px);
+   background-size: 14px 14px;
+}
+
+.status-card-hostel .status-card-inner {
+   position: relative;
+   z-index: 2;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+}
+
+.status-card-hostel .status-card-icon {
+   width: 48px;
+   height: 48px;
+   border-radius: 14px;
+   background: rgba(var(--sc-accent-rgb), .15);
+   color: var(--bs-primary);
+   backdrop-filter: blur(2px);
+}
+
+.status-card-hostel .status-card-value {
+   font-size: 1.55rem;
+}
+
+/* ============================================================
+   8. HR / STAFF — inline icon + value,
+animated bottom underline
+   ============================================================ */
+.status-card-hr {
+   display: flex;
+   align-items: center;
+   gap: .9rem;
+}
+
+.status-card-hr .status-card-icon {
+   width: 48px;
+   height: 48px;
+   border-radius: 12px;
+   background: rgba(var(--sc-accent-rgb), .12);
+   color: var(--bs-primary);
+   flex-shrink: 0;
+}
+
+.status-card-hr .status-card-value {
+   font-size: 1.5rem;
+}
+
+.status-card-hr::after {
+   content: "";
+   position: absolute;
+   left: 0;
+   bottom: 0;
+   height: 3px;
+   width: 0;
+   background: var(--bs-primary);
+   transition: width .3s ease;
+}
+
+.status-card-hr:hover::after {
+   width: 100%;
+}
+
+/* ============================================================
+   DARK MODE  (html[data-theme="dark"])
+   ============================================================ */
+[data-theme="dark"] .status-card {
+   background: #1a2233;
+   color: #e9edf5;
+   border-color: rgba(255, 255, 255, .08);
+}
+
+[data-theme="dark"] .status-card .status-card-label {
+   color: #8a94a6;
+}
+
+[data-theme="dark"] .status-card .status-card-value {
+   color: #e9edf5;
+}
+
+[data-theme="dark"] .status-card:hover {
+   box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .4);
+}
+
+[data-theme="dark"] .status-card-students .status-card-icon {
+   background: #1a2233;
+}
+
+[data-theme="dark"] .status-card-library {
+   border-color: rgba(var(--sc-accent-rgb), .35);
+}
+
+/* ============================================================
+   RTL
+   ============================================================ */
+[dir="rtl"] .status-card-transport::after {
+   right: auto;
+   left: -30px;
+}
+
+[dir="rtl"] .status-card-hr::after {
+   left: auto;
+   right: 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:575.98px) {
+   .status-card {
+      padding: 1rem;
+   }
+
+   .status-card .status-card-value,
+   .status-card-students .status-card-value,
+   .status-card-transport .status-card-value,
+   .status-card-library .status-card-value {
+      font-size: 1.4rem;
+   }
+}

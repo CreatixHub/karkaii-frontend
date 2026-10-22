@@ -1,0 +1,72 @@
+/* ============================================================
+   PAGE-SCOPED STAT-CARD SKINS (body.sc-skin-*) — migrated from app-new.css
+   ============================================================ */
+/* PAGE-SCOPED SKINS — give each module a distinct identity by
+   restyling the shared .stat-card markup. Add one class to <body>.
+   Accent color still comes from .stat-primary/.stat-success/etc.
+   ============================================================ */
+
+/* base tweak for all skinned pages */
+[class*="sc-skin-"] .stat-card { border-radius:16px; }
+
+/* STUDENTS — full-width top gradient accent + circular gradient icon */
+body.sc-skin-students .stat-card::before { inset:0 0 auto 0 !important; width:100% !important; height:4px !important; border-radius:16px 16px 0 0 !important; opacity:1 !important; }
+body.sc-skin-students .stat-card::after { opacity:.05 !important; }
+body.sc-skin-students .stat-card .stat-icon { border-radius:50% !important; }
+body.sc-skin-students .stat-card { padding-top:.35rem; }
+
+/* TEACHERS / DASHBOARDS — thick left rail + squared icon */
+body.sc-skin-teachers .stat-card::before { width:6px !important; border-radius:16px 0 0 16px !important; opacity:1 !important; }
+body.sc-skin-teachers .stat-card::after { display:none !important; }
+body.sc-skin-teachers .stat-card .stat-icon { border-radius:12px !important; }
+body.sc-skin-teachers .stat-card .card-body { padding-left:1.4rem; }
+
+/* FEES — ring-style icon (bordered),
+no side strip */
+body.sc-skin-fees .stat-card::before { display:none !important; }
+body.sc-skin-fees .stat-card::after { opacity:.05 !important; }
+body.sc-skin-fees .stat-card .stat-icon { background:transparent !important; border:3px solid; border-radius:50% !important; }
+
+/* EXAMS / ACADEMICS — bottom accent bar + squared icon */
+body.sc-skin-exams .stat-card::before { inset:auto 0 0 0 !important; top:auto !important; width:100% !important; height:4px !important; border-radius:0 0 16px 16px !important; opacity:1 !important; }
+body.sc-skin-exams .stat-card::after { display:none !important; }
+body.sc-skin-exams .stat-card .stat-icon { border-radius:12px !important; }
+
+/* ACADEMICS — dashed outline + top-left accent dot */
+body.sc-skin-academics .stat-card { border:1.5px dashed rgba(0,0,0,.12) !important; }
+body.sc-skin-academics .stat-card::before { inset:14px auto auto 14px !important; width:10px !important; height:10px !important; border-radius:50% !important; opacity:1 !important; }
+body.sc-skin-academics .stat-card::after { display:none !important; }
+body.sc-skin-academics .stat-card .stat-icon { border-radius:12px !important; }
+[data-theme="dark"] body.sc-skin-academics .stat-card { border-color:rgba(255,255,255,.14) !important; }
+
+/* TRANSPORT / OPS — diagonal corner accent + solid icon */
+body.sc-skin-transport .stat-card::before { display:none !important; }
+body.sc-skin-transport .stat-card::after { top:-30px !important; right:-30px !important; left:auto !important; width:90px !important; height:90px !important; border-radius:20px !important; transform:rotate(45deg); opacity:.16 !important; }
+body.sc-skin-transport .stat-card .stat-icon { color:#fff !important; }
+body.sc-skin-transport .stat-card.stat-primary .stat-icon { background:var(--bs-primary) !important; }
+body.sc-skin-transport .stat-card.stat-success .stat-icon { background:var(--bs-success) !important; }
+body.sc-skin-transport .stat-card.stat-info .stat-icon { background:var(--bs-info) !important; }
+body.sc-skin-transport .stat-card.stat-warning .stat-icon { background:var(--bs-warning) !important; }
+body.sc-skin-transport .stat-card.stat-danger .stat-icon { background:var(--bs-danger) !important; }
+body.sc-skin-transport .stat-card.stat-secondary .stat-icon { background:var(--bs-secondary) !important; }
+
+/* HOSTEL / HEALTH — dotted pattern background */
+body.sc-skin-hostel .stat-card::before { display:none !important; }
+body.sc-skin-hostel .stat-card::after { display:none !important; }
+body.sc-skin-hostel .stat-card { background-image:radial-gradient(rgba(0,0,0,.06) 1.4px, transparent 1.4px); background-size:14px 14px; }
+[data-theme="dark"] body.sc-skin-hostel .stat-card { background-image:radial-gradient(rgba(255,255,255,.06) 1.4px, transparent 1.4px); }
+body.sc-skin-hostel .stat-card .stat-icon { border-radius:14px !important; }
+
+/* HR / GOVERNANCE — animated bottom underline on hover */
+body.sc-skin-hr .stat-card::before { inset:auto 0 0 0 !important; top:auto !important; width:0 !important; height:3px !important; border-radius:0 !important; opacity:1 !important; transition:width .3s ease; }
+body.sc-skin-hr .stat-card:hover::before { width:100% !important; }
+body.sc-skin-hr .stat-card::after { display:none !important; }
+body.sc-skin-hr .stat-card .stat-icon { border-radius:12px !important; }
+
+/* AI — soft glow gradient border + circular icon */
+body.sc-skin-ai .stat-card { border:1px solid rgba(53,119,241,.18) !important; box-shadow:0 0 0 1px rgba(53,119,241,.04) inset; }
+body.sc-skin-ai .stat-card::before { inset:0 !important; width:auto !important; height:auto !important; border-radius:16px !important; background:linear-gradient(135deg, rgba(124,58,237,.08), rgba(53,119,241,.02)) !important; opacity:1 !important; z-index:0; }
+body.sc-skin-ai .stat-card::after { display:none !important; }
+body.sc-skin-ai .stat-card .card-body { position:relative; z-index:1; }
+body.sc-skin-ai .stat-card .stat-icon { border-radius:50% !important; }
+[data-theme="dark"] body.sc-skin-ai .stat-card { border-color:rgba(124,58,237,.3) !important; }

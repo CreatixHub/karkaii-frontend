@@ -1,0 +1,588 @@
+@use "../utils/variables";
+
+/*-----------------
+    Stat
+
+    The figure-and-caption pairing that every dashboard repeats: a large value,
+    a muted label, and an optional delta showing which way it moved.
+
+        <div class="stat">
+            <span class="stat-caption">Enrolment</span>
+            <div class="stat-value">1,248</div>
+            <span class="stat-label">Active students</span>
+            <span class="stat-delta stat-delta-up"><i class="ti ti-arrow-up"></i>3%</span>
+        </div>
+
+    The pieces are independent — use `.stat-caption` on its own as a section
+    eyebrow, or `.stat-delta` beside any number.
+-----------------*/
+
+/*----- uppercase micro-caption, above a value or as a section eyebrow -----*/
+.stat-caption {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: variables.$font-weight-bold;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: variables.$gray-600;
+}
+
+/*----- the figure itself -----*/
+.stat-value {
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: variables.$gray-900;
+
+    &.stat-value-sm {
+        font-size: 1.5rem;
+    }
+
+    &.stat-value-xs {
+        font-size: 1.125rem;
+    }
+
+    // a unit or qualifier sitting inside the figure — "86 issues", "5.3 h".
+    // Sized in em so it stays in proportion at every step of the scale
+    // instead of inheriting the figure's weight and size.
+    >span,
+    >small {
+        font-size: 0.6em;
+        font-weight: variables.$font-weight-medium;
+        letter-spacing: 0;
+        color: variables.$gray-600;
+    }
+}
+
+/*----- muted caption under or beside the figure -----*/
+.stat-label {
+    font-size: 0.8rem;
+    color: variables.$gray-600;
+
+    &.stat-label-sm {
+        font-size: 0.74rem;
+    }
+}
+
+/*----- direction of travel -----*/
+.stat-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    font-size: 0.76rem;
+    font-weight: variables.$font-weight-bold;
+    line-height: 1.3;
+
+    &.stat-delta-sm {
+        font-size: 0.72rem;
+    }
+
+    &.stat-delta-up {
+        color: variables.$success;
+    }
+
+    &.stat-delta-down {
+        color: variables.$danger;
+    }
+
+    &.stat-delta-flat {
+        color: variables.$gray-500;
+    }
+}
+
+/*-----------------
+    Stat tile
+
+    A bordered box holding one stat, used in KPI strips. It lifts on hover so
+    it reads as a target when the whole tile is clickable.
+-----------------*/
+.stat-tile {
+    border: 1px solid variables.$border-color;
+    border-radius: variables.$border-radius-xxl;
+    padding: 0.7rem 0.8rem;
+    height: 100%;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+
+    // the lift follows the tile's own accent, so a coloured tile does not
+    // flash blue when it is pointed at
+    &.stat-tile-hover:hover {
+        transform: translateY(-2px);
+        border-color: var(--avatar-accent, #{variables.$primary});
+    }
+
+    /*----- compact, centred variant for three-up stat grids -----*/
+    &.stat-tile-plain {
+        text-align: center;
+        background: variables.$light;
+        border: 0;
+        border-radius: variables.$border-radius-lg;
+        padding: 0.6rem 0.5rem;
+    }
+
+    /*----- sits on a coloured or photographic panel -----*/
+    &.stat-tile-on-media {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(4px);
+        padding: 0.4rem 0.55rem;
+        color: variables.$white;
+    }
+
+    /*----- accent rule down the leading edge -----*/
+    &.stat-tile-accent {
+        position: relative;
+        overflow: hidden;
+
+        &::before {
+            content: "";
+            position: absolute;
+            inset-inline-start: 0;
+            inset-block: 0;
+            width: 3px;
+            background: var(--avatar-accent, #{variables.$primary});
+        }
+    }
+}
+
+/*-----------------
+    Stat grid — evenly divided columns of stats inside one card
+-----------------*/
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--stat-grid-columns, 3), 1fr);
+    gap: 0.4rem;
+}
+
+
+/*-----------------
+	Dashboard widgets — merged in from the former
+	components/_ui-dashboard-widgets.scss. These are generic, reusable
+	components; they live with their own kind rather than in a page-shaped file.
+-----------------*/
+/* ---------- KPI ---------- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+
+.stats-grid.stats-grid-compact {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.card-stat {
+    padding: 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    transition: transform var(--transition-card), box-shadow var(--transition-card);
+}
+
+.card-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card-lift);
+}
+
+.card-stat-header {
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.card-stat-delta {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    gap: 2px;
+}
+
+.card-stat-delta.up {
+    color: var(--tone-success);
+    background: var(--tone-success-soft);
+}
+
+.card-stat-delta.down {
+    color: var(--tone-danger);
+    background: var(--tone-danger-soft);
+}
+
+.card-stat-delta.flat {
+    color: var(--muted);
+    background: var(--surface-soft);
+}
+
+.card-stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--heading);
+    line-height: 1;
+}
+
+.card-stat-value small {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.card-stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+}
+
+/* ---------- MY CLASSES ---------- */
+.class-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.award-icon i {
+    color: #fff;
+
+}
+
+/* ---------- ACHIEVEMENTS ---------- */
+.award-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.award-item {
+    padding: 14px 8px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-list);
+    background: var(--surface);
+    transition: transform var(--transition-card);
+}
+
+.award-item:hover {
+    transform: translateY(-3px);
+}
+
+// the award tile is the visual anchor of the achievements grid, so its glyph
+// runs proportionally larger than the list/timeline tiles (~60% vs ~48%)
+.award-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    margin: 0 auto 8px;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    i {
+        font-size: 22px !important; 
+    }
+}
+
+.award-item b {
+    display: block;
+    font-size: 12px;
+    color: var(--heading);
+}
+
+.award-item span {
+    font-size: 10px;
+    color: var(--muted);
+}
+
+@media (max-width: 1199px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .class-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .class-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .award-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 575px) {
+
+    .stats-grid,
+    .card-profile-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- METRIC TILES ---------- */
+/* small figure + caption block; the left rail takes a border-* utility */
+.metric-tile {
+    padding: 14px;
+    border: 1px solid var(--border-soft);
+    border-left-width: 3px;
+    border-radius: var(--radius-list);
+    background: var(--surface);
+    transition: transform var(--transition-card), box-shadow var(--transition-card);
+}
+
+.metric-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+}
+
+.metric-tile-value {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -.4px;
+    color: var(--heading);
+    margin: 8px 0 2px;
+}
+
+.metric-tile-value small {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+.metric-tile-label {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.metric-tile-sm {
+    padding: 9px;
+}
+
+.metric-tile-sm .metric-tile-value {
+    font-size: 17px;
+    margin: 4px 0 1px;
+}
+
+.metric-tile-md {
+    padding: 11px;
+}
+
+.metric-tile-md .metric-tile-value {
+    font-size: 19px;
+    margin: 6px 0 2px;
+}
+
+/* ---------- COUNTDOWN STRIP ---------- */
+.countdown-strip {
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-soft);
+    border-left-width: 3px;
+    border-radius: var(--radius-list);
+    background: var(--surface);
+}
+
+.countdown-strip .ic {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 19px;
+}
+
+.countdown-strip .tx {
+    min-width: 0;
+    flex: 1;
+}
+
+.countdown-strip .tx b {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--heading);
+    line-height: 1.2;
+}
+
+.countdown-strip .tx span {
+    font-size: 10.5px;
+    color: var(--muted);
+}
+
+.countdown-strip .num {
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.countdown-strip .num b {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1;
+}
+
+.countdown-strip .num span {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+}
+
+.fact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.fact-tile {
+    padding: 9px 10px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-left-width: 3px;
+}
+
+.fact-tile b {
+    display: block;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: var(--heading);
+    line-height: 1.1;
+}
+
+.fact-tile b small {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+.fact-tile span {
+    font-size: 10px;
+    color: var(--muted);
+}
+
+/* ---------- SUMMARY CELLS ---------- */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.summary-cell {
+    padding: 8px 10px;
+    border-radius: 9px;
+    border: 1px solid var(--border-soft);
+    border-left-width: 3px;
+    background: var(--surface);
+}
+
+.summary-cell .k {
+    display: block;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+}
+
+.summary-cell b {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--heading);
+    white-space: nowrap;
+}
+
+/* ---------- GOAL RINGS ---------- */
+.goal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.goal-item {
+    padding: 14px 8px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    background: var(--surface);
+    transition: transform var(--transition-card), box-shadow var(--transition-card);
+}
+
+.goal-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card);
+}
+
+.goal-item .progress-ring {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 8px;
+}
+
+.goal-item .progress-ring-hole {
+    width: 60px;
+    height: 60px;
+}
+
+.goal-item .progress-ring-hole b {
+    font-size: 15px;
+}
+
+.goal-item b {
+    display: block;
+    font-size: 12.5px;
+    color: var(--heading);
+}
+
+.goal-item span {
+    font-size: 10.5px;
+    color: var(--muted);
+}
+
+/* ---------- STREAK CHIPS ---------- */
+.streak-list {
+    gap: 5px;
+}
+
+.streak-list span {
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    background: var(--surface-soft);
+    color: var(--muted);
+}
+
+.amount-value {
+    font-size: 16px;
+    color: var(--heading);
+}
+
+@media (max-width: 1399px) {
+    .summary-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .fact-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .goal-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .fact-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}

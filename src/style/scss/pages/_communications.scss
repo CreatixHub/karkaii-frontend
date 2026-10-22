@@ -1,0 +1,3001 @@
+@use "sass:color";
+@use "../utils/variables";
+
+/*-----------------
+	Communications — announcement workspace components
+
+	A shared vocabulary for the Announcements & Communication Center: the
+	announcements themselves, who they go to, the channels that carry them,
+	what is queued to go out, and the templates they are written from.
+	Class prefix `cmx-`.
+
+	The visual language is a publishing desk. An announcement is treated as
+	a piece with a cover, a priority rail down its left edge, and a
+	delivery footer stating which channels carried it and how far it got.
+	Audience and channel cards are read as delivery instruments — a
+	recipient count with a read-rate bar underneath — not as dashboard
+	tiles.
+
+	Contents
+	  1. Tokens + shared pieces
+	  2. Announcement cards
+	  3. Audience cards
+	  4. Template cards
+	  5. Schedule cards
+	  6. Channel cards
+	  7. Offcanvas workspace + modals
+	  8. Broadcast scheduler
+	  9. SMS communication center
+	  10. WhatsApp communication center
+	  11. Notification & parent communication center
+-----------------*/
+
+/* ============================================================
+   1. TOKENS + SHARED PIECES
+   ============================================================ */
+:root {
+
+	/* A deep editorial indigo-blue, distinct from the plain brand blue so
+	   the communication desk reads as its own surface. */
+	--message-accent: #{color.mix(variables.$primary, variables.$dark, 72%)};
+	--message-accent-line: #{color.mix(variables.$primary, #ffffff, 30%)};
+	--message-urgent: #{variables.$danger};
+	--message-urgent-soft: #{variables.$danger-transparent};
+	--message-high: #{variables.$warning};
+	--message-high-soft: #{variables.$warning-transparent};
+	--message-normal: #{variables.$info};
+	--message-normal-soft: #{variables.$info-transparent};
+	--message-live: #{variables.$success};
+	--message-live-soft: #{variables.$success-transparent};
+	--message-draft: #{variables.$purple};
+	--message-draft-soft: #{color.mix(variables.$purple, #ffffff, 10%)};
+}
+
+[data-theme="dark"],
+[data-bs-theme="dark"],
+html.darkmode {
+	--message-accent-line: rgba(61, 94, 225, .38);
+	--message-urgent-soft: rgba(234, 84, 85, 0.18);
+	--message-high-soft: rgba(255, 159, 67, 0.18);
+	--message-normal-soft: rgba(0, 207, 232, 0.18);
+	--message-live-soft: rgba(40, 199, 111, 0.18);
+	--message-draft-soft: rgba(115, 103, 240, 0.18);
+
+	.message-status-badge.is-high {
+		color: var(--message-high);
+	}
+}
+
+.message-metric-label {
+	display: block;
+	font-size: 11px;
+	font-weight: variables.$font-weight-semibold;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+	color: var(--bs-secondary-color);
+	margin-bottom: 4px;
+}
+
+/* Section heading shared by every block on the page. */
+.message-section-header {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 14px;
+	flex-wrap: wrap;
+	margin-bottom: 16px;
+
+	h2 {
+		font-size: 20px;
+		font-weight: variables.$font-weight-bold;
+		color: var(--bs-emphasis-color);
+		margin-bottom: 3px;
+	}
+
+	p {
+		font-size: 13px;
+		color: var(--bs-secondary-color);
+		margin-bottom: 0;
+		max-width: 74ch;
+	}
+}
+
+/* Status / meta badge. */
+.message-status-badge {
+	/* geometry, typography and surface come from the shared badge component */
+	i {
+		font-size: 12px;
+	}
+
+	&.is-live {
+		background: var(--message-live-soft);
+		color: var(--message-live);
+		border-color: transparent;
+	}
+
+	&.is-draft {
+		background: var(--message-draft-soft);
+		color: var(--message-draft);
+		border-color: transparent;
+	}
+
+	&.is-scheduled {
+		background: var(--message-normal-soft);
+		color: var(--message-normal);
+		border-color: transparent;
+	}
+
+	&.is-urgent {
+		background: var(--message-urgent-soft);
+		color: var(--message-urgent);
+		border-color: transparent;
+	}
+
+	&.is-high {
+		background: var(--message-high-soft);
+		color: #{color.adjust(variables.$warning, $lightness: -12%)};
+		border-color: transparent;
+	}
+
+	&.is-accent {
+		background: var(--tint-primary);
+		color: var(--bs-primary);
+		border-color: transparent;
+	}
+
+	&.is-expired {
+		border-style: dashed;
+	}
+}
+
+/* Category tag — the subject of the announcement, always plain. */
+.category {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 11px;
+	font-weight: variables.$font-weight-semibold;
+	letter-spacing: .05em;
+	text-transform: uppercase;
+	color: var(--bs-primary);
+
+	&::before {
+		content: "";
+		width: 6px;
+		height: 6px;
+		border-radius: 2px;
+		background: currentcolor;
+	}
+}
+
+/* Channel pip — a channel this piece was carried on. */
+.pip {
+	width: 24px;
+	height: 24px;
+	border-radius: 7px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 13px;
+	background: var(--bs-secondary-bg);
+	color: var(--bs-secondary-color);
+	border: 1px solid var(--bs-border-color);
+
+	&.is-on {
+		background: var(--tint-primary);
+		color: var(--bs-primary);
+		border-color: transparent;
+	}
+
+	&.is-off {
+		opacity: .45;
+	}
+}
+
+.pips {
+	display: inline-flex;
+	gap: 4px;
+}
+
+/* Read-rate bar, used on announcement, audience and channel cards. */
+.rate {
+	height: 5px;
+	border-radius: 999px;
+	background: var(--track);
+	overflow: hidden;
+
+	span {
+		display: block;
+		height: 100%;
+		border-radius: 999px;
+		background: var(--bs-primary);
+	}
+
+	&.is-live span {
+		background: var(--message-live);
+	}
+
+	&.is-warn span {
+		background: var(--message-high);
+	}
+}
+
+
+/* Small key/value line reused inside card bodies. */
+.info-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 9px 0;
+	border-bottom: 1px dashed var(--bs-border-color);
+
+	&:last-child {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	&:first-child {
+		padding-top: 0;
+	}
+
+	.row-key {
+		flex: 1 1 auto;
+		font-size: 13px;
+		font-weight: variables.$font-weight-medium;
+		color: var(--bs-emphasis-color);
+
+		small {
+			display: block;
+			font-size: 11.5px;
+			font-weight: variables.$font-weight-normal;
+			color: var(--bs-secondary-color);
+			margin-top: 1px;
+		}
+	}
+
+	.row-value {
+		flex: 0 0 auto;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		color: var(--bs-emphasis-color);
+	}
+}
+
+/* ============================================================
+   2. ANNOUNCEMENT CARDS
+   ============================================================ */
+.message-post {
+	position: relative;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+	}
+
+	/* Priority rail — the one piece of colour on an otherwise calm card. */
+	&::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 3px;
+		background: var(--message-normal);
+		z-index: 2;
+	}
+
+	&.is-urgent::before {
+		background: var(--message-urgent);
+	}
+
+	&.is-high::before {
+		background: var(--message-high);
+	}
+
+	&.is-draft {
+		border-style: dashed;
+
+		&::before {
+			background: var(--message-draft);
+		}
+	}
+}
+
+.post-cover {
+	position: relative;
+	display: block;
+	height: 148px;
+	overflow: hidden;
+	background: var(--bs-secondary-bg);
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform .4s cubic-bezier(.4, 0, .2, 1);
+	}
+
+	.message-post:hover & img {
+		transform: scale(1.04);
+	}
+
+	/* Status sits on the cover so the body stays about the content. */
+	.post-status {
+		position: absolute;
+		top: 10px;
+		left: 12px;
+		display: inline-flex;
+		gap: 5px;
+		flex-wrap: wrap;
+	}
+
+	.post-acknowledgement {
+		position: absolute;
+		top: 10px;
+		right: 12px;
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-size: 11px;
+		font-weight: variables.$font-weight-semibold;
+		padding: 2px 9px;
+		border-radius: 999px;
+		background: rgba(20, 20, 43, .72);
+		color: #fff;
+		backdrop-filter: blur(4px);
+	}
+}
+
+.post-body {
+	padding: 14px 16px;
+	flex: 1 1 auto;
+
+	.post-title {
+		font-size: 15.5px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--bs-emphasis-color);
+		line-height: 1.35;
+		margin: 6px 0 5px;
+
+		a {
+			color: inherit;
+		}
+	}
+
+	.post-summary {
+		font-size: 12.5px;
+		color: var(--bs-secondary-color);
+		margin-bottom: 0;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+}
+
+/* Dates and attachments — the practical facts, set apart from the copy. */
+.post-facts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 16px;
+	margin-top: 12px;
+	font-size: 11.5px;
+	color: var(--bs-secondary-color);
+
+	span {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+	}
+
+	b {
+		color: var(--bs-emphasis-color);
+		font-weight: variables.$font-weight-semibold;
+	}
+}
+
+.post-reach {
+	padding: 0 16px 12px;
+
+	.post-reach-top {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 8px;
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+		margin-bottom: 5px;
+
+		b {
+			color: var(--bs-emphasis-color);
+			font-weight: variables.$font-weight-semibold;
+		}
+	}
+}
+
+.post-footer {
+	margin-top: auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	flex-wrap: wrap;
+	padding: 11px 16px;
+	border-top: 1px solid var(--bs-border-color);
+	background: var(--bs-secondary-bg);
+}
+
+/* ============================================================
+   3. AUDIENCE CARDS
+   ============================================================ */
+.audience {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	padding: 16px;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+	}
+
+	.audience-top {
+		display: flex;
+		align-items: center;
+		gap: 11px;
+		margin-bottom: 14px;
+
+		.audience-icon {
+			width: 38px;
+			height: 38px;
+			flex-shrink: 0;
+			border-radius: var(--radius-sm);
+			background: var(--tint-primary);
+			color: var(--bs-primary);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 19px;
+		}
+
+		.audience-name {
+			font-size: 14.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 1px;
+		}
+
+		small {
+			font-size: 11.5px;
+			color: var(--bs-secondary-color);
+		}
+	}
+
+	.audience-count {
+		display: flex;
+		align-items: baseline;
+		gap: 6px;
+		margin-bottom: 12px;
+
+		b {
+			font-size: 24px;
+			font-weight: variables.$font-weight-bold;
+			color: var(--bs-emphasis-color);
+			line-height: 1;
+		}
+
+		span {
+			font-size: 12px;
+			color: var(--bs-secondary-color);
+		}
+	}
+
+	.audience-footer {
+		margin-top: auto;
+		padding-top: 12px;
+		border-top: 1px dashed var(--bs-border-color);
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* ============================================================
+   4. TEMPLATE CARDS
+   ============================================================ */
+.template {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+	}
+
+	/* A miniature of the notice the template writes. */
+	.template-preview {
+		padding: 14px 16px 12px;
+		background: var(--tint-primary);
+		border-bottom: 1px solid var(--bs-border-color);
+
+		.template-mini {
+			border-radius: var(--radius-sm);
+			background: var(--bs-body-bg);
+			border: 1px solid var(--bs-border-color);
+			padding: 10px 12px;
+
+			b {
+				display: block;
+				font-size: 12px;
+				font-weight: variables.$font-weight-semibold;
+				color: var(--bs-emphasis-color);
+				margin-bottom: 7px;
+			}
+
+			i {
+				display: block;
+				height: 6px;
+				border-radius: 3px;
+				background: var(--track);
+				margin-bottom: 5px;
+
+				&:last-child {
+					margin-bottom: 0;
+				}
+			}
+		}
+	}
+
+	.template-body {
+		padding: 13px 16px;
+		flex: 1 1 auto;
+
+		.template-title {
+			font-size: 14px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin: 5px 0 4px;
+		}
+
+		p {
+			font-size: 12px;
+			color: var(--bs-secondary-color);
+			margin-bottom: 0;
+		}
+	}
+
+	.template-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		padding: 11px 16px;
+		border-top: 1px solid var(--bs-border-color);
+		background: var(--bs-secondary-bg);
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* ============================================================
+   5. SCHEDULE CARDS
+   ============================================================ */
+.schedule {
+	display: flex;
+	gap: 0;
+	height: 100%;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+	}
+
+	/* The date block reads as a tear-off from a desk calendar. */
+	.schedule-when {
+		flex: 0 0 92px;
+		padding: 14px 10px;
+		text-align: center;
+		background: var(--tint-primary);
+		border-right: 1px solid var(--bs-border-color);
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+
+		.schedule-day {
+			font-size: 26px;
+			font-weight: variables.$font-weight-bold;
+			color: var(--bs-primary);
+			line-height: 1;
+		}
+
+		.schedule-month {
+			font-size: 11px;
+			font-weight: variables.$font-weight-semibold;
+			letter-spacing: .08em;
+			text-transform: uppercase;
+			color: var(--bs-primary);
+			margin-top: 3px;
+		}
+
+		.schedule-time {
+			font-size: 11.5px;
+			color: var(--bs-secondary-color);
+			margin-top: 7px;
+			padding-top: 7px;
+			border-top: 1px dashed var(--border-strong);
+		}
+	}
+
+	.schedule-main {
+		flex: 1 1 auto;
+		padding: 13px 15px;
+		min-width: 0;
+
+		.schedule-title {
+			font-size: 14px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 4px;
+		}
+	}
+
+	.schedule-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 5px 14px;
+		margin-top: 10px;
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+
+		span {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+		}
+
+		b {
+			color: var(--bs-emphasis-color);
+			font-weight: variables.$font-weight-semibold;
+		}
+	}
+}
+
+/* ============================================================
+   6. CHANNEL CARDS
+   ============================================================ */
+.channel {
+	position: relative;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	padding: 16px;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+	}
+
+	&.is-off {
+		background: var(--bs-secondary-bg);
+	}
+
+	.channel-top {
+		display: flex;
+		align-items: flex-start;
+		gap: 11px;
+		margin-bottom: 12px;
+
+		.channel-icon {
+			width: 40px;
+			height: 40px;
+			flex-shrink: 0;
+			border-radius: var(--radius-sm);
+			background: var(--tint-primary);
+			color: var(--bs-primary);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 20px;
+		}
+
+		.channel-name {
+			font-size: 14.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 2px;
+		}
+
+		p {
+			font-size: 11.5px;
+			color: var(--bs-secondary-color);
+			margin-bottom: 0;
+		}
+	}
+
+	.channel-footer {
+		margin-top: auto;
+		padding-top: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		border-top: 1px dashed var(--bs-border-color);
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* ============================================================
+   7. OFFCANVAS WORKSPACE + MODALS
+   ============================================================ */
+.message-detail-panel {
+	width: 88% !important;
+	max-width: 1400px;
+
+	.offcanvas-header {
+		border-bottom: 1px solid var(--bs-border-color);
+		padding: 16px 22px;
+		align-items: flex-start;
+		gap: 14px;
+	}
+
+	.offcanvas-body {
+		padding: 20px 22px 28px;
+		background: var(--bs-secondary-bg);
+	}
+}
+
+@media (max-width: 991.98px) {
+	.message-detail-panel {
+		width: 100% !important;
+	}
+}
+
+.detail-title {
+	font-size: 20px;
+	font-weight: variables.$font-weight-bold;
+	color: var(--bs-emphasis-color);
+	margin-bottom: 5px;
+	line-height: 1.3;
+}
+
+/* A plain panel used to group anything inside the offcanvas or a modal. */
+.message-panel {
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+
+	.message-panel-header {
+		display: flex;
+		align-items: center;
+		gap: 11px;
+		padding: 13px 16px;
+		border-bottom: 1px solid var(--bs-border-color);
+
+		.panel-icon {
+			width: 32px;
+			height: 32px;
+			flex-shrink: 0;
+			border-radius: var(--radius-sm);
+			background: var(--tint-primary);
+			color: var(--bs-primary);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 16px;
+		}
+
+		.panel-title {
+			font-size: 14px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 0;
+		}
+	}
+
+	.message-panel-body {
+		padding: 14px 16px;
+		flex: 1 1 auto;
+	}
+
+	.panel-footer {
+		padding: 11px 16px;
+		border-top: 1px solid var(--bs-border-color);
+		background: var(--bs-secondary-bg);
+		border-radius: 0 0 var(--radius) var(--radius);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		flex-wrap: wrap;
+		font-size: 12px;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* The announcement as the recipient sees it. */
+.reader {
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	overflow: hidden;
+
+	.reader-cover {
+		height: 210px;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	.reader-body {
+		padding: 20px 22px 24px;
+
+		h3 {
+			font-size: 22px;
+			font-weight: variables.$font-weight-bold;
+			color: var(--bs-emphasis-color);
+			line-height: 1.3;
+			margin: 8px 0 10px;
+		}
+
+		p {
+			font-size: 13.5px;
+			line-height: 1.7;
+			color: var(--bs-secondary-color);
+		}
+
+		h6 {
+			font-size: 14px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin: 18px 0 8px;
+		}
+
+		ul {
+			padding-left: 18px;
+			font-size: 13.5px;
+			line-height: 1.8;
+			color: var(--bs-secondary-color);
+		}
+	}
+}
+
+/* Attachment row. */
+.file {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	padding: 9px 11px;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius-sm);
+	background: var(--bs-body-bg);
+	transition: var(--transition);
+
+	+ .file {
+		margin-top: 8px;
+	}
+
+	&:hover {
+		border-color: var(--message-accent-line);
+	}
+
+	i {
+		width: 32px;
+		height: 32px;
+		flex-shrink: 0;
+		border-radius: 8px;
+		background: var(--bs-secondary-bg);
+		color: var(--bs-primary);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 16px;
+	}
+
+	.message-file-name {
+		flex: 1 1 auto;
+		min-width: 0;
+		font-size: 12.5px;
+		font-weight: variables.$font-weight-medium;
+		color: var(--bs-emphasis-color);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		small {
+			display: block;
+			font-size: 11px;
+			font-weight: variables.$font-weight-normal;
+			color: var(--bs-secondary-color);
+		}
+	}
+}
+
+/* Comment thread inside the offcanvas. */
+.comment {
+	display: flex;
+	gap: 11px;
+	padding: 12px 0;
+	border-bottom: 1px dashed var(--bs-border-color);
+
+	&:last-child {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	img {
+		width: 34px;
+		height: 34px;
+		border-radius: 50%;
+		object-fit: cover;
+		flex-shrink: 0;
+	}
+
+	.comment-who {
+		display: flex;
+		align-items: baseline;
+		gap: 8px;
+		flex-wrap: wrap;
+		margin-bottom: 3px;
+
+		b {
+			font-size: 13px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+		}
+
+		time {
+			font-size: 11px;
+			color: var(--bs-secondary-color);
+		}
+	}
+
+	p {
+		font-size: 12.5px;
+		color: var(--bs-secondary-color);
+		margin-bottom: 0;
+		line-height: 1.6;
+	}
+}
+
+/* Compact related-announcement row. */
+.message-related-item {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	padding: 10px 0;
+	border-bottom: 1px dashed var(--bs-border-color);
+
+	&:last-child {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	img {
+		width: 46px;
+		height: 40px;
+		border-radius: 7px;
+		object-fit: cover;
+		flex-shrink: 0;
+	}
+
+	.related-text {
+		flex: 1 1 auto;
+		min-width: 0;
+
+		b {
+			display: block;
+			font-size: 12.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		small {
+			font-size: 11px;
+			color: var(--bs-secondary-color);
+		}
+	}
+}
+
+.message-modal-icon {
+	width: 40px;
+	height: 40px;
+	border-radius: var(--radius-sm);
+	background: var(--tint-primary);
+	color: var(--bs-primary);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 20px;
+}
+
+/* ============================================================
+   8. BROADCAST SCHEDULER
+
+   The scheduler shares the badges, pips, rows, panels, reader and
+   offcanvas above — a broadcast is an announcement that has not left
+   yet. What it adds is the machinery of *when*: a departure clock on
+   every card, a recurrence rule stated in words, a per-channel queue,
+   and an approval that has to clear before the clock matters.
+   ============================================================ */
+
+/* --- Broadcast card ----------------------------------------- */
+.broadcast {
+	position: relative;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+	}
+
+	/* State rail — reads at a glance across a wall of cards. */
+	&::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 3px;
+		background: var(--message-normal);
+		z-index: 2;
+	}
+
+	&.is-paused::before {
+		background: var(--message-high);
+	}
+
+	&.is-draft {
+		border-style: dashed;
+
+		&::before {
+			background: var(--message-draft);
+		}
+	}
+
+	&.is-cancelled {
+		opacity: .72;
+
+		&::before {
+			background: var(--bs-secondary-color);
+		}
+	}
+
+	&.is-sent::before {
+		background: var(--message-live);
+	}
+}
+
+/* The departure block: when this leaves, and from which time zone. */
+.broadcast-when {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 13px 15px;
+	background: var(--tint-primary);
+	border-bottom: 1px solid var(--bs-border-color);
+
+	.clock {
+		flex: 0 0 auto;
+		text-align: center;
+		line-height: 1;
+
+		b {
+			display: block;
+			font-size: 20px;
+			font-weight: variables.$font-weight-bold;
+			color: var(--bs-primary);
+		}
+
+		span {
+			display: block;
+			font-size: 10.5px;
+			font-weight: variables.$font-weight-semibold;
+			letter-spacing: .08em;
+			text-transform: uppercase;
+			color: var(--bs-primary);
+			margin-top: 4px;
+		}
+	}
+
+	.broadcast-when-text {
+		flex: 1 1 auto;
+		min-width: 0;
+		padding-left: 12px;
+		border-left: 1px dashed var(--border-strong);
+
+		b {
+			display: block;
+			font-size: 13.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+		}
+
+		small {
+			display: block;
+			font-size: 11px;
+			color: var(--bs-secondary-color);
+			margin-top: 2px;
+		}
+	}
+}
+
+.broadcast-body {
+	padding: 13px 15px;
+	flex: 1 1 auto;
+
+	.broadcast-title {
+		font-size: 15px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--bs-emphasis-color);
+		line-height: 1.35;
+		margin: 6px 0 5px;
+
+		a {
+			color: inherit;
+		}
+	}
+
+	.broadcast-description {
+		font-size: 12.5px;
+		color: var(--bs-secondary-color);
+		margin-bottom: 0;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+}
+
+.broadcast-facts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 14px;
+	margin-top: 11px;
+	font-size: 11.5px;
+	color: var(--bs-secondary-color);
+
+	span {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+	}
+
+	b {
+		color: var(--bs-emphasis-color);
+		font-weight: variables.$font-weight-semibold;
+	}
+}
+
+.broadcast-footer {
+	margin-top: auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	flex-wrap: wrap;
+	padding: 11px 15px;
+	border-top: 1px solid var(--bs-border-color);
+	background: var(--bs-secondary-bg);
+}
+
+/* --- Recurrence rule, written out --------------------------- */
+.recurrence {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 11px;
+	font-weight: variables.$font-weight-semibold;
+	padding: 2px 9px;
+	border-radius: 999px;
+	background: var(--bs-body-bg);
+	color: var(--bs-emphasis-color);
+	border: 1px dashed var(--border-strong);
+	white-space: nowrap;
+
+	i {
+		font-size: 12px;
+		color: var(--bs-primary);
+	}
+
+	&.is-once {
+		border-style: solid;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* --- Channel queue meter ------------------------------------ */
+.queue {
+	display: flex;
+	gap: 3px;
+	margin-top: 4px;
+
+	span {
+		flex: 1 1 0;
+		height: 18px;
+		border-radius: 3px;
+		background: var(--track);
+
+		&.is-filled {
+			background: var(--bs-primary);
+		}
+
+		&.is-warn {
+			background: var(--message-high);
+		}
+
+		&.is-done {
+			background: var(--message-live);
+		}
+	}
+}
+
+/* --- Schedule state card ------------------------------------ */
+.state {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	padding: 15px;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+	}
+
+	.state-top {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-bottom: 12px;
+
+		.state-icon {
+			width: 36px;
+			height: 36px;
+			flex-shrink: 0;
+			border-radius: var(--radius-sm);
+			background: var(--tint-primary);
+			color: var(--bs-primary);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 18px;
+		}
+
+		.state-name {
+			font-size: 14px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 0;
+		}
+
+		.state-n {
+			font-size: 18px;
+			font-weight: variables.$font-weight-bold;
+			color: var(--bs-emphasis-color);
+			margin-left: auto;
+		}
+	}
+
+	&.is-warn .state-icon {
+		background: var(--message-high-soft);
+		color: color.adjust(variables.$warning, $lightness: -12%);
+	}
+
+	&.is-done .state-icon {
+		background: var(--message-live-soft);
+		color: var(--message-live);
+	}
+
+	&.is-stop .state-icon {
+		background: var(--message-urgent-soft);
+		color: var(--message-urgent);
+	}
+
+	&.is-draft .state-icon {
+		background: var(--message-draft-soft);
+		color: var(--message-draft);
+	}
+}
+
+/* --- Approval card ------------------------------------------ */
+.approval {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-left: 3px solid var(--message-high);
+	border-radius: var(--radius-sm);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	padding: 14px;
+	transition: var(--transition);
+
+	&:hover {
+		box-shadow: var(--shadow-lift);
+	}
+
+	&.is-approved {
+		border-left-color: var(--message-live);
+	}
+
+	&.is-rejected {
+		border-left-color: var(--message-urgent);
+	}
+
+	&.is-scheduled {
+		border-left-color: var(--message-normal);
+	}
+
+	&.is-review {
+		border-left-color: var(--message-draft);
+	}
+
+	.approval-title {
+		font-size: 14px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--bs-emphasis-color);
+		line-height: 1.35;
+		margin-bottom: 8px;
+	}
+
+	.approval-who {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 4px;
+		font-size: 12px;
+		color: var(--bs-secondary-color);
+
+		img {
+			width: 24px;
+			height: 24px;
+			border-radius: 50%;
+			object-fit: cover;
+		}
+
+		b {
+			color: var(--bs-emphasis-color);
+			font-weight: variables.$font-weight-semibold;
+		}
+	}
+
+	.approval-footer {
+		margin-top: auto;
+		padding-top: 12px;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		flex-wrap: wrap;
+	}
+}
+
+/* --- Quick action card -------------------------------------- */
+.quick-action {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	height: 100%;
+	text-align: left;
+	padding: 15px;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	transition: var(--transition);
+
+	i.message-action-icon {
+		width: 40px;
+		height: 40px;
+		flex-shrink: 0;
+		border-radius: var(--radius-sm);
+		background: var(--tint-primary);
+		color: var(--bs-primary);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 20px;
+		transition: var(--transition);
+	}
+
+	.action-text {
+		flex: 1 1 auto;
+		min-width: 0;
+
+		b {
+			display: block;
+			font-size: 13.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 2px;
+		}
+
+		small {
+			font-size: 11.5px;
+			color: var(--bs-secondary-color);
+		}
+	}
+
+	.message-action-go {
+		flex: 0 0 auto;
+		font-size: 16px;
+		color: var(--bs-secondary-color);
+		transition: var(--transition);
+	}
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+
+		i.message-action-icon {
+			background: var(--bs-primary);
+			color: #fff;
+		}
+
+		.message-action-go {
+			color: var(--bs-primary);
+			transform: translateX(2px);
+		}
+	}
+}
+
+/* ============================================================
+   9. SMS COMMUNICATION CENTER
+
+   SMS is the one channel with a hard budget — 160 characters to a
+   segment, and every segment costs money and arrives separately. So
+   the pieces here are built around that constraint: a composer whose
+   counter is part of the furniture rather than a footnote, merge
+   fields that are visibly placeholders, a recipient card that reads
+   as selected or not, and a preview drawn as the handset it lands on.
+
+   Everything else — badges, rows, panels, offcanvas, template and
+   action cards — is reused from the sections above.
+   ============================================================ */
+
+/* --- Composer workspace ------------------------------------- */
+.compose {
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+
+	.compose-header {
+		display: flex;
+		align-items: center;
+		gap: 11px;
+		padding: 14px 16px;
+		border-bottom: 1px solid var(--bs-border-color);
+
+		.compose-icon {
+			width: 36px;
+			height: 36px;
+			flex-shrink: 0;
+			border-radius: var(--radius-sm);
+			background: var(--bs-primary);
+			color: #fff;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 18px;
+		}
+
+		.compose-title {
+			font-size: 15px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 1px;
+		}
+
+		p {
+			font-size: 12px;
+			color: var(--bs-secondary-color);
+			margin-bottom: 0;
+		}
+	}
+
+	.compose-body {
+		padding: 16px;
+	}
+
+	.compose-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		flex-wrap: wrap;
+		padding: 13px 16px;
+		border-top: 1px solid var(--bs-border-color);
+		background: var(--bs-secondary-bg);
+	}
+}
+
+/* The editor surface — a plain field, but framed so it reads as the
+   message body rather than as one more form input. */
+.editor {
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius-sm);
+	background: var(--bs-body-bg);
+	overflow: hidden;
+
+	.editor-bar {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		flex-wrap: wrap;
+		padding: 7px 9px;
+		border-bottom: 1px solid var(--bs-border-color);
+		background: var(--bs-secondary-bg);
+
+		button {
+			width: 28px;
+			height: 28px;
+			border: 0;
+			border-radius: 7px;
+			background: transparent;
+			color: var(--bs-secondary-color);
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 15px;
+			transition: var(--transition);
+
+			&:hover {
+				background: var(--bs-body-bg);
+				color: var(--bs-primary);
+			}
+		}
+
+		.editor-sep {
+			width: 1px;
+			height: 18px;
+			background: var(--bs-border-color);
+			margin: 0 4px;
+		}
+	}
+
+	textarea.form-control {
+		border: 0;
+		border-radius: 0;
+		resize: vertical;
+		font-size: 13.5px;
+		line-height: 1.7;
+		min-height: 150px;
+		background-color: transparent !important;
+		color: var(--bs-emphasis-color);
+
+		&:focus {
+			box-shadow: none;
+		}
+	}
+}
+
+/* --- Character / segment counter ---------------------------- */
+.counter {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	flex-wrap: wrap;
+	padding: 11px 13px;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius-sm);
+	background: var(--bs-secondary-bg);
+
+	.counter-figure {
+		line-height: 1.15;
+
+		b {
+			display: block;
+			font-size: 17px;
+			font-weight: variables.$font-weight-bold;
+			color: var(--bs-emphasis-color);
+		}
+
+		span {
+			font-size: 10.5px;
+			font-weight: variables.$font-weight-semibold;
+			letter-spacing: .07em;
+			text-transform: uppercase;
+			color: var(--bs-secondary-color);
+		}
+	}
+
+	.counter-bar {
+		flex: 1 1 120px;
+		min-width: 110px;
+	}
+}
+
+/* Segment ticks — one block per 160-character segment. */
+.segments {
+	display: flex;
+	gap: 3px;
+
+	span {
+		flex: 1 1 0;
+		height: 6px;
+		border-radius: 999px;
+		background: var(--track);
+
+		&.is-used {
+			background: var(--bs-primary);
+		}
+
+		&.is-part {
+			background: var(--message-accent-line);
+		}
+
+		&.is-over {
+			background: var(--message-high);
+		}
+	}
+}
+
+/* --- Merge field chip --------------------------------------- */
+.merge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-family: "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", monospace;
+	font-size: 11.5px;
+	font-weight: variables.$font-weight-medium;
+	padding: 3px 9px;
+	border-radius: 6px;
+	background: var(--tint-primary);
+	color: var(--bs-primary);
+	border: 1px solid transparent;
+	transition: var(--transition);
+	white-space: nowrap;
+
+	i {
+		font-size: 12px;
+	}
+
+	&:hover {
+		border-color: var(--bs-primary);
+		background: var(--bs-body-bg);
+	}
+}
+
+.merges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+/* --- Recipient selection card ------------------------------- */
+.pick {
+	position: relative;
+	height: 100%;
+	display: flex;
+	align-items: flex-start;
+	gap: 11px;
+	padding: 14px;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	transition: var(--transition);
+	cursor: pointer;
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+	}
+
+	/* Selected reads through the border and the tick, not a fill — a
+	   wall of filled cards would be unreadable. */
+	&.is-picked {
+		border-color: var(--bs-primary);
+		box-shadow: inset 0 0 0 1px var(--bs-primary), var(--shadow);
+
+		.pick-icon {
+			background: var(--bs-primary);
+			color: #fff;
+		}
+	}
+
+	.pick-icon {
+		width: 38px;
+		height: 38px;
+		flex-shrink: 0;
+		border-radius: var(--radius-sm);
+		background: var(--tint-primary);
+		color: var(--bs-primary);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 19px;
+		transition: var(--transition);
+	}
+
+	.pick-text {
+		flex: 1 1 auto;
+		min-width: 0;
+
+		b {
+			display: block;
+			font-size: 13.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 2px;
+		}
+
+		.pick-n {
+			font-size: 17px;
+			font-weight: variables.$font-weight-bold;
+			color: var(--bs-emphasis-color);
+			line-height: 1.2;
+
+			small {
+				font-size: 11.5px;
+				font-weight: variables.$font-weight-normal;
+				color: var(--bs-secondary-color);
+				margin-left: 4px;
+			}
+		}
+
+		.pick-last {
+			display: block;
+			font-size: 11px;
+			color: var(--bs-secondary-color);
+			margin-top: 6px;
+			padding-top: 6px;
+			border-top: 1px dashed var(--bs-border-color);
+		}
+	}
+
+	.form-check-input {
+		flex-shrink: 0;
+		margin-top: 2px;
+	}
+}
+
+/* --- Upload dropzone ---------------------------------------- */
+.dropzone {
+	border: 1px dashed var(--border-strong);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	padding: 26px 20px;
+	text-align: center;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--bs-primary);
+		background: var(--tint-primary);
+	}
+
+	> i {
+		display: block;
+		font-size: 30px;
+		color: var(--bs-primary);
+		margin-bottom: 8px;
+	}
+
+	b {
+		display: block;
+		font-size: 14px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--bs-emphasis-color);
+		margin-bottom: 3px;
+	}
+
+	p {
+		font-size: 12px;
+		color: var(--bs-secondary-color);
+		margin: 0 auto 12px;
+		max-width: 44ch;
+	}
+}
+
+/* --- Mobile message preview --------------------------------- */
+.phone {
+	max-width: 300px;
+	margin: 0 auto;
+	/* always a dark bezel/status bar, like a phone's own chrome — not
+	   var(--bs-emphasis-color), which flips light in dark mode and left
+	   white text on a near-white bar; fixed to the colour light mode
+	   already rendered, so light mode is unchanged */
+	border: 8px solid #202C4B;
+	border-radius: 28px;
+	background: var(--bs-secondary-bg);
+	overflow: hidden;
+	box-shadow: var(--shadow-lift);
+
+	.phone-top {
+		background: #202C4B;
+		color: #fff;
+		padding: 4px 14px 10px;
+		text-align: center;
+
+		b {
+			display: block;
+			font-size: 12.5px;
+			font-weight: variables.$font-weight-semibold;
+		}
+
+		small {
+			font-size: 10.5px;
+			opacity: .7;
+		}
+	}
+
+	.phone-body {
+		padding: 14px 12px 18px;
+		min-height: 190px;
+		background: var(--bs-secondary-bg);
+	}
+
+	/* The message as it lands: a received bubble, tail on the left. */
+	.message-bubble {
+		position: relative;
+		background: var(--bs-body-bg);
+		border: 1px solid var(--bs-border-color);
+		border-radius: 14px 14px 14px 3px;
+		padding: 10px 12px;
+		font-size: 12.5px;
+		line-height: 1.6;
+		color: var(--bs-emphasis-color);
+		box-shadow: var(--shadow);
+
+		+ .message-bubble {
+			margin-top: 8px;
+		}
+
+		mark {
+			background: var(--tint-primary);
+			color: var(--bs-primary);
+			padding: 0 3px;
+			border-radius: 3px;
+			font-weight: variables.$font-weight-semibold;
+		}
+	}
+
+	.bubble-time {
+		display: block;
+		font-size: 10px;
+		color: var(--bs-secondary-color);
+		margin: 5px 0 0 4px;
+	}
+}
+
+/* --- SMS log card ------------------------------------------- */
+.log {
+	position: relative;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	padding: 14px;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+	}
+
+	/* Delivery outcome as a corner flag rather than a full-width band. */
+	&::after {
+		content: "";
+		position: absolute;
+		top: 14px;
+		right: 14px;
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--message-live);
+	}
+
+	&.is-failed::after {
+		background: var(--message-urgent);
+	}
+
+	&.is-pending::after {
+		background: var(--message-high);
+	}
+
+	&.is-queued::after {
+		background: var(--message-normal);
+	}
+
+	.log-title {
+		font-size: 13.5px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--bs-emphasis-color);
+		line-height: 1.35;
+		margin: 0 18px 8px 0;
+	}
+
+	.log-to {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 12.5px;
+		color: var(--bs-emphasis-color);
+		margin-bottom: 10px;
+
+		i {
+			width: 28px;
+			height: 28px;
+			flex-shrink: 0;
+			border-radius: 8px;
+			background: var(--bs-secondary-bg);
+			color: var(--bs-secondary-color);
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 14px;
+		}
+
+		small {
+			display: block;
+			font-size: 11px;
+			color: var(--bs-secondary-color);
+		}
+	}
+
+	/* A failure is stated, not hidden behind a status pill. */
+	.log-why {
+		font-size: 11.5px;
+		color: var(--message-urgent);
+		background: var(--message-urgent-soft);
+		border-radius: 6px;
+		padding: 5px 8px;
+		margin-top: 8px;
+	}
+
+	.log-footer {
+		margin-top: auto;
+		padding-top: 11px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		flex-wrap: wrap;
+		border-top: 1px dashed var(--bs-border-color);
+		font-size: 11px;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* ============================================================
+   10. WHATSAPP COMMUNICATION CENTER
+
+   A conversation channel rather than a broadcast one, so the centre of
+   this page is an inbox and a chat, not a composer. Everything already
+   defined above — badges, rows, panels, template cards, action cards,
+   dropzone, merge fields, offcanvas — is reused as-is.
+
+   The one page-wide change is the accent: `.whatsapp` remaps the accent
+   tokens to WhatsApp's green, so every shared component picks it up
+   without a second copy of any rule. Put the class on the content
+   wrapper, and on the offcanvas and modals, which live outside it.
+   ============================================================ */
+.whatsapp {
+	--message-accent: #{color.mix(#25D366, variables.$dark, 66%)};
+	--message-accent-line: #{color.mix(#25D366, #ffffff, 40%)};
+}
+
+[data-bs-theme="dark"] .whatsapp {
+	--message-accent: #{color.mix(#25D366, #ffffff, 74%)};
+	--message-accent-line: rgba(37, 211, 102, .38);
+}
+
+/* --- Conversation inbox ------------------------------------- */
+.inbox {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+
+	.inbox-header {
+		padding: 13px 14px;
+		border-bottom: 1px solid var(--bs-border-color);
+	}
+
+	.inbox-list {
+		flex: 1 1 auto;
+		overflow-y: auto;
+		max-height: 560px;
+
+		&::-webkit-scrollbar {
+			width: 5px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--track);
+			border-radius: 999px;
+		}
+	}
+
+	.inbox-footer {
+		padding: 11px 14px;
+		border-top: 1px solid var(--bs-border-color);
+		background: var(--bs-secondary-bg);
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+	}
+}
+
+/* Section label inside the list — Pinned, Today, Earlier. */
+.inbox-section {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	padding: 7px 14px;
+	font-size: 10.5px;
+	font-weight: variables.$font-weight-semibold;
+	letter-spacing: .09em;
+	text-transform: uppercase;
+	color: var(--bs-secondary-color);
+	background: var(--bs-secondary-bg);
+	border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* A single conversation row. */
+.thread {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: 11px;
+	width: 100%;
+	text-align: left;
+	padding: 12px 14px;
+	border: 0;
+	border-bottom: 1px solid var(--bs-border-color);
+	background: transparent;
+	transition: var(--transition);
+
+	&:hover {
+		background: var(--bs-secondary-bg);
+	}
+
+	/* Active thread carries a rail, not a fill, so the avatar and the
+	   preview text keep their contrast. */
+	&.is-active {
+		background: var(--tint-primary);
+
+		&::before {
+			content: "";
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			width: 3px;
+			background: var(--bs-primary);
+		}
+	}
+
+	&.is-unread .thread-name,
+	&.is-unread .thread-preview {
+		color: var(--bs-emphasis-color);
+		font-weight: variables.$font-weight-semibold;
+	}
+
+	.thread-avatar {
+		position: relative;
+		flex: 0 0 auto;
+
+		img {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			object-fit: cover;
+		}
+
+		/* Presence dot, cut out of the avatar edge. */
+		&::after {
+			content: "";
+			position: absolute;
+			right: -1px;
+			bottom: -1px;
+			width: 11px;
+			height: 11px;
+			border-radius: 50%;
+			background: var(--bs-secondary-color);
+			border: 2px solid var(--bs-body-bg);
+		}
+
+		&.is-online::after {
+			background: var(--message-live);
+		}
+	}
+
+	.thread-text {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.thread-top {
+		display: flex;
+		align-items: baseline;
+		gap: 8px;
+		margin-bottom: 2px;
+	}
+
+	.thread-name {
+		flex: 1 1 auto;
+		min-width: 0;
+		font-size: 13.5px;
+		font-weight: variables.$font-weight-medium;
+		color: var(--bs-emphasis-color);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.thread-time {
+		flex: 0 0 auto;
+		font-size: 10.5px;
+		color: var(--bs-secondary-color);
+	}
+
+	.thread-preview {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		font-size: 12px;
+		color: var(--bs-secondary-color);
+		margin-bottom: 0;
+
+		span {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		> i {
+			flex-shrink: 0;
+			font-size: 13px;
+		}
+	}
+
+	.thread-meta {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		margin-top: 6px;
+		flex-wrap: wrap;
+	}
+
+	.thread-n {
+		flex: 0 0 auto;
+		min-width: 18px;
+		height: 18px;
+		padding: 0 5px;
+		border-radius: 999px;
+		background: var(--bs-primary);
+		color: #fff;
+		font-size: 10.5px;
+		font-weight: variables.$font-weight-bold;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.thread-pin {
+		font-size: 13px;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* --- Chat workspace ----------------------------------------- */
+.message-chat {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+
+	.message-chat-header {
+		display: flex;
+		align-items: center;
+		gap: 11px;
+		padding: 12px 15px;
+		border-bottom: 1px solid var(--bs-border-color);
+
+		img {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			object-fit: cover;
+			flex-shrink: 0;
+		}
+
+		.chat-who {
+			flex: 1 1 auto;
+			min-width: 0;
+
+			b {
+				display: block;
+				font-size: 14.5px;
+				font-weight: variables.$font-weight-semibold;
+				color: var(--bs-emphasis-color);
+				line-height: 1.3;
+			}
+
+			small {
+				font-size: 11.5px;
+				color: var(--bs-secondary-color);
+			}
+		}
+	}
+
+	/* The canvas carries the faint pattern a messaging app has, so the
+	   bubbles read as a conversation rather than a list of rows. */
+	.chat-canvas {
+		flex: 1 1 auto;
+		overflow-y: auto;
+		max-height: 480px;
+		padding: 18px 16px;
+		background-color: var(--bs-secondary-bg);
+		background-image: radial-gradient(var(--border-strong) 1px, transparent 1px);
+		background-size: 22px 22px;
+
+		&::-webkit-scrollbar {
+			width: 5px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: var(--track);
+			border-radius: 999px;
+		}
+	}
+}
+
+/* Day divider inside the canvas. */
+.message-day {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 4px 0 16px;
+
+	span {
+		font-size: 10.5px;
+		font-weight: variables.$font-weight-semibold;
+		letter-spacing: .06em;
+		text-transform: uppercase;
+		color: var(--bs-secondary-color);
+		background: var(--bs-body-bg);
+		border: 1px solid var(--bs-border-color);
+		border-radius: 999px;
+		padding: 3px 12px;
+	}
+}
+
+/* --- Message bubble ----------------------------------------- */
+.message-message {
+	display: flex;
+	margin-bottom: 12px;
+
+	.message-in {
+		max-width: 78%;
+		background: var(--bs-body-bg);
+		border: 1px solid var(--bs-border-color);
+		border-radius: 14px 14px 14px 3px;
+		padding: 9px 12px;
+		box-shadow: var(--shadow);
+
+		p {
+			font-size: 13px;
+			line-height: 1.6;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 0;
+		}
+	}
+
+	.message-meta {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 4px;
+		font-size: 10px;
+		color: var(--bs-secondary-color);
+		margin-top: 4px;
+
+		/* Read receipt — the double tick, blue once seen. */
+		i.is-read {
+			color: var(--message-normal);
+		}
+	}
+
+	/* Outgoing sits right, tinted, with the tail mirrored. */
+	&.is-out {
+		justify-content: flex-end;
+
+		.message-in {
+			background: var(--tint-primary);
+			border-color: transparent;
+			border-radius: 14px 14px 3px 14px;
+		}
+	}
+
+	/* An outgoing message sent from a registered template is labelled,
+	   because a template send is billed and a session reply is not. */
+	.message-template {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-size: 10px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--bs-primary);
+		margin-bottom: 5px;
+	}
+}
+
+/* Attachment bubbles: document, voice note and image. */
+.message-attachment {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px;
+	border-radius: 9px;
+	background: var(--bs-secondary-bg);
+	min-width: 210px;
+
+	> i {
+		width: 34px;
+		height: 34px;
+		flex-shrink: 0;
+		border-radius: 8px;
+		background: var(--bs-body-bg);
+		color: var(--bs-primary);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 17px;
+	}
+
+	.attachment-text {
+		flex: 1 1 auto;
+		min-width: 0;
+		font-size: 12px;
+		font-weight: variables.$font-weight-medium;
+		color: var(--bs-emphasis-color);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		small {
+			display: block;
+			font-size: 10.5px;
+			font-weight: variables.$font-weight-normal;
+			color: var(--bs-secondary-color);
+		}
+	}
+}
+
+/* Voice note — a static waveform, not a control. */
+.wave {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	flex: 1 1 auto;
+	height: 22px;
+
+	span {
+		flex: 1 1 0;
+		background: var(--message-accent-line);
+		border-radius: 999px;
+		min-height: 3px;
+	}
+
+	.h-1 { height: 25%; }
+	.h-2 { height: 45%; }
+	.h-3 { height: 70%; }
+	.h-4 { height: 100%; }
+	.h-5 { height: 55%; }
+}
+
+.message-image {
+	display: block;
+	width: 190px;
+	max-width: 100%;
+	border-radius: 9px;
+	margin-bottom: 6px;
+}
+
+/* --- Composer ----------------------------------------------- */
+.composer {
+	border-top: 1px solid var(--bs-border-color);
+	background: var(--bs-body-bg);
+	padding: 11px 14px;
+
+	.composer-row {
+		display: flex;
+		align-items: flex-end;
+		gap: 8px;
+
+		.form-control {
+			resize: none;
+		}
+	}
+
+	.composer-tools {
+		display: flex;
+		align-items: center;
+		gap: 3px;
+		flex-shrink: 0;
+
+		button {
+			width: 34px;
+			height: 34px;
+			border: 0;
+			border-radius: 9px;
+			background: transparent;
+			color: var(--bs-secondary-color);
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 17px;
+			transition: var(--transition);
+
+			&:hover {
+				background: var(--bs-secondary-bg);
+				color: var(--bs-primary);
+			}
+		}
+	}
+}
+
+/* Quick reply chip above the composer. */
+.quick-reply {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 11.5px;
+	font-weight: variables.$font-weight-medium;
+	padding: 4px 11px;
+	border-radius: 999px;
+	background: var(--bs-body-bg);
+	color: var(--bs-emphasis-color);
+	border: 1px solid var(--bs-border-color);
+	white-space: nowrap;
+	transition: var(--transition);
+
+	i {
+		font-size: 12px;
+		color: var(--bs-primary);
+	}
+
+	&:hover {
+		border-color: var(--bs-primary);
+		background: var(--tint-primary);
+	}
+}
+
+.qrs {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+	margin-bottom: 9px;
+}
+
+/* --- Broadcast queue card ----------------------------------- */
+.message-quote {
+	position: relative;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	padding: 14px 14px 14px 17px;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+	}
+
+	&::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 3px;
+		border-radius: var(--radius) 0 0 var(--radius);
+		background: var(--message-normal);
+	}
+
+	&.is-draft::before { background: var(--message-draft); }
+	&.is-processing::before { background: var(--message-high); }
+	&.is-sent::before,
+	&.is-delivered::before { background: var(--message-live); }
+	&.is-failed::before { background: var(--message-urgent); }
+	&.is-cancelled {
+		opacity: .72;
+
+		&::before { background: var(--bs-secondary-color); }
+	}
+
+	.message-quote-title {
+		font-size: 13.5px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--bs-emphasis-color);
+		line-height: 1.35;
+		margin-bottom: 6px;
+	}
+
+	.message-quote-message {
+		font-size: 12px;
+		color: var(--bs-secondary-color);
+		margin-bottom: 10px;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.message-quote-footer {
+		margin-top: auto;
+		padding-top: 11px;
+		border-top: 1px dashed var(--bs-border-color);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		flex-wrap: wrap;
+		font-size: 11px;
+		color: var(--bs-secondary-color);
+	}
+}
+
+/* --- Media library tile ------------------------------------- */
+.message-media {
+	position: relative;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+	}
+
+	.media-thumb {
+		position: relative;
+		height: 104px;
+		background: var(--bs-secondary-bg);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-bottom: 1px solid var(--bs-border-color);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		> i {
+			font-size: 30px;
+			color: var(--bs-primary);
+		}
+
+		.media-kind {
+			position: absolute;
+			top: 8px;
+			left: 8px;
+			font-size: 10px;
+			font-weight: variables.$font-weight-semibold;
+			letter-spacing: .05em;
+			text-transform: uppercase;
+			padding: 2px 8px;
+			border-radius: 999px;
+			background: rgba(20, 20, 43, .72);
+			color: #fff;
+			backdrop-filter: blur(4px);
+		}
+	}
+
+	.message-media-body {
+		padding: 11px 12px;
+		flex: 1 1 auto;
+
+		b {
+			display: block;
+			font-size: 12.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		small {
+			font-size: 11px;
+			color: var(--bs-secondary-color);
+		}
+	}
+
+	.media-footer {
+		display: flex;
+		gap: 6px;
+		padding: 10px 12px;
+		border-top: 1px solid var(--bs-border-color);
+		background: var(--bs-secondary-bg);
+	}
+}
+
+/* ============================================================
+   11. NOTIFICATION & PARENT COMMUNICATION CENTER
+
+   Three channels governed together — email, push and the parent
+   communications that ride on either. Almost everything is reused from
+   the sections above: channel cards, audience cards, template cards,
+   log cards, action cards, panels, rows, badges, dropzone, merge
+   fields, handset preview and the offcanvas.
+
+   What this page adds is the distinction it lives on: delivered is not
+   read. A notification card states both, stacked, because a 99%
+   delivery rate against a 40% read rate is the whole story. `.notification`
+   remaps the accent to a violet so the centre is not mistaken for the
+   announcements desk; put it on the content wrapper and on the
+   offcanvas and modals, which sit outside it.
+   ============================================================ */
+.notification {
+	--message-accent: #{color.mix(variables.$violet, variables.$dark, 70%)};
+	--message-accent-line: #{color.mix(variables.$violet, #ffffff, 34%)};
+}
+
+[data-bs-theme="dark"] .notification {
+	--message-accent: #{color.mix(variables.$violet, #ffffff, 62%)};
+	--message-accent-line: rgba(103, 58, 183, .44);
+}
+
+/* --- Notification card -------------------------------------- */
+.message-note-item {
+	position: relative;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+		transform: translateY(-2px);
+	}
+
+	/* Priority rail. */
+	&::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 3px;
+		background: var(--message-normal);
+		z-index: 2;
+	}
+
+	&.is-urgent::before { background: var(--message-urgent); }
+	&.is-high::before { background: var(--message-high); }
+	&.is-sent::before { background: var(--message-live); }
+
+	&.is-draft {
+		border-style: dashed;
+
+		&::before { background: var(--message-draft); }
+	}
+
+	&.is-archived {
+		opacity: .72;
+
+		&::before { background: var(--bs-secondary-color); }
+	}
+
+	.note-body {
+		padding: 14px 15px;
+		flex: 1 1 auto;
+	}
+
+	.note-title {
+		font-size: 15px;
+		font-weight: variables.$font-weight-semibold;
+		color: var(--bs-emphasis-color);
+		line-height: 1.35;
+		margin: 6px 0 5px;
+
+		a {
+			color: inherit;
+		}
+	}
+
+	.note-description {
+		font-size: 12.5px;
+		color: var(--bs-secondary-color);
+		margin-bottom: 0;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.note-facts {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 14px;
+		margin-top: 11px;
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+
+		span {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+		}
+
+		b {
+			color: var(--bs-emphasis-color);
+			font-weight: variables.$font-weight-semibold;
+		}
+	}
+
+	/* Author line — who sent it is part of the record, not metadata. */
+	.message-note-by {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		margin-top: 12px;
+		padding-top: 11px;
+		border-top: 1px dashed var(--bs-border-color);
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+
+		img {
+			width: 22px;
+			height: 22px;
+			border-radius: 50%;
+			object-fit: cover;
+		}
+
+		b {
+			color: var(--bs-emphasis-color);
+			font-weight: variables.$font-weight-semibold;
+		}
+	}
+
+	.note-footer {
+		margin-top: auto;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		flex-wrap: wrap;
+		padding: 11px 15px;
+		border-top: 1px solid var(--bs-border-color);
+		background: var(--bs-secondary-bg);
+	}
+}
+
+/* --- Delivered versus read ---------------------------------- */
+.dual {
+	padding: 0 15px 12px;
+
+	.dual-row {
+		display: flex;
+		align-items: center;
+		gap: 9px;
+
+		+ .dual-row {
+			margin-top: 6px;
+		}
+
+		> span:first-child {
+			flex: 0 0 62px;
+			font-size: 10.5px;
+			font-weight: variables.$font-weight-semibold;
+			letter-spacing: .05em;
+			text-transform: uppercase;
+			color: var(--bs-secondary-color);
+		}
+
+		.dual-bar {
+			flex: 1 1 auto;
+			height: 5px;
+			border-radius: 999px;
+			background: var(--track);
+			overflow: hidden;
+
+			span {
+				display: block;
+				height: 100%;
+				border-radius: 999px;
+				background: var(--message-live);
+			}
+		}
+
+		/* The read bar is deliberately the accent, not green — read is a
+		   different achievement from delivered and should not look like
+		   the same success. */
+		&.is-read .dual-bar span {
+			background: var(--bs-primary);
+		}
+
+		> b {
+			flex: 0 0 auto;
+			font-size: 11.5px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			min-width: 34px;
+			text-align: right;
+		}
+	}
+}
+
+/* --- Parent communication card ------------------------------ */
+.message-push {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color);
+	border-radius: var(--radius);
+	background: var(--bs-body-bg);
+	box-shadow: var(--shadow);
+	padding: 15px;
+	transition: var(--transition);
+
+	&:hover {
+		border-color: var(--message-accent-line);
+		box-shadow: var(--shadow-lift);
+	}
+
+	.push-top {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-bottom: 11px;
+
+		.push-icon {
+			width: 36px;
+			height: 36px;
+			flex-shrink: 0;
+			border-radius: var(--radius-sm);
+			background: var(--tint-primary);
+			color: var(--bs-primary);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 18px;
+		}
+
+		.push-name {
+			flex: 1 1 auto;
+			min-width: 0;
+			font-size: 14px;
+			font-weight: variables.$font-weight-semibold;
+			color: var(--bs-emphasis-color);
+			margin-bottom: 0;
+		}
+	}
+
+	/* The message itself, quoted — the point of a communication card is
+	   what it actually says, not its configuration. */
+	.push-quote {
+		position: relative;
+		font-size: 12.5px;
+		line-height: 1.6;
+		color: var(--bs-emphasis-color);
+		background: var(--bs-secondary-bg);
+		border-radius: var(--radius-sm);
+		padding: 10px 12px 10px 26px;
+		margin-bottom: 12px;
+
+		&::before {
+			content: "\201C";
+			position: absolute;
+			left: 9px;
+			top: 4px;
+			font-size: 22px;
+			line-height: 1;
+			color: var(--message-accent-line);
+		}
+	}
+
+	.push-footer {
+		margin-top: auto;
+		padding-top: 11px;
+		border-top: 1px dashed var(--bs-border-color);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		flex-wrap: wrap;
+		font-size: 11.5px;
+		color: var(--bs-secondary-color);
+	}
+}

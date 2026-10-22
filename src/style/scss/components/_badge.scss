@@ -1,0 +1,237 @@
+@use "../utils/variables";
+
+.badge {
+    &.badge-primary {
+        background: rgba(variables.$primary, 0.1);
+        box-shadow: 0 1px 1px rgba(variables.$primary, 0.5);
+        color: variables.$primary;
+        
+    }
+}
+@each $color, $value in variables.$theme-colors {
+    .badge {
+        &.badge-#{$color} {
+            background: #{$value};
+            color: variables.$white;
+        }
+        &.badge-soft-#{$color} {
+            background: rgba($value, 0.1);
+            color: $value;
+        }
+    }
+}
+.badge{
+    padding: .25rem .45rem;
+    text-transform:capitalize;
+    font-weight: variables.$font-weight-semibold;
+    letter-spacing: 0.5px;
+    border-radius: variables.$border-radius;
+    &.badge-xs {
+        font-size: 10px;
+        padding: 0px 5px;
+        line-height: 18px;
+    }
+    &.badge-sm {
+        font-size: 11px;
+        padding: 5px 8px;
+        line-height: 11px;
+    }
+    &.badge-md {
+        font-size: 12px;
+        padding: 5px 12px;
+        line-height: 1.5;
+    }
+    &.badge-lg {
+        font-size: variables.$font-size-14;
+        padding: 0px 10px;
+        line-height: 30px;
+    }
+    &.badge-xl {
+        font-size: variables.$font-size-16;
+        padding: 0px 15px;
+        line-height: 35px;
+    }
+    &.badge-soft-skyblue {
+        background: variables.$skyblue-100;
+        color: variables.$skyblue;
+    }
+}
+.badge.arrow {
+    width: 20px;
+    height: 20px;
+    background: variables.$light-200;
+    color: variables.$dark;
+    &:hover {
+        background: variables.$primary;
+        color: variables.$white;
+    }
+}
+.badge.bg-light.arrow:hover {
+    background: variables.$dark !important;
+}
+.badge-primary-hover:hover {
+    background: variables.$primary !important;
+    border-color: variables.$primary !important;
+    color: variables.$white !important;
+}
+.badge-danger-hover:hover {
+    background: variables.$danger !important;
+    border-color: variables.$danger !important;
+    color: variables.$white !important;
+}
+// Outline badge
+@each $state, $value in variables.$theme-colors {
+    .badge-outline-#{$state} {
+        color: $value;
+        border: 1px solid $value;
+        background-color: transparent;
+
+        &[href] {
+            color: $value;
+            text-decoration: none;
+            background-color: rgba($value, 0.1);
+
+            &:is(:hover, :focus) {
+                color: $value;
+                text-decoration: none;
+                background-color: rgba($value, 0.1);
+            }
+        }
+    }
+}
+/*-----------------
+    Soft bordered badge
+
+    A compact pill with a soft fill, a matching border and an inner highlight.
+    Colour comes from `--badge-accent` / `--badge-accent-rgb`, so one class
+    serves every variant instead of a bespoke class per placement.
+-----------------*/
+.badge-soft-bordered {
+    --badge-accent: #{variables.$primary};
+    --badge-accent-rgb: 61, 94, 225;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    padding: 3px 8px 3px 7px;
+    border-radius: 50rem;
+    color: var(--badge-accent);
+    background: rgba(var(--badge-accent-rgb), 0.12);
+    border: 1px solid rgba(var(--badge-accent-rgb), 0.22);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+
+    &.badge-soft-bordered-success { --badge-accent: #{variables.$success}; --badge-accent-rgb: 26, 190, 23; }
+    &.badge-soft-bordered-warning { --badge-accent: #{variables.$warning}; --badge-accent-rgb: 234, 179, 0; }
+    &.badge-soft-bordered-danger { --badge-accent: #{variables.$danger}; --badge-accent-rgb: 232, 38, 70; }
+    &.badge-soft-bordered-info { --badge-accent: #{variables.$info}; --badge-accent-rgb: 15, 101, 205; }
+}
+
+/*-----------------
+    Badge — tag
+
+    The one accent-driven filled label in the template. Colour comes from the
+    surrounding `--accent` / `--accent-soft`, so a section recolours every tag
+    beneath it by setting one variable instead of carrying a class per colour.
+
+        <span class="badge badge-tag accent-info d-inline-flex align-items-center gap-1">
+            <i class="ti ti-discount"></i>Sibling 5%
+        </span>
+
+    Sizes: the default suits panel headers and card footers, `.badge-tag-sm` the
+    category label above a card title, `.badge-tag-xs` a dense inbox or table
+    row. `.badge-tag-dot` adds the leading dot that reads as a live state.
+
+    Replaces .portal-tag, .portal-tag-xs and .category-badge — one design, one
+    component. Every property Bootstrap's `.badge` sets is restated here, so the
+    component renders identically with or without `.badge` beside it.
+-----------------*/
+.badge-tag { gap: 4px; font-size: 10.5px; font-weight: 650; line-height: 1; letter-spacing: normal; text-transform: none; padding: 4px 8px; border-radius: 7px; color: var(--accent); background: var(--accent-soft); }
+.badge-tag i { font-size: 12px; }
+.badge-tag-sm { gap: 4px; font-size: 10px; line-height: inherit; padding: 2px 7px; border-radius: 6px; }
+.badge-tag-xs { font-size: 9px; }
+.badge-tag-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+/*-----------------
+    Badge — meta
+
+    The bordered tag that carries a record's secondary facts inside a list row:
+    a channel, a template type, a language. Quieter than the accent tag because
+    it stays on the page's own greys instead of taking a colour.
+
+    Replaces .eml-tag, .sms-tag, .acs-tag, .acd-tag, .lng-tag and .aig-tag —
+    six byte-identical rules across six pages, now one component.
+-----------------*/
+.badge-meta { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; letter-spacing: normal; text-transform: none; padding: 2px 8px; border-radius: 6px; border: 1px solid var(--bs-border-color); background: var(--bs-secondary-bg); color: var(--bs-secondary-color); }
+
+/*-----------------
+    Badge — status
+
+    The bordered pill that reports a record's state at the end of a list row.
+    `.badge-status-lg` is the roomier step used in card headers;
+    `.badge-status-strong` darkens the label where the pill is the row's
+    primary content rather than an aside.
+
+    Seven pages had drawn this pill for themselves, byte for byte. The geometry,
+    typography and surface now live here once and those pages ride the same
+    declarations. They keep their own class name only because each carries a
+    different `.is-*` state palette — `.is-draft` is one colour on a form field
+    and another on a broadcast — so collapsing the names would collide the
+    states. New markup should use `.badge-status` directly.
+-----------------*/
+.badge-status,
+.field-status-badge,
+.message-status-badge,
+.rule-status-badge,
+.lng-badge,
+.aig-badge,
+.hwk-tag,
+.ops-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; line-height: 1.5; letter-spacing: normal; text-transform: none; white-space: nowrap; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--bs-border-color); background: var(--bs-secondary-bg); color: var(--bs-secondary-color); }
+
+.badge-status-lg,
+.lng-badge,
+.aig-badge { gap: 5px; font-size: 11.5px; padding: 3px 10px; }
+
+.badge-status-strong,
+.hwk-tag,
+.ops-chip { gap: 5px; line-height: inherit; padding: 4px 10px; color: var(--bs-emphasis-color); }
+
+/*-----------------
+    Priority flag
+
+    The uppercase severity label that closes an insight, an alert or a support
+    ticket. Unlike the accent tag it names a fixed scale, so each level carries
+    its own colour rather than following the surrounding accent.
+
+    Promoted from pages/_parent-portal.scss — a reusable pattern, not page style.
+-----------------*/
+.priority-flag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 3px 7px; border-radius: 6px; }
+.priority-flag-high { color: var(--bs-danger); background: var(--tint-danger); }
+.priority-flag-medium { color: var(--bs-warning); background: var(--tint-warning); }
+.priority-flag-low { color: var(--bs-success); background: var(--tint-success); }
+
+
+/*-----------------
+    Notification dot
+
+    The unread marker on an inbox row, a tab or a menu item: a badge with a
+    state but no content. `.notification-dot-accent` follows the surrounding
+    accent where a list already recolours row by row.
+
+    Promoted from pages/_parent-portal.scss — a reusable pattern, not page style.
+-----------------*/
+.notification-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bs-primary); }
+.notification-dot-accent { background: var(--accent); }
+
+/*-----------------
+    Disabled badge
+
+    One modifier for the whole badge family — accent tags, priority flags,
+    category badges and Bootstrap's own `.badge` alike. Drains the colour and
+    dims the label rather than restyling it, so a disabled badge still reads as
+    the badge it was.
+-----------------*/
+.badge-disabled { opacity: .55; filter: grayscale(1); pointer-events: none; }

@@ -1,0 +1,665 @@
+@use "../utils/variables";
+
+.avatar {
+    position: relative;
+    height: 2.625rem;
+    width: 2.625rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: variables.$border-radius;
+    color: variables.$white;
+    font-weight: variables.$font-weight-medium;
+    a.badge:hover {
+        color: variables.$white;
+    }
+    img {
+        width: 100%;
+        height: 100%;
+        border-radius: variables.$border-radius;
+    }
+    &.avatar-rounded {
+        border-radius: 50%;
+        img {
+            border-radius: 50%;
+        }
+    }
+    &.avatar-radius-0 {
+        border-radius: 0;
+        img {
+            border-radius: 0;
+        }
+    }
+    .avatar-notification {
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        font-size: 10px;
+        border: 2px solid variables.$white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        inset-block-start: -4%;
+        inset-inline-end: -0.375rem;
+    }
+    &.online,&.offline {
+        &:before {
+            position: absolute;
+            content: "";
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            inset-inline-end: 0;
+            inset-block-end: 0;
+            border: 2px solid variables.$white !important;
+            z-index: 1;
+        }
+    }
+    &.online:before {
+        background-color: variables.$success;
+    }
+    &.offline:before {
+        background-color: variables.$gray-500;
+    }
+    &.avatar-xs {
+        width: 1.25rem;
+        height: 1.25rem;
+        line-height: 1.25rem;
+        font-size: 0.65rem;
+        .avatar-notification {
+            padding: 4px;
+            width:  12px;
+            height: 12px;
+            line-height: 12px;
+            font-size:8px;
+            inset-block-start: -25%;
+            inset-inline-end: -2.12px;
+        }
+    }
+    &.avatar-sm {
+        width: 1.5rem;
+        height: 1.5rem;
+        line-height: 1.5rem;
+        font-size: 0.65rem;
+        .avatar-notification {
+            padding: 0.3rem;
+            width:  1.1rem;
+            height: 1.1rem;
+            line-height: 1.1rem;
+            font-size: 0.5rem;
+            inset-block-start: -28%;
+            inset-inline-end: -0.45rem;
+        }
+        &.online,&.offline {
+            &:before {
+                width: 0.5rem;
+                height: 0.5rem;
+            }
+        }    
+    }
+    &.avatar-md {
+        width: 2rem;
+        height: 2rem;
+        line-height: 2rem;
+        font-size: 0.8rem;
+        .avatar-notification {
+            padding: 0.4rem;
+            width:  1.2rem;
+            height: 1.2rem;
+            line-height: 1.2rem;
+            font-size: 0.65rem;
+            inset-block-start: -6%;
+            inset-inline-end: -13%;
+        }
+        &.online,&.offline {
+            &:before {
+                width: 0.75rem;
+                height: 0.75rem;
+            }
+        }    
+        svg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+    }
+    &.avatar-lg {
+        width: 2.813rem;
+        height: 2.813rem;
+        line-height: 2.813rem;
+        font-size: 1rem;
+        .avatar-notification {
+            inset-block-start: -15%;
+            inset-inline-end: -0.25%;
+        }
+        &.online,&.offline {
+            &:before {
+                width: 0.8rem;
+                height: 0.8rem;
+            }
+        }    
+        svg {
+            width: 1.8rem;
+            height: 1.8rem;
+        }
+    }
+    &.avatar-xl {
+        width: 4rem;
+        height: 4rem;
+        line-height: 4rem;
+        font-size: 1.25rem;
+        .avatar-notification {
+            inset-block-start: -8%;
+            inset-inline-end: -0.2%;
+        }
+        &.online,&.offline {
+            &:before {
+                width: 0.95rem;
+                height: 0.95rem;
+            }
+        }    
+    }
+    &.avatar-xxl {
+        width: 5rem;
+        height: 5rem;
+        line-height: 5rem;
+        font-size: 1.5rem;
+        .avatar-notification {
+            inset-block-start: -4%;
+            inset-inline-end: 0rem;
+        }
+        &.online,&.offline {
+            &:before {
+                width: 1.05rem;
+                height: 1.05rem;
+                inset-block-end: 0.25rem;
+            }
+        }    
+    }
+    &.avatar-xxxl {
+        width: 6rem;
+        height: 6rem;
+        line-height: 6rem;
+        font-size: 1.75rem;
+        .avatar-notification {
+            inset-block-start: -4%;
+            inset-inline-end: 0rem;
+        }
+        &.online,&.offline {
+            &:before {
+                width: 1.05rem;
+                height: 1.05rem;
+                inset-block-end: 0.25rem;
+            }
+        }    
+    }
+    &.rounded-lg {
+        border-radius: 20px !important;
+    }
+}
+.avatar-list-stacked {
+    padding: 0;
+    &.avatar-group-overlapped {
+        .avatar {
+            margin-right: -.875rem;
+            &:hover{
+                z-index:1;
+            }
+        }
+    }	
+    &.avatar-group-lg {
+        .avatar { 
+            width: 3.25rem;
+            height: 3.25rem;
+            >.initial-wrap {
+                font-size: .95rem;
+            }
+        }
+        &.avatar-group-overlapped .avatar {
+            margin-right: -1rem;
+        }	
+    }
+    &.avatar-group-sm {
+        .avatar { 
+            width: 2rem;
+            height: 2rem;
+            >.initial-wrap {
+                font-size: .6rem;
+            }
+        }
+        &.avatar-group-overlapped .avatar {
+            margin-right: -0.625rem;
+        }	
+    }
+    &.avatar-group-xs {
+        .avatar { 
+            width: 1rem;
+            height: 1rem;
+            margin-inline-end: -6px !important;
+            >.initial-wrap {
+                font-size: .6rem;
+            }
+        }
+        &.avatar-group-overlapped .avatar {
+            margin-right: -6px;
+        }	
+    }
+    .avatar {
+        margin-inline-end: -0.875rem !important;
+        border: 1px solid rgba(0,0,0,0.05);
+        vertical-align: middle;
+        transition: transform ease 200ms;
+        &:last-child {
+            margin-inline-end: 0 !important;
+        }
+        &:hover {
+            z-index: 1;
+            transform: translateY(-0.188rem);
+        }
+    }
+}
+.avatar-group {
+	display: -webkit-inline-box;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
+	.avatar { 
+		width: 2.625rem;
+		height: 2.625rem;
+		.avatar-img,
+		>.initial-wrap {
+			border:2px solid variables.$white;
+			font-size: .9rem;
+		}
+	}
+	&.avatar-group-overlapped {
+		.avatar {
+			margin-right: -.875rem;
+			&:hover{
+				z-index:1;
+			}
+		}
+	}	
+	&.avatar-group-lg {
+		.avatar { 
+			width: 3.25rem;
+			height: 3.25rem;
+			>.initial-wrap {
+				font-size: .95rem;
+			}
+		}
+		&.avatar-group-overlapped .avatar {
+			margin-right: -1rem;
+		}	
+	}
+	&.avatar-group-sm {
+		.avatar { 
+			width: 2rem;
+			height: 2rem;
+			>.initial-wrap {
+				font-size: .6rem;
+			}
+		}
+		&.avatar-group-overlapped .avatar {
+			margin-right: -0.625rem;
+		}	
+	}
+}
+.avatar-sm {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+/*-----------------
+    Avatar — consolidated variants
+
+    Collected from the dashboard, profile and finance pages so every avatar in
+    the application is built from this one component. Sizes, rounding, groups,
+    stacks and online/offline are declared above; what follows are the
+    remaining variants those pages relied on.
+-----------------*/
+.avatar {
+
+    // ---- status: away / busy, alongside the existing online / offline ----
+    &.away,
+    &.busy {
+        &::before {
+            position: absolute;
+            content: "";
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            inset-inline-end: 0;
+            inset-block-end: 0;
+            border: 2px solid variables.$white !important;
+            z-index: 1;
+        }
+    }
+
+    &.away::before { background-color: variables.$warning; }
+    &.busy::before { background-color: variables.$danger; }
+
+    // status dot on top instead of bottom
+    &.status-top {
+        &.online::before,
+        &.offline::before,
+        &.away::before,
+        &.busy::before {
+            inset-block-end: auto;
+            inset-block-start: 0;
+        }
+    }
+
+    // ---- initials and icons: no image, just a tinted face ----
+    &.avatar-initial,
+    &.avatar-icon {
+        font-weight: variables.$font-weight-medium;
+        text-transform: uppercase;
+        overflow: hidden;
+    }
+
+    &.avatar-icon i {
+        line-height: 1;
+    }
+
+    // ---- bordered ----
+    &.avatar-bordered {
+        border: 2px solid variables.$white;
+        box-shadow: 0 0 0 1px variables.$light;
+    }
+
+    // ---- hover lift, used on stacked groups and member lists ----
+    &.avatar-hover {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+            z-index: 2;
+        }
+    }
+
+    // ---- overlay revealed on hover ----
+    &.avatar-overlay {
+        overflow: hidden;
+
+        .avatar-overlay-content {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.45);
+            color: variables.$white;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        &:hover .avatar-overlay-content { opacity: 1; }
+    }
+
+    // ---- badge pinned to a corner ----
+    .avatar-badge {
+        position: absolute;
+        inset-inline-end: -0.25rem;
+        inset-block-start: -0.25rem;
+        z-index: 2;
+    }
+}
+
+// ---- counter that closes a stacked group ----
+.avatar.avatar-count {
+    background-color: variables.$light;
+    color: variables.$gray-900;
+    font-size: 0.75rem;
+    font-weight: variables.$font-weight-bold;
+}
+
+/*-----------------
+    Exact sizes and radii
+
+    The dashboard, profile and finance pages were each built to their own
+    avatar dimensions rather than the named scale above. These modifiers carry
+    those exact values so those pages can drop their bespoke classes without
+    shifting a single pixel. Prefer the named sizes for anything new.
+-----------------*/
+.avatar {
+    &.avatar-26 { width: 26px; height: 26px; }
+    &.avatar-28 { width: 28px; height: 28px; }
+    &.avatar-32 { width: 32px; height: 32px; }
+    &.avatar-34 { width: 34px; height: 34px; }
+    &.avatar-38 { width: 38px; height: 38px; }
+    &.avatar-40 { width: 40px; height: 40px; }
+    &.avatar-42 { width: 42px; height: 42px; }
+    &.avatar-44 { width: 44px; height: 44px; }
+    &.avatar-46 { width: 46px; height: 46px; }
+    &.avatar-48 { width: 48px; height: 48px; }
+    &.avatar-58 { width: 58px; height: 58px; }
+
+    &.avatar-r-8 { border-radius: 8px; img { border-radius: 8px; } }
+    &.avatar-r-9 { border-radius: 9px; img { border-radius: 9px; } }
+    &.avatar-r-10 { border-radius: 10px; img { border-radius: 10px; } }
+    &.avatar-r-11 { border-radius: 11px; img { border-radius: 11px; } }
+    &.avatar-r-12 { border-radius: 12px; img { border-radius: 12px; } }
+    &.avatar-r-16 { border-radius: 16px; img { border-radius: 16px; } }
+
+    // images in these cells are cropped, never letterboxed
+    img { object-fit: cover; }
+}
+
+/* a bare <img class="avatar …"> has no inner image to size, so it takes the
+   dimensions itself */
+img.avatar { display: inline-block; flex-shrink: 0; }
+
+/*-----------------
+    Status dot as a child element
+
+    The `.online` / `.offline` modifiers above draw an 8px dot inside the
+    avatar. Several pages instead hang a larger dot just outside the corner,
+    so that shape gets its own child element. The ring colour follows the
+    surface the avatar sits on via `--avatar-status-ring`.
+-----------------*/
+.avatar {
+    // exact sizes carried from the pages need to hold their width in a flex row
+    &.avatar-26, &.avatar-28, &.avatar-32, &.avatar-34,
+    &.avatar-38, &.avatar-40, &.avatar-42,
+    &.avatar-44, &.avatar-46, &.avatar-48, &.avatar-58 { flex-shrink: 0; }
+
+    .avatar-status {
+        position: absolute;
+        inset-inline-end: -2px;
+        inset-block-end: -2px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #16a34a;
+        border: 2px solid var(--avatar-status-ring, #{variables.$white});
+        z-index: 2;
+
+        &.avatar-status-sm { width: 11px; height: 11px; }
+
+        // sits just inside the corner rather than outside it
+        &.avatar-status-inset {
+            inset-inline-end: 1px;
+            inset-block-end: 1px;
+        }
+
+        &.is-offline { background: #9aa6c2; }
+        &.is-idle { background: #9CA1AF; }
+        &.is-online { background: #22c55e; }
+        &.is-away { background: #{variables.$warning}; }
+        &.is-busy { background: #{variables.$danger}; }
+    }
+
+    // double ring, used to mark the active record in a switcher
+    &.avatar-ring img {
+        box-shadow: 0 0 0 2px var(--avatar-ring-inner, #{variables.$white}),
+                    0 0 0 3px var(--avatar-ring-outer, #{variables.$primary});
+    }
+}
+
+[data-theme="dark"] .avatar .avatar-status,
+[data-bs-theme="dark"] .avatar .avatar-status {
+    border-color: var(--avatar-status-ring, #181d2c);
+}
+
+/*-----------------
+    Icon tile
+
+    The avatar of a subject, channel, event or metric rather than a person: a
+    softly rounded square with a centred icon. It takes the same named sizes as
+    a photo avatar, and any `bg-*-transparent` utility supplies the tint, so no
+    page needs its own icon-wrapper class.
+
+        <span class="avatar avatar-icon avatar-md bg-primary-transparent">
+            <i class="ti ti-users"></i>
+        </span>
+
+    Add `avatar-rounded` for a circle, or a background utility / gradient for a
+    solid tile — `color` then falls back to the component's white.
+-----------------*/
+.avatar.avatar-icon {
+    flex-shrink: 0;
+    line-height: 1;
+
+    > i {
+        line-height: 1;
+        font-size: 20px;
+    }
+
+    &.avatar-xs > i { font-size: 11px; }
+    &.avatar-sm > i { font-size: 13px; }
+    &.avatar-md > i { font-size: 16px; }
+    &.avatar-lg > i { font-size: 22px; }
+    &.avatar-xl > i { font-size: 28px; }
+    &.avatar-xxl > i,
+    &.avatar-xxxl > i { font-size: 34px; }
+
+    /* Exact glyph sizes, for tiles built to their own dimensions rather than
+       the named scale above. Declared on the tile, not the icon, so the glyph
+       is never a font-size utility fighting the component. */
+    &.avatar-glyph-14 > i { font-size: 14px; }
+    &.avatar-glyph-15 > i { font-size: 15px; }
+    &.avatar-glyph-16 > i { font-size: 16px; }
+    &.avatar-glyph-17 > i { font-size: 17px; }
+    &.avatar-glyph-18 > i { font-size: 18px; }
+    &.avatar-glyph-24 > i { font-size: 24px; }
+
+    /* Tinted from an accent token set by an ancestor, so a list can recolour
+       its tiles row by row without a class per colour. Set `--avatar-accent`
+       and `--avatar-accent-soft` alongside whatever accent the surrounding
+       component already declares. */
+    &.avatar-accent {
+        background: var(--avatar-accent, #{variables.$primary});
+        color: variables.$white;
+
+        > i { color: variables.$white; }
+    }
+
+    &.avatar-accent-soft {
+        background: var(--avatar-accent-soft, #{variables.$primary-transparent});
+        color: var(--avatar-accent, #{variables.$primary});
+    }
+
+    // softer corners than a photo avatar, scaled with the tile
+    &:not(.avatar-rounded):not(.avatar-radius-0) {
+        border-radius: 10px;
+
+        &.avatar-xs,
+        &.avatar-sm { border-radius: 6px; }
+
+        &.avatar-md { border-radius: 8px; }
+
+        &.avatar-xl,
+        &.avatar-xxl,
+        &.avatar-xxxl { border-radius: 14px; }
+
+        /* An explicit `avatar-r-*` outranks the rounding the tile picks from
+           its size — without this the exact radii only reach photo avatars. */
+        &.avatar-r-8 { border-radius: 8px; }
+        &.avatar-r-9 { border-radius: 9px; }
+        &.avatar-r-10 { border-radius: 10px; }
+        &.avatar-r-11 { border-radius: 11px; }
+        &.avatar-r-12 { border-radius: 12px; }
+        &.avatar-r-16 { border-radius: 16px; }
+    }
+}
+
+/*-----------------
+    Medal
+
+    The award finish of the icon tile: the accent fill lit by a diagonal sheen
+    and dropped onto a glow of its own colour. Used for achievement, badge and
+    certificate galleries, where the tile is the trophy rather than a label.
+
+        <span class="avatar avatar-icon avatar-48 avatar-rounded avatar-glyph-24 avatar-medal accent-warning">
+            <i class="ti ti-medal"></i>
+        </span>
+
+    Colour comes from the accent pair on the tile or any ancestor, so a gallery
+    recolours row by row without a class per medal. Pair with `.avatar-rounded`
+    for the usual disc; any size in the scale works.
+-----------------*/
+.avatar.avatar-medal,
+.avatar.avatar-icon.avatar-medal {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.15)),
+                var(--avatar-accent, #{variables.$primary});
+    color: variables.$white;
+    box-shadow: 0 8px 18px -8px var(--avatar-accent, #{variables.$primary});
+
+    > i { color: variables.$white; }
+}
+
+/*-----------------
+    AI orb
+
+    The tile that marks machine-generated content — a summary, a prediction, an
+    assistant reply. One violet-to-primary gradient across the whole template,
+    so every AI surface is recognisable at a glance and no panel mixes its own.
+
+        <span class="avatar avatar-icon avatar-26 avatar-r-8 avatar-glyph-15 avatar-ai">
+            <i class="ti ti-sparkles"></i>
+        </span>
+
+    Unlike the accent tiles this one does not follow its surroundings: the
+    gradient is the signal.
+-----------------*/
+.avatar.avatar-ai,
+.avatar.avatar-icon.avatar-ai {
+    background: linear-gradient(135deg, var(--accent-purple), var(--bs-primary));
+    color: variables.$white;
+
+    > i { color: variables.$white; }
+}
+
+/*-----------------
+    Accent tokens
+
+    Set the pair on any ancestor — a list row, a card, a KPI tile — and every
+    `.avatar-accent` / `.avatar-accent-soft` beneath it follows, so a list can
+    recolour per row without a class per colour on the avatar itself.
+-----------------*/
+/* One accent modifier for the whole template. Set it on any ancestor — a list
+   row, a card, a KPI tile, an avatar — and everything beneath recolours from
+   the same pair. Solid tone in `--accent`, 12% tint in `--accent-soft`; the
+   `--avatar-*` aliases keep older avatar markup working off the same values. */
+@each $name, $tone, $tint in (
+	("primary", var(--bs-primary), var(--tint-primary)),
+	("secondary", var(--bs-secondary), var(--tint-secondary)),
+	("success", var(--bs-success), var(--tint-success)),
+	("info", var(--bs-info), var(--tint-info)),
+	("warning", var(--bs-warning), var(--tint-warning)),
+	("danger", var(--bs-danger), var(--tint-danger)),
+	("purple", var(--accent-purple), var(--tint-purple)),
+	("teal", var(--accent-teal), var(--tint-teal)),
+	("pink", var(--accent-pink), var(--tint-pink)),
+	("indigo", var(--accent-indigo), var(--tint-info)),
+	("slate", var(--bs-secondary-color), var(--bs-tertiary-bg)),
+	("dark", var(--bs-dark), var(--bs-light))
+) {
+	.accent-#{$name} {
+		--accent: #{$tone};
+		--accent-soft: #{$tint};
+		--accent-strong: #{$tone};
+		--avatar-accent: #{$tone};
+		--avatar-accent-soft: #{$tint};
+	}
+}
