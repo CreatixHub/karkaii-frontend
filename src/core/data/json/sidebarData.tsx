@@ -784,6 +784,7 @@ export const SidebarData = [
         ],
       },
       */
+      /*
       {
         label: "Cafeteria",
         icon: "ti ti-chef-hat",
@@ -811,6 +812,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
       {
         label: "Assets",
         icon: "ti ti-package",
@@ -880,6 +882,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Medical",
         icon: "ti ti-first-aid-kit",
@@ -902,6 +905,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
     ],
   },
   {
@@ -1415,6 +1419,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Localization",
         icon: "ti ti-world",
@@ -1437,6 +1442,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
       {
         label: "Appearance",
         icon: "ti ti-palette",
