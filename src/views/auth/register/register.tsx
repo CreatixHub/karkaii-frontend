@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "@/routes/all_routes";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
@@ -37,9 +37,7 @@ const Register = () => {
                   />
                 </div>
                 <div className="authen-overlay-item  w-100 p-4">
-                  <h4 className="text-white mb-3">
-                    What's New on Karkaii !!!
-                  </h4>
+                  <h4 className="text-white mb-3">What's New on Karkaii !!!</h4>
                   <div className="d-flex align-items-center flex-row mb-3 justify-content-between p-3 br-5 gap-3 card">
                     <div>
                       <h6>Summer Vacation Holiday Homework</h6>
@@ -68,7 +66,7 @@ const Register = () => {
                       <h6>Date sheet Final Exam Nursery to Sr.Kg</h6>
                       <p className="mb-0 text-truncate">
                         Dear Parents, As the final examination for the session
-                        2024-25 is ...
+                        2026-27 is ...
                       </p>
                     </div>
                     <Link to="3">
@@ -127,36 +125,12 @@ const Register = () => {
                               <div className="text-center me-2 flex-fill">
                                 <Link
                                   to="3"
-                                  className="bg-primary br-10 p-2 btn btn-primary  d-flex align-items-center justify-content-center"
-                                >
-                                  <ImageWithBasePath
-                                    className="img-fluid m-1"
-                                    src="assets/img/icons/facebook-logo.svg"
-                                    alt="Facebook"
-                                  />
-                                </Link>
-                              </div>
-                              <div className="text-center me-2 flex-fill">
-                                <Link
-                                  to="3"
                                   className=" br-10 p-2 btn btn-outline-light  d-flex align-items-center justify-content-center"
                                 >
                                   <ImageWithBasePath
                                     className="img-fluid  m-1"
                                     src="assets/img/icons/google-logo.svg"
-                                    alt="Facebook"
-                                  />
-                                </Link>
-                              </div>
-                              <div className="text-center flex-fill">
-                                <Link
-                                  to="3"
-                                  className="bg-dark br-10 p-2 btn btn-dark d-flex align-items-center justify-content-center"
-                                >
-                                  <ImageWithBasePath
-                                    className="img-fluid  m-1"
-                                    src="assets/img/icons/apple-logo.svg"
-                                    alt="Apple"
+                                    alt="Google"
                                   />
                                 </Link>
                               </div>
