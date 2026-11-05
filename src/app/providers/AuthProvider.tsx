@@ -24,7 +24,7 @@ import type { ApiError } from '@services/api/errors';
 import { toApiError } from '@services/api/errors';
 import { authService } from '@services/auth/auth.service';
 import { tokenStorage } from '@services/auth/token-storage';
-import type { AuthSession, AuthUser, LoginCredentials } from '@services/auth/auth.types';
+import type { AuthSession, AuthUser, LoginCredentials, SignupCredentials } from '@services/auth/auth.types';
 import { AuthContext } from './auth-context';
 import type { AuthContextValue, AuthStatus } from './auth-context';
 
@@ -36,6 +36,18 @@ export interface AuthProviderProps {
 let refreshInFlight: Promise<boolean> | null = null;
 
 const sleep = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+
+/** Turns a school name into a URL-safe slug matching the backend's rule (3-41 chars, [a-z0-9-]). */
+function slugify(name: string): string {
+  const base = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 36);
+  const padded = base.length >= 3 ? base : `${base || 'school'}-school`;
+  return padded;
+}
 
 /**
  * Trades the httpOnly refresh cookie for a new access token and stores it.
@@ -69,6 +81,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     env.authEnabled ? 'initializing' : 'unauthenticated',
   );
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
 
   const mountedRef = useRef(true);
@@ -194,6 +207,44 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     [],
   );
 
+  const signup = useCallback(
+    async (credentials: SignupCredentials): Promise<AuthUser> => {
+      setIsSigningUp(true);
+      setError(null);
+
+      try {
+        // 1. Create the account. The returned session has no school yet (role/permissions are empty).
+        const account = await authService.signup(credentials);
+        tokenStorage.clear();
+        tokenStorage.setTokens(account.accessToken, account.refreshToken, true);
+        tokenStorage.setUser(account.user, true);
+
+        // 2. Create their school, then switch into it — this is what actually grants the owner role.
+        const slug = slugify(credentials.schoolName);
+        await authService.createOrganization({ name: credentials.schoolName.trim(), slug });
+        const session = await authService.switchOrganization(slug);
+
+        tokenStorage.setTokens(session.accessToken, session.refreshToken, true);
+        tokenStorage.setUser(session.user, true);
+
+        if (mountedRef.current) {
+          setUser(session.user);
+          setStatus('authenticated');
+          setIsSigningUp(false);
+        }
+        return session.user;
+      } catch (raw: unknown) {
+        const apiError = toApiError(raw);
+        if (mountedRef.current) {
+          setError(apiError);
+          setIsSigningUp(false);
+        }
+        throw apiError;
+      }
+    },
+    [],
+  );
+
   const logout = useCallback(async (): Promise<void> => {
     try {
       await authService.logout();
@@ -232,8 +283,10 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       status,
       isAuthenticated: status === 'authenticated',
       isLoggingIn,
+      isSigningUp,
       error,
       login,
+      signup,
       logout,
       hasRole,
       hasPermission,
@@ -243,8 +296,10 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       user,
       status,
       isLoggingIn,
+      isSigningUp,
       error,
       login,
+      signup,
       logout,
       hasRole,
       hasPermission,

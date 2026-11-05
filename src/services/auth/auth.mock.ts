@@ -7,7 +7,9 @@
  * be mistaken for a genuine credential.
  */
 
-import { createValidationError, createNotFoundError } from '@services/api/errors';
+import { ApiError, createValidationError, createNotFoundError } from '@services/api/errors';
+import { ERROR_CODE } from '@constants/api.constants';
+import { USER_ROLE } from '@constants/app.constants';
 import { defaultDemoUser, demoUsers } from '@mocks/auth.mock';
 import { mockRequest } from '@mocks/mock.utils';
 import { tokenStorage } from './token-storage';
@@ -18,6 +20,7 @@ import type {
   ForgotPasswordPayload,
   LoginCredentials,
   ResetPasswordPayload,
+  SignupCredentials,
 } from './auth.types';
 
 const MOCK_TOKEN_PREFIX = 'mock-access-token';
@@ -48,6 +51,48 @@ export const authMockService: AuthService = {
     const user = findUserByEmail(credentials.email);
     const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
 
+    return { user, accessToken: issueToken(user.id), expiresAt };
+  },
+
+  async signup(credentials: SignupCredentials): Promise<AuthSession> {
+    await mockRequest();
+
+    const fieldErrors: Record<string, string> = {};
+    if (!credentials.fullName?.trim() || credentials.fullName.trim().length < 2) {
+      fieldErrors.fullName = 'Name must be at least 2 characters';
+    }
+    if (!credentials.email?.trim()) fieldErrors.email = 'Email is required';
+    if (!credentials.password || credentials.password.length < 10) {
+      fieldErrors.password = 'Password must be at least 10 characters';
+    }
+    if (!credentials.schoolName?.trim()) fieldErrors.schoolName = 'School name is required';
+    if (Object.keys(fieldErrors).length > 0) throw createValidationError(fieldErrors);
+
+    if (demoUsers.some((u) => u.email.toLowerCase() === credentials.email.trim().toLowerCase())) {
+      throw new ApiError('An account with this email already exists', { status: 409, code: ERROR_CODE.CONFLICT });
+    }
+
+    // Standalone demo: the new person is immediately the admin of their own (fictional) school.
+    const user: AuthUser = {
+      id: `demo-${Date.now()}`,
+      name: credentials.fullName.trim(),
+      email: credentials.email.trim().toLowerCase(),
+      role: USER_ROLE.ADMIN,
+      permissions: ['*'],
+      avatarUrl: null,
+    };
+    const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
+    return { user, accessToken: issueToken(user.id), expiresAt };
+  },
+
+  async createOrganization(): Promise<void> {
+    await mockRequest(); // no multi-tenancy in standalone mode: nothing to create
+  },
+
+  async switchOrganization(): Promise<AuthSession> {
+    await mockRequest();
+    const user = tokenStorage.getUser() ?? defaultDemoUser;
+    const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
     return { user, accessToken: issueToken(user.id), expiresAt };
   },
 

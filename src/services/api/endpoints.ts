@@ -8,11 +8,17 @@
 export const endpoints = {
   auth: {
     login: '/auth/login',
+    signup: '/auth/signup',
     logout: '/auth/logout',
     refresh: '/auth/refresh',
     me: '/auth/me',
+    switchOrganization: '/auth/switch-organization',
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
+  },
+
+  organizations: {
+    create: '/organizations',
   },
 
   students: {
