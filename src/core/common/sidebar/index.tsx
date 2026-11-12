@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
 import { SidebarData } from "../../data/json/sidebarData";
-import { schoolWorkspaces } from "../../data/json/sidebarBrandData";
 import ImageWithBasePath from "../imageWithBasePath";
 import { setExpandMenu } from "../../data/redux/sidebarSlice";
 import {
@@ -13,6 +12,8 @@ import {
 } from "../../data/redux/themeSettingSlice";
 import usePreviousRoute from "./usePreviousRoute";
 import { all_routes } from "@/routes/all_routes";
+import { useAuth } from "@hooks/useAuth";
+import { roleLabel } from "@features/auth/roleHome";
 import "../../../style/icon/tabler-icons/webfont/tabler-icons.css";
 
 type MenuItem = {
@@ -68,9 +69,16 @@ const findActiveTrail = (items: MenuItem[], pathname: string): string[] => {
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const previousLocation = usePreviousRoute();
   const routes = all_routes;
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate(routes.login, { replace: true });
+  };
 
   // Labels of every currently expanded submenu, at any depth.
   const [openMenus, setOpenMenus] = useState<string[]>([]);
@@ -206,15 +214,10 @@ const Sidebar = () => {
     >
       <div className="sidebar-inner mui-native-scroll">
         <div id="sidebar-menu" className="sidebar-menu">
-          {/* School workspace */}
-          <div className="mui-side-brand dropdown">
-            <button
-              type="button"
-              className="mui-brand-card dropdown-toggle"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-              aria-label="Switch school"
-            >
+          {/* School workspace — shows the school this session is acting in. Switching between several schools
+              isn't built yet (every account has exactly one today), so this is a label, not a dropdown. */}
+          <div className="mui-side-brand">
+            <div className="mui-brand-card">
               <span className="mui-brand-logo">
                 <ImageWithBasePath
                   src="assets/img/icons/global-img.svg"
@@ -222,45 +225,9 @@ const Sidebar = () => {
                 />
               </span>
               <span className="mui-brand-meta d-flex flex-column gap-1">
-                <span className="mui-brand-name">Global International</span>
+                <span className="mui-brand-name">{user?.organization?.name ?? "Karkaii"}</span>
                 <span className="mui-brand-sub">School Management</span>
               </span>
-              <i className="ti ti-selector mui-brand-caret" />
-            </button>
-            <div className="dropdown-menu mui-brand-menu">
-              <div className="mui-brand-head">Switch School</div>
-              {schoolWorkspaces.map((school) => (
-                <Link
-                  key={school.name}
-                  to={school.active ? routes.adminDashboard : "#"}
-                  className={`mui-brand-item${school.active ? " active" : ""}`}
-                >
-                  {school.image ? (
-                    <span className="mui-bi-logo">
-                      <ImageWithBasePath src={school.image} alt="" />
-                    </span>
-                  ) : (
-                    <span
-                      className="mui-bi-logo mui-bi-letter"
-                      style={{ "--bl": school.color } as React.CSSProperties}
-                    >
-                      {school.letter}
-                    </span>
-                  )}
-                  <span className="mui-bi-meta">
-                    <b>{school.name}</b>
-                    <small>{school.campus}</small>
-                  </span>
-                  {school.active && <i className="ti ti-check mui-bi-check" />}
-                </Link>
-              ))}
-              <div className="mui-brand-divider" />
-              <Link to="#" className="mui-brand-add">
-                <span className="mui-bi-add">
-                  <i className="ti ti-plus" />
-                </span>
-                Add new school
-              </Link>
             </div>
           </div>
 
@@ -290,12 +257,12 @@ const Sidebar = () => {
             aria-label="Account menu"
           >
             <ImageWithBasePath
-              src="assets/img/profiles/avatar-27.jpg"
+              src={user?.avatarUrl || "assets/img/profiles/avatar-27.jpg"}
               alt="User avatar"
             />
             <span className="mui-su-meta">
-              <span className="mui-su-name">Kevin Larry</span>
-              <span className="mui-su-role">Administrator</span>
+              <span className="mui-su-name">{user?.name ?? "Guest"}</span>
+              <span className="mui-su-role">{roleLabel(user?.role)}</span>
             </span>
             <i className="ti ti-selector mui-su-caret" />
           </button>
@@ -321,6 +288,10 @@ const Sidebar = () => {
             <Link
               className="dropdown-item rounded-2 d-flex align-items-center text-danger"
               to={routes.login}
+              onClick={(e) => {
+                e.preventDefault();
+                void handleLogout();
+              }}
             >
               <i className="ti ti-logout me-2" />
               Logout

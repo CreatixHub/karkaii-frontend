@@ -54,25 +54,6 @@ const Login = () => {
                             Please enter your details to sign in
                           </p>
                         </div>
-                        <div className="mt-4">
-                          <div className="d-flex align-items-center justify-content-center flex-wrap">
-                            <div className="text-center flex-fill">
-                              <Link
-                                to="#"
-                                className="br-10 p-2 btn btn-outline-light d-flex align-items-center justify-content-center"
-                              >
-                                <ImageWithBasePath
-                                  className="img-fluid m-1"
-                                  src="assets/img/icons/google-logo.svg"
-                                  alt="Google"
-                                />
-                              </Link>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="login-or">
-                          <span className="span-or">Or</span>
-                        </div>
                         <div className="mb-3 ">
                           <label className="form-label">Email Address</label>
                           <div className="input-icon mb-3 position-relative">

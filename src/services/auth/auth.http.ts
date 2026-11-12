@@ -10,6 +10,7 @@ import type {
   ForgotPasswordPayload,
   LoginCredentials,
   ResetPasswordPayload,
+  SignupCredentials,
 } from './auth.types';
 
 /** A user document exactly as server/src/models/User.js returns it (secrets are stripped server-side). */
@@ -20,6 +21,7 @@ interface BackendUser {
   role: UserRole;
   avatar?: string | null;
   phone?: string | null;
+  organization?: { id: string; slug: string; name: string; roles: string[] } | null;
 }
 
 /** Roles with unrestricted UI access. The server still enforces every permission on every request. */
@@ -34,6 +36,7 @@ function toAuthUser(u: BackendUser): AuthUser {
     role: u.role,
     permissions: FULL_ACCESS_ROLES.has(u.role) ? ['*'] : [],
     avatarUrl: u.avatar ?? null,
+    organization: u.organization ?? null,
   };
 }
 
@@ -75,6 +78,20 @@ function withServerMessage(error: unknown): never {
   throw error;
 }
 
+/**
+ * Same idea as `withServerMessage`, for the sign-up -> create-school -> switch-school chain: it also needs to
+ * surface 409 ("this email/slug is already taken") with the server's own wording, which login never hits.
+ */
+function withSignupServerMessage(error: unknown): never {
+  if (error instanceof ApiError && [400, 401, 403, 404, 409, 429].includes(error.status)) {
+    const message = (error.details as { message?: unknown } | undefined)?.message;
+    if (typeof message === 'string' && message) {
+      throw new ApiError(message, { status: error.status, code: error.code, details: error.details, fieldErrors: error.fieldErrors });
+    }
+  }
+  throw error;
+}
+
 export const authHttpService: AuthService = {
   async login(credentials: LoginCredentials) {
     // `skipAuth` — there is no session yet, so no Authorization header.
@@ -88,6 +105,37 @@ export const authHttpService: AuthService = {
       return toSession(response);
     } catch (error) {
       return withServerMessage(error);
+    }
+  },
+
+  async signup(credentials: SignupCredentials) {
+    // `schoolName` isn't part of the account; it's used afterwards to create the school (see `createOrganization`).
+    try {
+      const response = await apiClient.post<LoginResponse>(
+        endpoints.auth.signup,
+        { fullName: credentials.fullName.trim(), email: credentials.email, password: credentials.password },
+        { skipAuth: true, skipRefresh: true },
+      );
+      return toSession(response);
+    } catch (error) {
+      return withSignupServerMessage(error);
+    }
+  },
+
+  async createOrganization(payload: { name: string; slug: string }) {
+    try {
+      await apiClient.post<unknown>(endpoints.organizations.create, payload);
+    } catch (error) {
+      withSignupServerMessage(error);
+    }
+  },
+
+  async switchOrganization(slug: string) {
+    try {
+      const response = await apiClient.post<LoginResponse>(endpoints.auth.switchOrganization, { organization: slug });
+      return toSession(response);
+    } catch (error) {
+      return withSignupServerMessage(error);
     }
   },
 

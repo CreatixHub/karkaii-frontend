@@ -12,6 +12,8 @@ export interface AuthUser {
   /** Fine-grained permissions, e.g. "students.create". */
   permissions: string[];
   avatarUrl: string | null;
+  /** The school this session is acting in. Absent/null for mock users and for a brand-new signup with no school yet. */
+  organization?: { id: string; slug: string; name: string; roles: string[] } | null;
 }
 
 export interface LoginCredentials {
@@ -19,6 +21,14 @@ export interface LoginCredentials {
   password: string;
   /** Persist the session across browser restarts. */
   rememberMe?: boolean;
+}
+
+export interface SignupCredentials {
+  fullName: string;
+  email: string;
+  password: string;
+  /** Name of the school to create for this person; they become its owner. */
+  schoolName: string;
 }
 
 /** What a successful `POST /auth/login` returns. */

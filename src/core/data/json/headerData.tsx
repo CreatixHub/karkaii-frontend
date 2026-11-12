@@ -107,15 +107,16 @@ export const appTiles = [
 export const searchRecent = [
   { label: "Fee collection report", link: routes.feesMaster },
   { label: "Today's attendance", link: routes.studentAttendance },
-  { label: "Term-1 exam schedule", link: routes.examSchedule },
+  // { label: "Term-1 exam schedule", link: routes.examSchedule }, // hidden: Examination is not in the finalised modules
 ];
 
 export const searchQuickLinks = [
   { label: "Students", icon: "ti ti-users-group", tone: "ic-blue", link: routes.studentGrid },
   { label: "Teachers", icon: "ti ti-chalkboard", tone: "ic-green", link: routes.teacherGrid },
   { label: "Fees", icon: "ti ti-report-money", tone: "ic-amber", link: routes.feesMaster },
-  { label: "Examinations", icon: "ti ti-file-certificate", tone: "ic-purple", link: routes.exam },
-  { label: "Library", icon: "ti ti-books", tone: "ic-teal", link: routes.libraryBooks },
+  // hidden: Examination and Library are not in the finalised modules
+  // { label: "Examinations", icon: "ti ti-file-certificate", tone: "ic-purple", link: routes.exam },
+  // { label: "Library", icon: "ti ti-books", tone: "ic-teal", link: routes.libraryBooks },
 ];
 
 export const DOCS_URL = "https://preschool.dreamstechnologies.com/documentation/index.html";

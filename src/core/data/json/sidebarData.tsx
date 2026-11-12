@@ -5,6 +5,8 @@ const routes = all_routes;
 // Mirrors the menu in html/sidebar.html — section order, labels, Tabler icons and
 // nesting are taken verbatim from the template. Regenerate rather than hand-edit
 // when the HTML sidebar changes.
+// Only the finalised modules are shown. Everything else is commented out with /* ... */ (or // for the whole
+// Communication section): remove the comment markers around an item to bring it back.
 export const SidebarData = [
   {
     label: "Main",
@@ -37,6 +39,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Application",
         icon: "ti ti-layout-list",
@@ -69,6 +72,8 @@ export const SidebarData = [
           },
         ],
       },
+      */
+      /*
       {
         label: "Layouts",
         icon: "ti ti-layout-dashboard",
@@ -111,6 +116,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
     ],
   },
   {
@@ -186,18 +192,22 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Parents",
         icon: "ti ti-users-group",
         submenu: false,
         link: routes.parentGrid,
       },
+      */
+      /*
       {
         label: "Guardians",
         icon: "ti ti-user-heart",
         submenu: false,
         link: routes.guardiansGrid,
       },
+      */
       {
         label: "Staff",
         icon: "ti ti-user-cog",
@@ -268,23 +278,30 @@ export const SidebarData = [
             submenu: false,
             link: routes.classSection,
           },
+          /*
           {
             label: "Class Routine",
             submenu: false,
             link: routes.classRoutine,
           },
+          */
+          /*
           {
             label: "Class Schedule",
             submenu: false,
             link: routes.sheduleClasses,
           },
+          */
+          /*
           {
             label: "Academic Calendar",
             submenu: false,
             link: routes.academicCalendar,
           },
+          */
         ],
       },
+      /*
       {
         label: "Subjects & Curriculum",
         icon: "ti ti-book",
@@ -306,6 +323,13 @@ export const SidebarData = [
             link: routes.classSyllabus,
           },
         ],
+      },
+      */
+      {
+        label: "Subjects",
+        icon: "ti ti-book",
+        submenu: false,
+        link: routes.classSubject,
       },
       {
         label: "Timetable",
@@ -329,11 +353,13 @@ export const SidebarData = [
         icon: "ti ti-book-2",
         submenu: true,
         submenuItems: [
+          /*
           {
             label: "Lesson Planning",
             submenu: false,
             link: routes.lessonPlanning,
           },
+          */
           {
             label: "Study Materials",
             submenu: false,
@@ -346,6 +372,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Examination",
         icon: "ti ti-certificate",
@@ -418,6 +445,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
     ],
   },
   {
@@ -484,11 +512,13 @@ export const SidebarData = [
             submenu: false,
             link: routes.staffAttendance,
           },
+          /*
           {
             label: "Biometric / RFID",
             submenu: false,
             link: routes.biometricRfid,
           },
+          */
           {
             label: "Leave List",
             submenu: false,
@@ -554,6 +584,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Billing",
         icon: "ti ti-file-invoice",
@@ -591,6 +622,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
       {
         label: "Accounts",
         icon: "ti ti-receipt-2",
@@ -606,26 +638,34 @@ export const SidebarData = [
             submenu: false,
             link: routes.expenseCategory,
           },
+          /*
           {
             label: "Income",
             submenu: false,
             link: routes.accountsIncome,
           },
+          */
+          /*
           {
             label: "Ledger",
             submenu: false,
             link: routes.ledger,
           },
+          */
+          /*
           {
             label: "Financial Reports",
             submenu: false,
             link: routes.financialReports,
           },
+          */
+          /*
           {
             label: "Tax Reports",
             submenu: false,
             link: routes.taxReports,
           },
+          */
         ],
       },
     ],
@@ -634,6 +674,7 @@ export const SidebarData = [
     label: "Campus Operations",
     submenuHdr: "Campus Operations",
     submenuItems: [
+      /*
       {
         label: "Library",
         icon: "ti ti-books",
@@ -676,6 +717,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
       {
         label: "Transport",
         icon: "ti ti-bus",
@@ -723,6 +765,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Sports",
         icon: "ti ti-run",
@@ -740,6 +783,7 @@ export const SidebarData = [
           },
         ],
       },
+      */
       /*
       {
         label: "Hostel",
@@ -840,6 +884,7 @@ export const SidebarData = [
           },
         ],
       },
+      /*
       {
         label: "Security",
         icon: "ti ti-shield-lock",
@@ -882,6 +927,13 @@ export const SidebarData = [
           },
         ],
       },
+      */
+      {
+        label: "Gate Pass",
+        icon: "ti ti-shield-lock",
+        submenu: false,
+        link: routes.gatePass,
+      },
       /*
       {
         label: "Medical",
@@ -908,134 +960,135 @@ export const SidebarData = [
       */
     ],
   },
-  {
-    label: "Communication",
-    submenuHdr: "Communication",
-    submenuItems: [
-      {
-        label: "Broadcast",
-        icon: "ti ti-speakerphone",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Announcements",
-            submenu: false,
-            link: routes.announcements,
-          },
-          {
-            label: "Notice Board",
-            submenu: false,
-            link: routes.noticeBoard,
-          },
-          {
-            label: "Broadcast Scheduler",
-            submenu: false,
-            link: routes.broadcastScheduler,
-          },
-        ],
-      },
-      {
-        label: "SMS",
-        icon: "ti ti-message-2",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Send SMS",
-            submenu: false,
-            link: routes.sendSms,
-          },
-          {
-            label: "Bulk SMS",
-            submenu: false,
-            link: routes.bulkSms,
-          },
-          {
-            label: "Templates",
-            submenu: false,
-            link: routes.smsTemplates,
-          },
-          {
-            label: "Logs",
-            submenu: false,
-            link: routes.smsLogs,
-          },
-        ],
-      },
-      {
-        label: "WhatsApp",
-        icon: "ti ti-brand-whatsapp",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Send Message",
-            submenu: false,
-            link: routes.sendWhatsapp,
-          },
-          {
-            label: "Bulk Messaging",
-            submenu: false,
-            link: routes.bulkWhatsapp,
-          },
-          {
-            label: "Templates",
-            submenu: false,
-            link: routes.whatsappTemplates,
-          },
-          {
-            label: "Chat Inbox",
-            submenu: false,
-            link: routes.chatInbox,
-          },
-        ],
-      },
-      {
-        label: "Notifications",
-        icon: "ti ti-bell-ringing",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Email Notifications",
-            submenu: false,
-            link: routes.emailNotifications,
-          },
-          {
-            label: "Push Notifications",
-            submenu: false,
-            link: routes.pushNotifications,
-          },
-          {
-            label: "Parent Communication",
-            submenu: false,
-            link: routes.parentCommunication,
-          },
-        ],
-      },
-      /*
-      {
-        label: "Automation",
-        icon: "ti ti-bolt",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Workflow Rules",
-            submenu: false,
-            link: routes.workflowRules,
-          },
-          {
-            label: "Trigger Actions",
-            submenu: false,
-            link: routes.triggerActions,
-          },
-          {
-            label: "Scheduled Tasks",
-            submenu: false,
-            link: routes.scheduledTasks,
-          },
-        ],
-      },
-      */
-    ],
-  },
+  // {
+  //   label: "Communication",
+  //   submenuHdr: "Communication",
+  //   submenuItems: [
+  //     {
+  //       label: "Broadcast",
+  //       icon: "ti ti-speakerphone",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Announcements",
+  //           submenu: false,
+  //           link: routes.announcements,
+  //         },
+  //         {
+  //           label: "Notice Board",
+  //           submenu: false,
+  //           link: routes.noticeBoard,
+  //         },
+  //         {
+  //           label: "Broadcast Scheduler",
+  //           submenu: false,
+  //           link: routes.broadcastScheduler,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: "SMS",
+  //       icon: "ti ti-message-2",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Send SMS",
+  //           submenu: false,
+  //           link: routes.sendSms,
+  //         },
+  //         {
+  //           label: "Bulk SMS",
+  //           submenu: false,
+  //           link: routes.bulkSms,
+  //         },
+  //         {
+  //           label: "Templates",
+  //           submenu: false,
+  //           link: routes.smsTemplates,
+  //         },
+  //         {
+  //           label: "Logs",
+  //           submenu: false,
+  //           link: routes.smsLogs,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: "WhatsApp",
+  //       icon: "ti ti-brand-whatsapp",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Send Message",
+  //           submenu: false,
+  //           link: routes.sendWhatsapp,
+  //         },
+  //         {
+  //           label: "Bulk Messaging",
+  //           submenu: false,
+  //           link: routes.bulkWhatsapp,
+  //         },
+  //         {
+  //           label: "Templates",
+  //           submenu: false,
+  //           link: routes.whatsappTemplates,
+  //         },
+  //         {
+  //           label: "Chat Inbox",
+  //           submenu: false,
+  //           link: routes.chatInbox,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: "Notifications",
+  //       icon: "ti ti-bell-ringing",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Email Notifications",
+  //           submenu: false,
+  //           link: routes.emailNotifications,
+  //         },
+  //         {
+  //           label: "Push Notifications",
+  //           submenu: false,
+  //           link: routes.pushNotifications,
+  //         },
+  //         {
+  //           label: "Parent Communication",
+  //           submenu: false,
+  //           link: routes.parentCommunication,
+  //         },
+  //       ],
+  //     },
+  //     /*
+  //     {
+  //       label: "Automation",
+  //       icon: "ti ti-bolt",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Workflow Rules",
+  //           submenu: false,
+  //           link: routes.workflowRules,
+  //         },
+  //         {
+  //           label: "Trigger Actions",
+  //           submenu: false,
+  //           link: routes.triggerActions,
+  //         },
+  //         {
+  //           label: "Scheduled Tasks",
+  //           submenu: false,
+  //           link: routes.scheduledTasks,
+  //         },
+  //       ],
+  //     },
+  //     */
+  //   ],
+  // },
+  /*
   {
     label: "Reports",
     submenuHdr: "Reports",
@@ -1143,6 +1196,8 @@ export const SidebarData = [
       },
     ],
   },
+  */
+  /*
   {
     label: "Administration",
     submenuHdr: "Administration",
@@ -1230,562 +1285,564 @@ export const SidebarData = [
       },
     ],
   },
-  {
-    label: "Settings",
-    submenuHdr: "Settings",
-    submenuItems: [
-      {
-        label: "General",
-        icon: "ti ti-settings",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "School Profile",
-            submenu: false,
-            link: routes.schoolProfile,
-          },
-          {
-            label: "Academic Year",
-            submenu: false,
-            link: routes.academicYear,
-          },
-          {
-            label: "Preferences",
-            submenu: false,
-            link: routes.preference,
-          },
-        ],
-      },
-      {
-        label: "Account & Security",
-        icon: "ti ti-shield-lock",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Profile",
-            submenu: false,
-            link: routes.profilesettings,
-          },
-          {
-            label: "Security",
-            submenu: false,
-            link: routes.securitysettings,
-          },
-          {
-            label: "OTP",
-            submenu: false,
-            link: routes.optSettings,
-          },
-          {
-            label: "Social Authentication",
-            submenu: false,
-            link: routes.socialAuthentication,
-          },
-          {
-            label: "Session Management",
-            submenu: false,
-            link: routes.sessionManagement,
-          },
-          {
-            label: "Login Activity",
-            submenu: false,
-            link: routes.loginActivity,
-          },
-          {
-            label: "Activity Logs",
-            submenu: false,
-            link: routes.activityLogs,
-          },
-        ],
-      },
-      {
-        label: "Academic",
-        icon: "ti ti-school",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "School Settings",
-            submenu: false,
-            link: routes.schoolSettings,
-          },
-          {
-            label: "Class Settings",
-            submenu: false,
-            link: routes.classSettings,
-          },
-          {
-            label: "Subject Settings",
-            submenu: false,
-            link: routes.subjectSettings,
-          },
-          {
-            label: "Grading Rules",
-            submenu: false,
-            link: routes.gradingRules,
-          },
-          {
-            label: "Academic Settings",
-            submenu: false,
-            link: routes.academicSettings,
-          },
-          {
-            label: "Religion",
-            submenu: false,
-            link: routes.religion,
-          },
-          {
-            label: "Section Settings",
-            submenu: false,
-            link: routes.sectionSettings,
-          },
-          {
-            label: "Timetable Settings",
-            submenu: false,
-            link: routes.timetableSettings,
-          },
-          {
-            label: "Exam Settings",
-            submenu: false,
-            link: routes.examSettings,
-          },
-        ],
-      },
-      {
-        label: "Financial Settings",
-        icon: "ti ti-zoom-money",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Payment Settings",
-            submenu: false,
-            link: routes.paymentSettings,
-          },
-          {
-            label: "Payment Gateways",
-            submenu: false,
-            link: routes.paymentGateways,
-          },
-          {
-            label: "Tax Rates",
-            submenu: false,
-            link: routes.taxRates,
-          },
-          {
-            label: "Invoice Settings",
-            submenu: false,
-            link: routes.invoiceSettings,
-          },
-          {
-            label: "Fee Rules",
-            submenu: false,
-            link: routes.feeRules,
-          },
-          {
-            label: "Discount Rules",
-            submenu: false,
-            link: routes.discountRules,
-          },
-        ],
-      },
-      {
-        label: "Communication",
-        icon: "ti ti-file-symlink",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Email Settings",
-            submenu: false,
-            link: routes.emailSettings,
-          },
-          {
-            label: "Email Templates",
-            submenu: false,
-            link: routes.emailTemplates,
-          },
-          {
-            label: "SMS Settings",
-            submenu: false,
-            link: routes.smsSettings,
-          },
-          {
-            label: "OTP",
-            submenu: false,
-            link: routes.optSettings,
-          },
-          {
-            label: "GDPR Cookies",
-            submenu: false,
-            link: routes.gdprCookies,
-          },
-        ],
-      },
-      /*
-      {
-        label: "Localization",
-        icon: "ti ti-world",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Language",
-            submenu: false,
-            link: routes.language,
-          },
-          {
-            label: "Localization",
-            submenu: false,
-            link: routes.localization,
-          },
-          {
-            label: "Prefixes",
-            submenu: false,
-            link: routes.prefixes,
-          },
-        ],
-      },
-      */
-      {
-        label: "Appearance",
-        icon: "ti ti-palette",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Theme Settings",
-            submenu: false,
-            link: routes.themeSettings,
-          },
-          {
-            label: "Custom Fields",
-            submenu: false,
-            link: routes.customFields,
-          },
-        ],
-      },
-      /*
-      {
-        label: "System",
-        icon: "ti ti-server-cog",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Backup & Restore",
-            submenu: false,
-            link: routes.backupRestore,
-          },
-          {
-            label: "Storage",
-            submenu: false,
-            link: routes.storage,
-          },
-          {
-            label: "Ban IP",
-            submenu: false,
-            link: routes.banIpAddress,
-          },
-          {
-            label: "GDPR",
-            submenu: false,
-            link: routes.gdpr,
-          },
-          {
-            label: "Logs",
-            submenu: false,
-            link: routes.systemLogs,
-          },
-          {
-            label: "Cache",
-            submenu: false,
-            link: routes.cache,
-          },
-          {
-            label: "Maintenance Mode",
-            submenu: false,
-            link: routes.maintenanceMode,
-          },
-        ],
-      },
-      */
-    ],
-  },
-  {
-    label: "CMS & Pages",
-    submenuHdr: "CMS & Pages",
-    submenuItems: [
-      {
-        label: "Pages",
-        icon: "ti ti-page-break",
-        submenu: false,
-        link: routes.pages,
-      },
-      /*
-      {
-        label: "Blog",
-        icon: "ti ti-brand-blogger",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "All Blogs",
-            submenu: false,
-            link: routes.allBlogs,
-          },
-          {
-            label: "Categories",
-            submenu: false,
-            link: routes.blogCategories,
-          },
-          {
-            label: "Comments",
-            submenu: false,
-            link: routes.blogComments,
-          },
-          {
-            label: "Tags",
-            submenu: false,
-            link: routes.blogTags,
-          },
-        ],
-      },
-      */
-      {
-        label: "Location",
-        icon: "ti ti-map-pin-search",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Countries",
-            submenu: false,
-            link: routes.countries,
-          },
-          {
-            label: "States",
-            submenu: false,
-            link: routes.states,
-          },
-          {
-            label: "Cities",
-            submenu: false,
-            link: routes.cities,
-          },
-        ],
-      },
-      /*
-      {
-        label: "Testimonials",
-        icon: "ti ti-quote",
-        submenu: false,
-        link: routes.testimonials,
-      },
-      */
-      {
-        label: "FAQ",
-        icon: "ti ti-help-circle",
-        submenu: false,
-        link: routes.faq,
-      },
-      {
-        label: "Support",
-        icon: "ti ti-lifebuoy",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Contact Messages",
-            icon: "ti ti-message",
-            submenu: false,
-            link: routes.contactMessages,
-          },
-          {
-            label: "Tickets",
-            icon: "ti ti-ticket",
-            submenu: false,
-            link: routes.tickets,
-          },
-        ],
-      },
-      {
-        label: "Profile",
-        icon: "ti ti-user",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "User Profile",
-            submenu: false,
-            link: routes.profile,
-          },
-          {
-            label: "Blank Page",
-            submenu: false,
-            link: routes.blankPage,
-          },
-        ],
-      },
-      {
-        label: "Authentication",
-        icon: "ti ti-lock-open",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "Login",
-            submenu: true,
-            submenuItems: [
-              {
-                label: "Cover",
-                submenu: false,
-                link: routes.login,
-              },
-              {
-                label: "Illustration",
-                submenu: false,
-                link: routes.login2,
-              },
-              {
-                label: "Basic",
-                submenu: false,
-                link: routes.login3,
-              },
-            ],
-          },
-          {
-            label: "Register",
-            submenu: true,
-            submenuItems: [
-              {
-                label: "Cover",
-                submenu: false,
-                link: routes.register,
-              },
-              {
-                label: "Illustration",
-                submenu: false,
-                link: routes.register2,
-              },
-              {
-                label: "Basic",
-                submenu: false,
-                link: routes.register3,
-              },
-            ],
-          },
-          {
-            label: "Forgot Password",
-            submenu: true,
-            submenuItems: [
-              {
-                label: "Cover",
-                submenu: false,
-                link: routes.forgotPassword,
-              },
-              {
-                label: "Illustration",
-                submenu: false,
-                link: routes.forgotPassword2,
-              },
-              {
-                label: "Basic",
-                submenu: false,
-                link: routes.forgotPassword3,
-              },
-            ],
-          },
-          {
-            label: "Reset Password",
-            submenu: true,
-            submenuItems: [
-              {
-                label: "Cover",
-                submenu: false,
-                link: routes.resetPassword,
-              },
-              {
-                label: "Illustration",
-                submenu: false,
-                link: routes.resetPassword2,
-              },
-              {
-                label: "Basic",
-                submenu: false,
-                link: routes.resetPassword3,
-              },
-            ],
-          },
-          {
-            label: "Email Verification",
-            submenu: true,
-            submenuItems: [
-              {
-                label: "Cover",
-                submenu: false,
-                link: routes.emailVerification,
-              },
-              {
-                label: "Illustration",
-                submenu: false,
-                link: routes.emailVerification2,
-              },
-              {
-                label: "Basic",
-                submenu: false,
-                link: routes.emailVerification3,
-              },
-            ],
-          },
-          {
-            label: "2 Step Verification",
-            submenu: true,
-            submenuItems: [
-              {
-                label: "Cover",
-                submenu: false,
-                link: routes.twoStepVerification,
-              },
-              {
-                label: "Illustration",
-                submenu: false,
-                link: routes.twoStepVerification2,
-              },
-              {
-                label: "Basic",
-                submenu: false,
-                link: routes.twoStepVerification3,
-              },
-            ],
-          },
-          {
-            label: "Lock Screen",
-            submenu: false,
-            link: routes.lockScreen,
-          },
-        ],
-      },
-      /*
-      {
-        label: "Error Pages",
-        icon: "ti ti-error-404",
-        submenu: true,
-        submenuItems: [
-          {
-            label: "404 Error",
-            submenu: false,
-            link: routes.error404,
-          },
-          {
-            label: "500 Error",
-            submenu: false,
-            link: routes.error500,
-          },
-          {
-            label: "Coming Soon",
-            submenu: false,
-            link: routes.comingSoon,
-          },
-          {
-            label: "Under Maintenance",
-            submenu: false,
-            link: routes.underMaintenance,
-          },
-        ],
-      },
-      */
-    ],
-  },
+  */
+  // {
+  //   label: "Settings",
+  //   submenuHdr: "Settings",
+  //   submenuItems: [
+  //     {
+  //       label: "General",
+  //       icon: "ti ti-settings",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "School Profile",
+  //           submenu: false,
+  //           link: routes.schoolProfile,
+  //         },
+  //         {
+  //           label: "Academic Year",
+  //           submenu: false,
+  //           link: routes.academicYear,
+  //         },
+  //         {
+  //           label: "Preferences",
+  //           submenu: false,
+  //           link: routes.preference,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: "Account & Security",
+  //       icon: "ti ti-shield-lock",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Profile",
+  //           submenu: false,
+  //           link: routes.profilesettings,
+  //         },
+  //         {
+  //           label: "Security",
+  //           submenu: false,
+  //           link: routes.securitysettings,
+  //         },
+  //         {
+  //           label: "OTP",
+  //           submenu: false,
+  //           link: routes.optSettings,
+  //         },
+  //         {
+  //           label: "Social Authentication",
+  //           submenu: false,
+  //           link: routes.socialAuthentication,
+  //         },
+  //         {
+  //           label: "Session Management",
+  //           submenu: false,
+  //           link: routes.sessionManagement,
+  //         },
+  //         {
+  //           label: "Login Activity",
+  //           submenu: false,
+  //           link: routes.loginActivity,
+  //         },
+  //         {
+  //           label: "Activity Logs",
+  //           submenu: false,
+  //           link: routes.activityLogs,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: "Academic",
+  //       icon: "ti ti-school",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "School Settings",
+  //           submenu: false,
+  //           link: routes.schoolSettings,
+  //         },
+  //         {
+  //           label: "Class Settings",
+  //           submenu: false,
+  //           link: routes.classSettings,
+  //         },
+  //         {
+  //           label: "Subject Settings",
+  //           submenu: false,
+  //           link: routes.subjectSettings,
+  //         },
+  //         {
+  //           label: "Grading Rules",
+  //           submenu: false,
+  //           link: routes.gradingRules,
+  //         },
+  //         {
+  //           label: "Academic Settings",
+  //           submenu: false,
+  //           link: routes.academicSettings,
+  //         },
+  //         {
+  //           label: "Religion",
+  //           submenu: false,
+  //           link: routes.religion,
+  //         },
+  //         {
+  //           label: "Section Settings",
+  //           submenu: false,
+  //           link: routes.sectionSettings,
+  //         },
+  //         {
+  //           label: "Timetable Settings",
+  //           submenu: false,
+  //           link: routes.timetableSettings,
+  //         },
+  //         {
+  //           label: "Exam Settings",
+  //           submenu: false,
+  //           link: routes.examSettings,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: "Financial Settings",
+  //       icon: "ti ti-zoom-money",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Payment Settings",
+  //           submenu: false,
+  //           link: routes.paymentSettings,
+  //         },
+  //         {
+  //           label: "Payment Gateways",
+  //           submenu: false,
+  //           link: routes.paymentGateways,
+  //         },
+  //         {
+  //           label: "Tax Rates",
+  //           submenu: false,
+  //           link: routes.taxRates,
+  //         },
+  //         {
+  //           label: "Invoice Settings",
+  //           submenu: false,
+  //           link: routes.invoiceSettings,
+  //         },
+  //         {
+  //           label: "Fee Rules",
+  //           submenu: false,
+  //           link: routes.feeRules,
+  //         },
+  //         {
+  //           label: "Discount Rules",
+  //           submenu: false,
+  //           link: routes.discountRules,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: "Communication",
+  //       icon: "ti ti-file-symlink",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Email Settings",
+  //           submenu: false,
+  //           link: routes.emailSettings,
+  //         },
+  //         {
+  //           label: "Email Templates",
+  //           submenu: false,
+  //           link: routes.emailTemplates,
+  //         },
+  //         {
+  //           label: "SMS Settings",
+  //           submenu: false,
+  //           link: routes.smsSettings,
+  //         },
+  //         {
+  //           label: "OTP",
+  //           submenu: false,
+  //           link: routes.optSettings,
+  //         },
+  //         {
+  //           label: "GDPR Cookies",
+  //           submenu: false,
+  //           link: routes.gdprCookies,
+  //         },
+  //       ],
+  //     },
+  //     /*
+  //     {
+  //       label: "Localization",
+  //       icon: "ti ti-world",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Language",
+  //           submenu: false,
+  //           link: routes.language,
+  //         },
+  //         {
+  //           label: "Localization",
+  //           submenu: false,
+  //           link: routes.localization,
+  //         },
+  //         {
+  //           label: "Prefixes",
+  //           submenu: false,
+  //           link: routes.prefixes,
+  //         },
+  //       ],
+  //     },
+  //     */
+  //     {
+  //       label: "Appearance",
+  //       icon: "ti ti-palette",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Theme Settings",
+  //           submenu: false,
+  //           link: routes.themeSettings,
+  //         },
+  //         {
+  //           label: "Custom Fields",
+  //           submenu: false,
+  //           link: routes.customFields,
+  //         },
+  //       ],
+  //     },
+  //     /*
+  //     {
+  //       label: "System",
+  //       icon: "ti ti-server-cog",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Backup & Restore",
+  //           submenu: false,
+  //           link: routes.backupRestore,
+  //         },
+  //         {
+  //           label: "Storage",
+  //           submenu: false,
+  //           link: routes.storage,
+  //         },
+  //         {
+  //           label: "Ban IP",
+  //           submenu: false,
+  //           link: routes.banIpAddress,
+  //         },
+  //         {
+  //           label: "GDPR",
+  //           submenu: false,
+  //           link: routes.gdpr,
+  //         },
+  //         {
+  //           label: "Logs",
+  //           submenu: false,
+  //           link: routes.systemLogs,
+  //         },
+  //         {
+  //           label: "Cache",
+  //           submenu: false,
+  //           link: routes.cache,
+  //         },
+  //         {
+  //           label: "Maintenance Mode",
+  //           submenu: false,
+  //           link: routes.maintenanceMode,
+  //         },
+  //       ],
+  //     },
+  //     */
+  //   ],
+  // },
+  // {
+  //   label: "CMS & Pages",
+  //   submenuHdr: "CMS & Pages",
+  //   submenuItems: [
+  //     {
+  //       label: "Pages",
+  //       icon: "ti ti-page-break",
+  //       submenu: false,
+  //       link: routes.pages,
+  //     },
+  //     /*
+  //     {
+  //       label: "Blog",
+  //       icon: "ti ti-brand-blogger",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "All Blogs",
+  //           submenu: false,
+  //           link: routes.allBlogs,
+  //         },
+  //         {
+  //           label: "Categories",
+  //           submenu: false,
+  //           link: routes.blogCategories,
+  //         },
+  //         {
+  //           label: "Comments",
+  //           submenu: false,
+  //           link: routes.blogComments,
+  //         },
+  //         {
+  //           label: "Tags",
+  //           submenu: false,
+  //           link: routes.blogTags,
+  //         },
+  //       ],
+  //     },
+  //     */
+  //     {
+  //       label: "Location",
+  //       icon: "ti ti-map-pin-search",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Countries",
+  //           submenu: false,
+  //           link: routes.countries,
+  //         },
+  //         {
+  //           label: "States",
+  //           submenu: false,
+  //           link: routes.states,
+  //         },
+  //         {
+  //           label: "Cities",
+  //           submenu: false,
+  //           link: routes.cities,
+  //         },
+  //       ],
+  //     },
+  //     /*
+  //     {
+  //       label: "Testimonials",
+  //       icon: "ti ti-quote",
+  //       submenu: false,
+  //       link: routes.testimonials,
+  //     },
+  //     */
+  //     {
+  //       label: "FAQ",
+  //       icon: "ti ti-help-circle",
+  //       submenu: false,
+  //       link: routes.faq,
+  //     },
+  //     {
+  //       label: "Support",
+  //       icon: "ti ti-lifebuoy",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Contact Messages",
+  //           icon: "ti ti-message",
+  //           submenu: false,
+  //           link: routes.contactMessages,
+  //         },
+  //         {
+  //           label: "Tickets",
+  //           icon: "ti ti-ticket",
+  //           submenu: false,
+  //           link: routes.tickets,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: "Profile",
+  //       icon: "ti ti-user",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "User Profile",
+  //           submenu: false,
+  //           link: routes.profile,
+  //         },
+  //         {
+  //           label: "Blank Page",
+  //           submenu: false,
+  //           link: routes.blankPage,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: "Authentication",
+  //       icon: "ti ti-lock-open",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "Login",
+  //           submenu: true,
+  //           submenuItems: [
+  //             {
+  //               label: "Cover",
+  //               submenu: false,
+  //               link: routes.login,
+  //             },
+  //             {
+  //               label: "Illustration",
+  //               submenu: false,
+  //               link: routes.login2,
+  //             },
+  //             {
+  //               label: "Basic",
+  //               submenu: false,
+  //               link: routes.login3,
+  //             },
+  //           ],
+  //         },
+  //         {
+  //           label: "Register",
+  //           submenu: true,
+  //           submenuItems: [
+  //             {
+  //               label: "Cover",
+  //               submenu: false,
+  //               link: routes.register,
+  //             },
+  //             {
+  //               label: "Illustration",
+  //               submenu: false,
+  //               link: routes.register2,
+  //             },
+  //             {
+  //               label: "Basic",
+  //               submenu: false,
+  //               link: routes.register3,
+  //             },
+  //           ],
+  //         },
+  //         {
+  //           label: "Forgot Password",
+  //           submenu: true,
+  //           submenuItems: [
+  //             {
+  //               label: "Cover",
+  //               submenu: false,
+  //               link: routes.forgotPassword,
+  //             },
+  //             {
+  //               label: "Illustration",
+  //               submenu: false,
+  //               link: routes.forgotPassword2,
+  //             },
+  //             {
+  //               label: "Basic",
+  //               submenu: false,
+  //               link: routes.forgotPassword3,
+  //             },
+  //           ],
+  //         },
+  //         {
+  //           label: "Reset Password",
+  //           submenu: true,
+  //           submenuItems: [
+  //             {
+  //               label: "Cover",
+  //               submenu: false,
+  //               link: routes.resetPassword,
+  //             },
+  //             {
+  //               label: "Illustration",
+  //               submenu: false,
+  //               link: routes.resetPassword2,
+  //             },
+  //             {
+  //               label: "Basic",
+  //               submenu: false,
+  //               link: routes.resetPassword3,
+  //             },
+  //           ],
+  //         },
+  //         {
+  //           label: "Email Verification",
+  //           submenu: true,
+  //           submenuItems: [
+  //             {
+  //               label: "Cover",
+  //               submenu: false,
+  //               link: routes.emailVerification,
+  //             },
+  //             {
+  //               label: "Illustration",
+  //               submenu: false,
+  //               link: routes.emailVerification2,
+  //             },
+  //             {
+  //               label: "Basic",
+  //               submenu: false,
+  //               link: routes.emailVerification3,
+  //             },
+  //           ],
+  //         },
+  //         {
+  //           label: "2 Step Verification",
+  //           submenu: true,
+  //           submenuItems: [
+  //             {
+  //               label: "Cover",
+  //               submenu: false,
+  //               link: routes.twoStepVerification,
+  //             },
+  //             {
+  //               label: "Illustration",
+  //               submenu: false,
+  //               link: routes.twoStepVerification2,
+  //             },
+  //             {
+  //               label: "Basic",
+  //               submenu: false,
+  //               link: routes.twoStepVerification3,
+  //             },
+  //           ],
+  //         },
+  //         {
+  //           label: "Lock Screen",
+  //           submenu: false,
+  //           link: routes.lockScreen,
+  //         },
+  //       ],
+  //     },
+  //     /*
+  //     {
+  //       label: "Error Pages",
+  //       icon: "ti ti-error-404",
+  //       submenu: true,
+  //       submenuItems: [
+  //         {
+  //           label: "404 Error",
+  //           submenu: false,
+  //           link: routes.error404,
+  //         },
+  //         {
+  //           label: "500 Error",
+  //           submenu: false,
+  //           link: routes.error500,
+  //         },
+  //         {
+  //           label: "Coming Soon",
+  //           submenu: false,
+  //           link: routes.comingSoon,
+  //         },
+  //         {
+  //           label: "Under Maintenance",
+  //           submenu: false,
+  //           link: routes.underMaintenance,
+  //         },
+  //       ],
+  //     },
+  //     */
+  //   ],
+  // },
+  /*
   {
     label: "UI Interface",
     submenuHdr: "UI Interface",
@@ -2183,6 +2240,8 @@ export const SidebarData = [
       },
     ],
   },
+  */
+  /*
   {
     label: "Help",
     submenuHdr: "Help",
@@ -2248,4 +2307,5 @@ export const SidebarData = [
       },
     ],
   },
+  */
 ];

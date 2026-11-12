@@ -1,17 +1,20 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { all_routes } from "@/routes/all_routes";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
 import CopyrightLine from "../CopyrightLine";
+import { env } from "@config/env";
+import { useAuth } from "@hooks/useAuth";
+import { useSignup } from "@features/auth";
+import { roleHomeRoute } from "@features/auth/roleHome";
+
 type PasswordField = "password" | "confirmPassword";
 
 const Register = () => {
   const routes = all_routes;
-  const navigation = useNavigate();
+  const { form, isSigningUp } = useSignup();
+  const { user, isAuthenticated } = useAuth();
 
-  const navigationPath = () => {
-    navigation(routes.login);
-  };
   const [passwordVisibility, setPasswordVisibility] = useState({
     password: false,
     confirmPassword: false,
@@ -23,6 +26,11 @@ const Register = () => {
       [field]: !prevState[field],
     }));
   };
+
+  // Already signed in (e.g. opened /register in a second tab): go straight to the dashboard.
+  if (env.authEnabled && isAuthenticated && user) {
+    return <Navigate to={roleHomeRoute(user.role)} replace />;
+  }
   return (
     <>
       <div className="container-fuild">
@@ -103,7 +111,7 @@ const Register = () => {
             <div className="col-lg-6 col-md-12 col-sm-12">
               <div className="row justify-content-center align-items-center vh-100 overflow-auto flex-wrap ">
                 <div className="col-md-8 mx-auto p-4">
-                  <form>
+                  <form onSubmit={form.handleSubmit} noValidate>
                     <div>
                       <div className=" mx-auto mb-5 text-center">
                         <ImageWithBasePath
@@ -121,31 +129,26 @@ const Register = () => {
                             </p>
                           </div>
                           <div className="mt-4">
-                            <div className="d-flex align-items-center justify-content-center flex-wrap">
-                              <div className="text-center me-2 flex-fill">
-                                <Link
-                                  to="3"
-                                  className=" br-10 p-2 btn btn-outline-light  d-flex align-items-center justify-content-center"
-                                >
-                                  <ImageWithBasePath
-                                    className="img-fluid  m-1"
-                                    src="assets/img/icons/google-logo.svg"
-                                    alt="Google"
-                                  />
-                                </Link>
-                              </div>
-                            </div>
-                            <div className="login-or">
-                              <span className="span-or">Or</span>
-                            </div>
                             <div className="mb-3 ">
                               <label className="form-label">Name</label>
                               <div className="input-icon mb-3 position-relative">
                                 <span className="input-icon-addon">
                                   <i className="ti ti-user" />
                                 </span>
-                                <input type="text" className="form-control" />
+                                <input
+                                  type="text"
+                                  name="fullName"
+                                  autoComplete="name"
+                                  value={form.values.fullName}
+                                  onChange={form.handleChange}
+                                  onBlur={form.handleBlur}
+                                  className={`form-control${form.touched.fullName && form.errors.fullName ? " is-invalid" : ""}`}
+                                  aria-invalid={Boolean(form.touched.fullName && form.errors.fullName)}
+                                />
                               </div>
+                              {form.touched.fullName && form.errors.fullName && (
+                                <div className="text-danger fs-13 mb-2">{form.errors.fullName}</div>
+                              )}
                               <label className="form-label">
                                 Email Address
                               </label>
@@ -153,8 +156,38 @@ const Register = () => {
                                 <span className="input-icon-addon">
                                   <i className="ti ti-mail" />
                                 </span>
-                                <input type="text" className="form-control" />
+                                <input
+                                  type="email"
+                                  name="email"
+                                  autoComplete="username"
+                                  value={form.values.email}
+                                  onChange={form.handleChange}
+                                  onBlur={form.handleBlur}
+                                  className={`form-control${form.touched.email && form.errors.email ? " is-invalid" : ""}`}
+                                  aria-invalid={Boolean(form.touched.email && form.errors.email)}
+                                />
                               </div>
+                              {form.touched.email && form.errors.email && (
+                                <div className="text-danger fs-13 mb-2">{form.errors.email}</div>
+                              )}
+                              <label className="form-label">School Name</label>
+                              <div className="input-icon mb-3 position-relative">
+                                <span className="input-icon-addon">
+                                  <i className="ti ti-building" />
+                                </span>
+                                <input
+                                  type="text"
+                                  name="schoolName"
+                                  value={form.values.schoolName}
+                                  onChange={form.handleChange}
+                                  onBlur={form.handleBlur}
+                                  className={`form-control${form.touched.schoolName && form.errors.schoolName ? " is-invalid" : ""}`}
+                                  aria-invalid={Boolean(form.touched.schoolName && form.errors.schoolName)}
+                                />
+                              </div>
+                              {form.touched.schoolName && form.errors.schoolName && (
+                                <div className="text-danger fs-13 mb-2">{form.errors.schoolName}</div>
+                              )}
                               <label className="form-label">Password</label>
                               <div className="pass-group mb-3">
                                 <input
@@ -163,7 +196,13 @@ const Register = () => {
                                       ? "text"
                                       : "password"
                                   }
-                                  className="pass-input form-control"
+                                  name="password"
+                                  autoComplete="new-password"
+                                  value={form.values.password}
+                                  onChange={form.handleChange}
+                                  onBlur={form.handleBlur}
+                                  className={`pass-input form-control${form.touched.password && form.errors.password ? " is-invalid" : ""}`}
+                                  aria-invalid={Boolean(form.touched.password && form.errors.password)}
                                 />
                                 <span
                                   className={`ti toggle-passwords ${
@@ -176,6 +215,9 @@ const Register = () => {
                                   }
                                 ></span>
                               </div>
+                              {form.touched.password && form.errors.password && (
+                                <div className="text-danger fs-13 mb-2">{form.errors.password}</div>
+                              )}
                               <label className="form-label">
                                 Confirm Password
                               </label>
@@ -186,7 +228,13 @@ const Register = () => {
                                       ? "text"
                                       : "password"
                                   }
-                                  className="pass-input form-control"
+                                  name="confirmPassword"
+                                  autoComplete="new-password"
+                                  value={form.values.confirmPassword}
+                                  onChange={form.handleChange}
+                                  onBlur={form.handleBlur}
+                                  className={`pass-input form-control${form.touched.confirmPassword && form.errors.confirmPassword ? " is-invalid" : ""}`}
+                                  aria-invalid={Boolean(form.touched.confirmPassword && form.errors.confirmPassword)}
                                 />
                                 <span
                                   className={`ti toggle-passwords ${
@@ -199,13 +247,24 @@ const Register = () => {
                                   }
                                 ></span>
                               </div>
+                              {form.touched.confirmPassword && form.errors.confirmPassword && (
+                                <div className="text-danger fs-13 mt-1">{form.errors.confirmPassword}</div>
+                              )}
                             </div>
+                            {form.submitError && (
+                              <div className="alert alert-danger py-2 mb-3" role="alert">
+                                {form.submitError.message}
+                              </div>
+                            )}
                             <div className="form-wrap form-wrap-checkbox mb-3">
                               <div className="d-flex align-items-center">
                                 <div className="form-check form-check-md mb-0 me-2">
                                   <input
                                     className="form-check-input mt-0"
                                     type="checkbox"
+                                    name="agreeToTerms"
+                                    checked={form.values.agreeToTerms}
+                                    onChange={form.handleChange}
                                   />
                                 </div>
                                 <h6 className="fw-normal text-dark mb-0">
@@ -216,15 +275,18 @@ const Register = () => {
                                   </Link>
                                 </h6>
                               </div>
+                              {form.touched.agreeToTerms && form.errors.agreeToTerms && (
+                                <div className="text-danger fs-13 mt-1">{form.errors.agreeToTerms}</div>
+                              )}
                             </div>
                           </div>
                           <div className="mb-3">
                             <button
-                              onClick={navigationPath}
                               type="submit"
                               className="btn btn-primary w-100"
+                              disabled={form.isSubmitting || isSigningUp}
                             >
-                              Sign Up
+                              {form.isSubmitting || isSigningUp ? "Creating your school…" : "Sign Up"}
                             </button>
                           </div>
                           <div className="text-center">

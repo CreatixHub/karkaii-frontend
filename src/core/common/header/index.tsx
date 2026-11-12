@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 
@@ -12,6 +12,8 @@ import {
 } from "../../data/redux/sidebarSlice";
 import ImageWithBasePath from "../imageWithBasePath";
 import { all_routes } from "@/routes/all_routes";
+import { useAuth } from "@hooks/useAuth";
+import { roleLabel } from "@features/auth/roleHome";
 import {
   academicYears,
   addNewActions,
@@ -26,6 +28,13 @@ const Header = () => {
   const routes = all_routes;
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate(routes.login, { replace: true });
+  };
 
   const dataTheme = useSelector((state: any) => state.themeSetting.dataTheme);
   const dataLayout = useSelector((state: any) => state.themeSetting.dataLayout);
@@ -442,7 +451,7 @@ const Header = () => {
                 >
                   <span className="avatar avatar-md rounded online">
                     <ImageWithBasePath
-                      src="assets/img/profiles/avatar-27.jpg"
+                      src={user?.avatarUrl || "assets/img/profiles/avatar-27.jpg"}
                       alt="Img"
                       className="img-fluid"
                     />
@@ -455,17 +464,17 @@ const Header = () => {
                   <div className="mui-profile-head">
                     <span className="avatar avatar-md online avatar-rounded">
                       <ImageWithBasePath
-                        src="assets/img/profiles/avatar-27.jpg"
+                        src={user?.avatarUrl || "assets/img/profiles/avatar-27.jpg"}
                         alt="img"
                       />
                     </span>
                     <div className="mui-profile-id">
-                      <h6 className="mb-0">Kevin Larry</h6>
+                      <h6 className="mb-0">{user?.name ?? "Guest"}</h6>
                       <span className="mui-profile-mail">
-                        kevin.larry@karkaii.com
+                        {user?.email ?? ""}
                       </span>
                     </div>
-                    <span className="mui-profile-role">Admin</span>
+                    <span className="mui-profile-role">{roleLabel(user?.role)}</span>
                   </div>
                   <div className="mui-profile-body">
                     <Link className="dropdown-item" to={routes.profile}>
@@ -504,7 +513,14 @@ const Header = () => {
                       <i className="ti ti-help-circle" />
                       Help Center
                     </a>
-                    <Link className="dropdown-item text-danger" to={routes.login}>
+                    <Link
+                      className="dropdown-item text-danger"
+                      to={routes.login}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        void handleLogout();
+                      }}
+                    >
                       <i className="ti ti-login" />
                       Logout
                     </Link>
@@ -532,7 +548,14 @@ const Header = () => {
             <Link className="dropdown-item" to={routes.profilesettings}>
               Settings
             </Link>
-            <Link className="dropdown-item" to={routes.login}>
+            <Link
+              className="dropdown-item"
+              to={routes.login}
+              onClick={(e) => {
+                e.preventDefault();
+                void handleLogout();
+              }}
+            >
               Logout
             </Link>
           </div>
