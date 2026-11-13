@@ -14,6 +14,8 @@ import usePreviousRoute from "./usePreviousRoute";
 import { all_routes } from "@/routes/all_routes";
 import { useAuth } from "@hooks/useAuth";
 import { roleLabel } from "@features/auth/roleHome";
+import { env } from "@config/env";
+import { filterMenuItems } from "../../data/json/sidebarAccess";
 import "../../../style/icon/tabler-icons/webfont/tabler-icons.css";
 
 type MenuItem = {
@@ -37,7 +39,7 @@ const sections = SidebarData as unknown as MenuSection[];
 
 /**
  * What each layout demo link applies. `dark_data_theme` lives in `dataTheme`,
- * not `dataLayout`, so the two are dispatched separately — sending it through
+ * not `dataLayout`, so the two are dispatched separately - sending it through
  * `setDataLayout` leaves `data-theme` untouched and blanks `data-layout`.
  *
  * Default clears the theme as well, so returning to it from Dark restores the
@@ -74,6 +76,16 @@ const Sidebar = () => {
   const previousLocation = usePreviousRoute();
   const routes = all_routes;
   const { user, logout } = useAuth();
+
+  // Only the menu items this role may use (owner/admin see everything; with auth switched off, everything shows).
+  const menuRole = env.authEnabled ? user?.role ?? null : "admin";
+  const visibleSections = useMemo(
+    () =>
+      sections
+        .map((section) => ({ ...section, submenuItems: filterMenuItems(section.submenuItems, menuRole) }))
+        .filter((section) => section.submenuItems.length > 0),
+    [menuRole],
+  );
 
   const handleLogout = async () => {
     await logout();
@@ -214,7 +226,7 @@ const Sidebar = () => {
     >
       <div className="sidebar-inner mui-native-scroll">
         <div id="sidebar-menu" className="sidebar-menu">
-          {/* School workspace — shows the school this session is acting in. Switching between several schools
+          {/* School workspace - shows the school this session is acting in. Switching between several schools
               isn't built yet (every account has exactly one today), so this is a label, not a dropdown. */}
           <div className="mui-side-brand">
             <div className="mui-brand-card">
@@ -233,7 +245,7 @@ const Sidebar = () => {
 
           <nav aria-label="Main">
             <ul>
-              {sections.map((section) => (
+              {visibleSections.map((section) => (
                 <li key={section.label}>
                   <h6 className="submenu-hdr">
                     <span>{section.submenuHdr ?? section.label}</span>
@@ -246,7 +258,7 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Sidebar Footer — user profile */}
+      {/* Sidebar Footer - user profile */}
       <div className="mui-side-footer">
         <div className="dropdown">
           <button

@@ -1,6 +1,7 @@
-import  { useEffect, useState } from "react";
+﻿import  { useEffect, useRef, useState } from "react";
+import type { FormEvent } from "react";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { all_routes } from "@/routes/all_routes";
 import CopyrightLine from "../CopyrightLine";
 import LoginShowcase from "./LoginShowcase";
@@ -14,6 +15,12 @@ const Login = () => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const { form, isLoggingIn } = useLogin();
   const { user, isAuthenticated } = useAuth();
+  const location = useLocation();
+  // Set by the register hook after a successful sign-up (`navigate(login, { state: { registered: true } })`).
+  const justRegistered = Boolean((location.state as { registered?: boolean } | null)?.registered);
+  // True once the person pressed "Sign In" on THIS page. From then on useLogin decides where they go
+  // (the dashboard of the role they picked), so the "already signed in" shortcut below must stay out of the way.
+  const signInPressed = useRef(false);
 
   const togglePasswordVisibility = () => {
     setPasswordVisible((prevState) => !prevState);
@@ -22,8 +29,13 @@ const Login = () => {
     localStorage.setItem("menuOpened", "Dashboard");
   }, []);
 
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    signInPressed.current = true;
+    form.handleSubmit(event);
+  };
+
   // Already signed in (e.g. opened /login in a second tab): go straight to the dashboard.
-  if (env.authEnabled && isAuthenticated && user) {
+  if (env.authEnabled && isAuthenticated && user && !signInPressed.current) {
     return <Navigate to={roleHomeRoute(user.role)} replace />;
   }
 
@@ -37,7 +49,7 @@ const Login = () => {
           <div className="col-lg-6 col-md-12 col-sm-12">
             <div className="row justify-content-center align-items-center vh-100 overflow-auto flex-wrap ">
               <div className="col-md-8 mx-auto p-4">
-                <form onSubmit={form.handleSubmit} noValidate>
+                <form onSubmit={handleSubmit} noValidate>
                   <div>
                     <div className=" mx-auto mb-5 text-center">
                       <ImageWithBasePath
@@ -53,6 +65,33 @@ const Login = () => {
                           <p className="mb-0">
                             Please enter your details to sign in
                           </p>
+                        </div>
+                        {justRegistered && (
+                          <div className="alert alert-success py-2 mb-3" role="alert">
+                            Registered successfully! Please sign in to continue.
+                          </div>
+                        )}
+                        <div className="mb-3">
+                          <label className="form-label">Sign in as</label>
+                          <select
+                            name="role"
+                            className="form-select"
+                            value={form.values.role}
+                            onChange={form.handleChange}
+                          >
+                            <option value="">My main role (automatic)</option>
+                            <option value="admin">Admin</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="student">Student</option>
+                            <option value="parent">Parent</option>
+                            <option value="accountant">Accountant</option>
+                            <option value="receptionist">Receptionist</option>
+                            <option value="librarian">Librarian</option>
+                            <option value="warden">Warden</option>
+                            <option value="transport_manager">Transport manager</option>
+                            <option value="nurse">Nurse</option>
+                            <option value="security">Security</option>
+                          </select>
                         </div>
                         <div className="mb-3 ">
                           <label className="form-label">Email Address</label>
@@ -117,7 +156,7 @@ const Login = () => {
                             <p className="ms-1 mb-0 ">Remember Me</p>
                           </div>
                           <div className="text-end ">
-                            <Link to={routes.forgotPassword}className="link-danger">
+                            <Link to={routes.forgotPassword} className="link-danger">
                               Forgot Password?
                             </Link>
                           </div>
@@ -130,12 +169,12 @@ const Login = () => {
                             className="btn btn-primary w-100"
                             disabled={form.isSubmitting || isLoggingIn}
                           >
-                            {form.isSubmitting || isLoggingIn ? "Signing in…" : "Sign In"}
+                            {form.isSubmitting || isLoggingIn ? "Signing in..." : "Sign In"}
                           </button>
                         </div>
                         <div className="text-center">
                           <h6 className="fw-normal text-dark mb-0">
-                            Don’t have an account?{" "}
+                            Don't have an account?{" "}
                             <Link to={routes.register} className="hover-a ">
                               {" "}
                               Create Account

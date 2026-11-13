@@ -12,7 +12,7 @@ export interface AuthUser {
   /** Fine-grained permissions, e.g. "students.create". */
   permissions: string[];
   avatarUrl: string | null;
-  /** The school this session is acting in. Absent/null for mock users and for a brand-new signup with no school yet. */
+  /** The school this session is acting in. Absent/null for mock users and for a brand-new signup with no school yet.*/
   organization?: { id: string; slug: string; name: string; roles: string[] } | null;
 }
 
@@ -21,6 +21,8 @@ export interface LoginCredentials {
   password: string;
   /** Persist the session across browser restarts. */
   rememberMe?: boolean;
+  /** "Sign in as": the server checks the person really holds this role. Omit to use their main role. */
+  role?: UserRole;
 }
 
 export interface SignupCredentials {

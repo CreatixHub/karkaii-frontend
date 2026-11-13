@@ -2,11 +2,13 @@
  * Feature hook for the registration form.
  *
  * Combines `useForm` (validation + submission) with `useAuth` (session), so the register page only needs to
- * bind inputs and render errors. On success the person's account AND their school already exist, and they are
- * signed in as its owner — this hook performs the whole chain (`AuthProvider.signup`), not just the account.
+ * bind inputs and render errors. On success the person's account AND their school already exist
+ * (`AuthProvider.signup` performs the whole chain). That call also signs the new owner in, so this hook
+ * signs them out again and sends them to the login page, with `state.registered` set so the login page can
+ * show a "Registered successfully" message.
  *
  * Standalone prototype mode (`VITE_USE_MOCK_API=true`): there is no server, so sign-up never fails validation
- * beyond basic shape checks and always lands the new person on the admin dashboard.
+ * beyond basic shape checks.
  */
 
 import { useNavigate } from 'react-router';
@@ -16,7 +18,7 @@ import type { UseFormResult } from '@hooks/useForm';
 import { compose, email as emailRule, matches, minLength, required } from '@utils/validation';
 import type { ValidationSchema } from '@utils/validation';
 import type { AuthUser } from '@services/auth/auth.types';
-import { roleHomeRoute } from '../roleHome';
+import { all_routes } from '@/routes/all_routes';
 
 export interface SignupFormValues extends Record<string, unknown> {
   fullName: string;
@@ -44,7 +46,7 @@ export interface UseSignupResult {
 
 export function useSignup(): UseSignupResult {
   const navigate = useNavigate();
-  const { signup, isSigningUp } = useAuth();
+  const { signup, logout, isSigningUp } = useAuth();
 
   const form = useForm<SignupFormValues, AuthUser>({
     initialValues: {
@@ -63,7 +65,13 @@ export function useSignup(): UseSignupResult {
         password: values.password,
         schoolName: values.schoolName,
       }),
-    onSuccess: (user) => navigate(roleHomeRoute(user.role), { replace: true }),
+    // The new owner is signed in by `signup`; clear that session and send them to the login page,
+    // which shows a "Registered successfully" message when it sees `state.registered`.
+    onSuccess: () => {
+      void Promise.resolve(logout()).finally(() =>
+        navigate(all_routes.login, { replace: true, state: { registered: true } }),
+      );
+    },
   });
 
   return { form, isSigningUp };
