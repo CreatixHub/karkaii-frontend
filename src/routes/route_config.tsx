@@ -1,6 +1,7 @@
 import { Navigate, Route } from "react-router";
 import { all_routes } from "./all_routes";
 import React from "react";
+import DashboardGuard from "../components/routing/DashboardGuard";
 
 // Lazily loaded page components.
 const Accordion = React.lazy(() => import("../views/uiInterface/base-ui/accordion"));
@@ -1259,7 +1260,7 @@ export const publicRoutes = [
   },
   {
     path: routes.adminDashboard,
-    element: <AdminDashboard />,
+    element: <DashboardGuard exclude={['teacher', 'student', 'parent']}><AdminDashboard /></DashboardGuard>,
     route: Route,
   },
   {
@@ -1459,7 +1460,7 @@ export const publicRoutes = [
   },
   {
     path: routes.parentDashboard,
-    element: <ParentDashboard />,
+    element: <DashboardGuard roles="parent"><ParentDashboard /></DashboardGuard>,
     route: Route,
   },
   {
@@ -1789,7 +1790,7 @@ export const publicRoutes = [
   },
   {
     path: routes.studentDashboard,
-    element: <StudentDasboard />,
+    element: <DashboardGuard roles="student"><StudentDasboard /></DashboardGuard>,
     route: Route,
   },
   {
@@ -1914,7 +1915,7 @@ export const publicRoutes = [
   },
   {
     path: routes.teacherDashboard,
-    element: <TeacherDashboard />,
+    element: <DashboardGuard roles="teacher"><TeacherDashboard /></DashboardGuard>,
     route: Route,
   },
   {
