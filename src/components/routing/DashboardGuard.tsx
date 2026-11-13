@@ -4,6 +4,9 @@
  * sends the visitor to *their own* dashboard (via `roleHomeRoute`) instead of a fixed page, so typing
  * another role's dashboard URL always lands somewhere sensible rather than a dead end.
  *
+ * An owner / admin (role "admin") may open every dashboard: they can do everything in the school, and it lets
+ * them preview each panel with "Sign in as". Teachers, students, parents and other staff stay on their own.
+ *
  * Inert while `VITE_AUTH_ENABLED` is false, same as `RoleGuard` and `ProtectedRoute`.
  */
 
@@ -29,6 +32,9 @@ const DashboardGuard = ({ roles, exclude, children }: DashboardGuardProps) => {
   const { user, hasRole } = useAuth();
 
   if (!env.authEnabled) return <>{children}</>;
+
+  // Owners and admins may open any dashboard.
+  if (hasRole('admin')) return <>{children}</>;
 
   const allowed = exclude ? !hasRole(exclude) : roles ? hasRole(roles) : true;
   if (allowed) return <>{children}</>;

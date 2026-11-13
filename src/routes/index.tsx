@@ -1,9 +1,9 @@
-
-import {  Route, Routes } from "react-router";
+import { Route, Routes } from "react-router";
 import { authRoutes, publicRoutes } from "./route_config";
 import Feature from "../layouts/MainLayout";
 import AuthFeature from "../layouts/AuthLayout";
 import ProtectedRoute from "@components/routing/ProtectedRoute";
+import MenuAccessGuard from "@components/routing/MenuAccessGuard";
 import React, { Suspense } from "react";
 
 // Lazy load Login component
@@ -11,10 +11,10 @@ const Login = React.lazy(() => import("../views/auth/login/login"));
 
 // Loading fallback component
 const LoadingFallback = () => (
-  <div style={{ 
-    display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
     height: '100vh',
     fontSize: '18px'
   }}>
@@ -31,25 +31,29 @@ const ALLRoutes: React.FC = () => {
           ProtectedRoute is a pass-through while VITE_AUTH_ENABLED is false,
           so these routes behave exactly as before. Setting that flag to true
           turns on session enforcement with no further code change.
+          Role dashboards are guarded individually in route_config.tsx (DashboardGuard);
+          every other menu page is guarded by MenuAccessGuard (same rules as the sidebar).
         */}
         <Route element={<ProtectedRoute />}>
-          <Route element={<Feature />}>
-            {publicRoutes.map((route, idx) => (
-              <Route
-                path={route.path}
-                element={route.element}
-                key={idx}
-              />
-            ))}
+          <Route element={<MenuAccessGuard />}>
+            <Route element={<Feature />}>
+              {publicRoutes.map((route, idx) => (
+                <Route
+                  path={route.path}
+                  element={route.element}
+                  key={idx}
+                />
+              ))}
+            </Route>
           </Route>
         </Route>
 
         <Route element={<AuthFeature />}>
           {authRoutes.map((route, idx) => (
-            <Route 
-              path={route.path} 
-              element={route.element} 
-              key={idx} 
+            <Route
+              path={route.path}
+              element={route.element}
+              key={idx}
             />
           ))}
         </Route>

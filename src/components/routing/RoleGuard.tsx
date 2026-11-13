@@ -6,20 +6,24 @@
  *
  * As a layout route:      <Route element={<RoleGuard roles={['admin']} />}>
  * Around a button:        <RoleGuard permission="students.create">...</RoleGuard>
+ *
+ * Route mode: a user without access is sent to their OWN dashboard (or `redirectTo`).
  */
 
-import { Navigate, Outlet } from 'react-router';
+import { Navigate, Outlet, useLocation } from 'react-router';
 import type { ReactNode } from 'react';
 import { env } from '@config/env';
 import type { UserRole } from '@constants/app.constants';
 import { useAuth } from '@hooks/useAuth';
+import { all_routes } from '@/routes/all_routes';
+import { roleHomeRoute } from '@features/auth/roleHome';
 
 export interface RoleGuardProps {
   roles?: UserRole | UserRole[];
   permission?: string;
   /** Rendered instead of `children` when access is denied. */
   fallback?: ReactNode;
-  /** Route mode only: where to send a user who lacks access. */
+  /** Route mode only: where to send a user who lacks access. Defaults to their own dashboard. */
   redirectTo?: string;
   /** Omit to use this as a layout route rendering an `<Outlet />`. */
   children?: ReactNode;
@@ -32,7 +36,8 @@ const RoleGuard = ({
   redirectTo,
   children,
 }: RoleGuardProps) => {
-  const { hasRole, hasPermission } = useAuth();
+  const { hasRole, hasPermission, user } = useAuth();
+  const location = useLocation();
 
   const isRouteMode = children === undefined;
 
@@ -45,7 +50,11 @@ const RoleGuard = ({
   const allowed = roleOk && permissionOk;
 
   if (!allowed) {
-    if (isRouteMode && redirectTo) return <Navigate to={redirectTo} replace />;
+    if (isRouteMode) {
+      const target = redirectTo ?? (user ? roleHomeRoute(user.role) : all_routes.login);
+      // never redirect to the page we are already on (would loop forever)
+      if (target !== location.pathname) return <Navigate to={target} replace />;
+    }
     return <>{fallback}</>;
   }
 
