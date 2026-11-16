@@ -22,7 +22,7 @@ import { env } from '@config/env';
 import { useAuth } from '@hooks/useAuth';
 import { useForm } from '@hooks/useForm';
 import type { UseFormResult } from '@hooks/useForm';
-import { compose, email as emailRule, required } from '@utils/validation';
+import { compose, required } from '@utils/validation';
 import type { ValidationSchema } from '@utils/validation';
 import type { UserRole } from '@constants/app.constants';
 import type { AuthUser } from '@services/auth/auth.types';
@@ -30,6 +30,7 @@ import { defaultDemoUser } from '@mocks/auth.mock';
 import { roleHomeRoute } from '../roleHome';
 
 export interface LoginFormValues extends Record<string, unknown> {
+  /** Email address OR username (a student's phone number / admission number). */
   email: string;
   password: string;
   rememberMe: boolean;
@@ -37,10 +38,11 @@ export interface LoginFormValues extends Record<string, unknown> {
   role: string;
 }
 
-// Only "is it filled in" is checked for the password: the server owns the real rules, and enforcing a
-// length here would reject (with a misleading message) a perfectly valid existing password.
+// Only "is it filled in" is checked: the server owns the real rules, and enforcing a format or length here
+// would reject (with a misleading message) a perfectly valid existing login. The first field accepts an
+// email address or a username (phone number / admission number), so it is not checked as an email.
 const loginValidationSchema: ValidationSchema<LoginFormValues> = {
-  email: compose(required('Email is required'), emailRule()),
+  email: compose(required('Email or phone number is required')),
   password: required('Password is required'),
 };
 

@@ -1,13 +1,9 @@
 /**
  * Route guard for the authenticated area.
  *
- * CRITICAL: while `VITE_AUTH_ENABLED` is false this renders `<Outlet />`
- * immediately and unconditionally. That is the current behaviour of the static
- * template — every route stays directly reachable and nothing redirects — so
- * wrapping the app in this guard today changes nothing at all.
- *
- * Flip `VITE_AUTH_ENABLED=true` once a real auth API is connected and the same
- * component starts enforcing the session, with no other code change.
+ * While `VITE_AUTH_ENABLED` is false this renders `<Outlet />` immediately.
+ * When enabled it enforces the session, and also sends users whose password
+ * is still temporary (`mustChangePassword`) to the "Set a new password" page.
  */
 
 import { Navigate, Outlet, useLocation } from 'react-router';
@@ -20,22 +16,24 @@ export interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
+const CHANGE_PASSWORD_ROUTE = '/change-password';
+
 const ProtectedRoute = ({ redirectTo = '/login' }: ProtectedRouteProps) => {
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const location = useLocation();
 
-  // Auth disabled — behave exactly as the template does today.
   if (!env.authEnabled) return <Outlet />;
 
-  // Still restoring a stored session: render nothing decisive yet, otherwise
-  // a refresh would bounce an authenticated user to the login screen.
   if (status === 'initializing') {
     return <LoadingState message="Checking your session..." size="lg" />;
   }
-
   if (status === 'unauthenticated') {
-    // `state.from` lets the login page return the user where they were going.
     return <Navigate to={redirectTo} replace state={{ from: location.pathname }} />;
+  }
+
+  // Temporary password (e.g. a new student): must set a real one first.
+  if (user?.mustChangePassword) {
+    return <Navigate to={CHANGE_PASSWORD_ROUTE} replace />;
   }
 
   return <Outlet />;

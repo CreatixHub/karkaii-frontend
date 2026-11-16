@@ -12,6 +12,11 @@ export interface AuthUser {
   /** Fine-grained permissions, e.g. "students.create". */
   permissions: string[];
   avatarUrl: string | null;
+  /** Sign-in name (a student's phone number or admission number). */
+  username?: string | null;
+  phone?: string | null;
+  /** True while the password is still the temporary one set at admission. */
+  mustChangePassword?: boolean;
   /** The school this session is acting in. Absent/null for mock users and for a brand-new signup with no school yet.*/
   organization?: { id: string; slug: string; name: string; roles: string[] } | null;
 }

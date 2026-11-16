@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import Modal from '@components/ui/Modal';
 import ToastStack from '@components/ui/ToastStack';
 import { all_routes } from '@/routes/all_routes';
-import { useReveal } from '@hooks/useReveal';
 import { useToasts } from '@hooks/useToasts';
+import { acceptAdmission } from '@services/admissions/admissions.api';
 import DetailTabs from './components/DetailTabs';
 import OverviewSidebar from './components/OverviewSidebar';
 import ActivityPane from './components/panes/ActivityPane';
@@ -30,17 +31,74 @@ import {
   profile,
   transportDetails,
 } from './data/admissionDetails.data';
+import { applyAdmission, dobPasswordText, loadAdmissionDetail } from './data/admissionDetails.live';
 import AdmissionDetailsModals from './modals/AdmissionDetailsModals';
 
 const routes = all_routes;
 
 const AdmissionDetails = () => {
-  const { loading } = useReveal(700);
+  const [params] = useSearchParams();
+  const admissionId = params.get('id') ?? '';
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [apiStatus, setApiStatus] = useState('');
+  const [dobPassword, setDobPassword] = useState('');
+  const [accepting, setAccepting] = useState(false);
+  const [credentials, setCredentials] = useState<{ username: string } | null>(null);
+
   const { toasts, push, dismiss } = useToasts();
 
   const [activePane, setActivePane] = useState('personal');
   const [moreOpen, setMoreOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<AdmissionDetailsModalId | null>(null);
+
+  /* Loads the real application into the page's data objects. `quiet` skips the skeleton. */
+  const load = useCallback(
+    async (quiet = false) => {
+      if (!admissionId) {
+        setError('No application selected. Open one from the Admissions list.');
+        setLoading(false);
+        return;
+      }
+      if (!quiet) setLoading(true);
+      try {
+        const a = await loadAdmissionDetail(admissionId);
+        applyAdmission(a);
+        setApiStatus(a.status);
+        setDobPassword(dobPasswordText(a.dob));
+        setError('');
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Could not load this application');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [admissionId],
+  );
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  /* Approve = accept: creates the student record and the student's login. */
+  const accept = async () => {
+    if (['accepted', 'rejected', 'withdrawn'].includes(apiStatus)) {
+      push(apiStatus === 'accepted' ? 'This application is already approved.' : 'This application is closed.');
+      return;
+    }
+    setAccepting(true);
+    try {
+      const result = await acceptAdmission(admissionId);
+      if (result.login) setCredentials({ username: result.login.username });
+      push('Application accepted. Student record created.');
+      await load(true);
+    } catch (e) {
+      push(e instanceof Error ? e.message : 'Could not accept the application');
+    } finally {
+      setAccepting(false);
+    }
+  };
 
   const openModal = (modal: AdmissionDetailsModalId) => setActiveModal(modal);
 
@@ -73,6 +131,19 @@ const AdmissionDetails = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="page-wrapper">
+        <div className="content">
+          <div className="alert alert-danger">{error}</div>
+          <Link to={routes.admissions} className="btn btn-primary">
+            Back to Admissions
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Page Wrapper */}
@@ -100,7 +171,7 @@ const AdmissionDetails = () => {
               onToggleMore={setMoreOpen}
               onMoreAction={handleMoreAction}
               onReject={() => openModal('rejectApplication')}
-              onApprove={() => push('Application approved.')}
+              onApprove={() => void (accepting ? undefined : accept())}
               onEmail={() => openModal('sendEmail')}
             />
 
@@ -179,6 +250,29 @@ const AdmissionDetails = () => {
         onToast={push}
         onConfirmDelete={confirmDelete}
       />
+
+      <Modal
+        open={credentials !== null}
+        onClose={() => setCredentials(null)}
+        title="Student login created"
+        footer={
+          <button type="button" className="btn btn-primary" onClick={() => setCredentials(null)}>
+            Done
+          </button>
+        }
+      >
+        <p className="mb-3">
+          Share these sign-in details with the family. The student should change the password after the first sign in.
+        </p>
+        <div className="border rounded p-3">
+          <div className="mb-2">
+            Username: <strong>{credentials?.username}</strong>
+          </div>
+          <div>
+            Password: <strong>{dobPassword}</strong> <span className="text-muted">(date of birth)</span>
+          </div>
+        </div>
+      </Modal>
 
       <ToastStack toasts={toasts} onDismiss={dismiss} id="admDetailsToasts" />
     </>

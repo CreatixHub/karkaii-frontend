@@ -55,221 +55,11 @@ export interface AdmissionRow {
   detail: AdmissionDetail;
 }
 
-const documentBadges: DocumentTag[] = [
-  { label: 'Photograph', className: 'badge badge-soft-success', icon: 'ti ti-circle-check' },
-  { label: 'Birth Certificate', className: 'badge badge-soft-success', icon: 'ti ti-circle-check' },
-  { label: 'Transfer Certificate', className: 'badge badge-soft-warning', icon: 'ti ti-clock' },
-  { label: 'Community Certificate', className: 'badge badge-soft-warning', icon: 'ti ti-clock' },
-  { label: 'Mark Sheets', className: 'badge badge-soft-success', icon: 'ti ti-circle-check' },
-  { label: 'Address Proof', className: 'badge badge-soft-danger', icon: 'ti ti-alert-circle' },
-];
-
-export const admissionRows: AdmissionRow[] = [
-  {
-    id: 'ADM202501',
-    name: 'Aaralyn Maria',
-    avatar: 'assets/img/students/student-01.jpg',
-    admissionNo: 'ADM202501',
-    gender: 'Female',
-    statusKey: 'pending',
-    status: { label: 'Pending', className: 'is-pending' },
-    classApplied: 'Class I',
-    parentName: 'Antony Maria',
-    parentAvatar: 'assets/img/profiles/avatar-27.jpg',
-    parentPhone: '+1 65465 21345',
-    appliedDate: '02 Jul 2026',
-    source: 'Website',
-    search: 'aaralyn maria adm202501 class i antony maria pending +1 65465 21345 website',
-    detail: {
-      gender: 'Female',
-      dob: '10 Jan 2018',
-      classApplied: 'Class I',
-      academicYear: '2024/2025',
-      source: 'Website',
-      parentName: 'Antony Maria',
-      relationship: 'Father',
-      mobile: '+1 65465 21345',
-      email: 'antony@example.com',
-      address: '24 Maple Street, Springfield, IL',
-      status: { label: 'Pending', className: 'badge-soft-primary' },
-      interview: 'Not Scheduled',
-      feeStatus: { label: 'Unpaid', className: 'badge-soft-danger' },
-      counselor: 'Teena Mathew',
-      previousSchool: 'Little Angels Pre-School',
-      documents: documentBadges,
-    },
-  },
-  {
-    id: 'ADM202502',
-    name: 'Ethan Cole',
-    avatar: 'assets/img/students/student-02.jpg',
-    admissionNo: 'ADM202502',
-    gender: 'Male',
-    statusKey: 'review',
-    status: { label: 'Under Review', className: 'is-review' },
-    classApplied: 'Class II',
-    parentName: 'Robert Cole',
-    parentAvatar: 'assets/img/profiles/avatar-23.jpg',
-    parentPhone: '+1 65465 87456',
-    appliedDate: '28 Jun 2026',
-    source: 'Referral',
-    search: 'ethan cole adm202502 class ii robert cole under review +1 65465 87456 referral',
-    detail: {
-      gender: 'Male',
-      dob: '22 Mar 2017',
-      classApplied: 'Class II',
-      academicYear: '2024/2025',
-      source: 'Referral',
-      parentName: 'Robert Cole',
-      relationship: 'Father',
-      mobile: '+1 65465 87456',
-      email: 'robert@example.com',
-      address: '118 Oak Avenue, Riverside, CA',
-      status: { label: 'Under Review', className: 'badge-soft-primary' },
-      interview: '28 Jul 2026',
-      feeStatus: { label: 'Partial', className: 'badge-soft-warning' },
-      counselor: 'Daniel Josua',
-      previousSchool: 'Sunrise Public School',
-      documents: documentBadges,
-    },
-  },
-  {
-    id: 'ADM202503',
-    name: 'Sophia Reyes',
-    avatar: 'assets/img/students/student-03.jpg',
-    admissionNo: 'ADM202503',
-    gender: 'Female',
-    statusKey: 'approved',
-    status: { label: 'Approved', className: 'is-active' },
-    classApplied: 'Class III',
-    parentName: 'Marcus Reyes',
-    parentAvatar: 'assets/img/profiles/avatar-25.jpg',
-    parentPhone: '+1 65465 99001',
-    appliedDate: '20 Jun 2026',
-    source: 'Walk-in',
-    search: 'sophia reyes adm202503 class iii marcus reyes approved +1 65465 99001 walk-in',
-    detail: {
-      gender: 'Female',
-      dob: '05 Sep 2016',
-      classApplied: 'Class III',
-      academicYear: '2024/2025',
-      source: 'Walk-in',
-      parentName: 'Marcus Reyes',
-      relationship: 'Father',
-      mobile: '+1 65465 99001',
-      email: 'marcus@example.com',
-      address: '76 Pine Road, Austin, TX',
-      status: { label: 'Approved', className: 'badge-soft-success' },
-      interview: '12 Jul 2026',
-      feeStatus: { label: 'Paid', className: 'badge-soft-success' },
-      counselor: 'Hellana Robert',
-      previousSchool: 'Green Valley Academy',
-      documents: documentBadges,
-    },
-  },
-  {
-    id: 'ADM202504',
-    name: 'Liam Walker',
-    avatar: 'assets/img/students/student-04.jpg',
-    admissionNo: 'ADM202504',
-    gender: 'Male',
-    statusKey: 'rejected',
-    status: { label: 'Rejected', className: 'is-blocked' },
-    classApplied: 'Class IV',
-    parentName: 'George Walker',
-    parentAvatar: 'assets/img/profiles/avatar-01.jpg',
-    parentPhone: '+1 65465 33221',
-    appliedDate: '15 Jun 2026',
-    source: 'Campaign',
-    search: 'liam walker adm202504 class iv george walker rejected +1 65465 33221 campaign',
-    detail: {
-      gender: 'Male',
-      dob: '14 Dec 2015',
-      classApplied: 'Class IV',
-      academicYear: '2024/2025',
-      source: 'Campaign',
-      parentName: 'George Walker',
-      relationship: 'Father',
-      mobile: '+1 65465 33221',
-      email: 'george@example.com',
-      address: '9 Birch Lane, Denver, CO',
-      status: { label: 'Rejected', className: 'badge-soft-primary' },
-      interview: 'No-Show',
-      feeStatus: { label: 'Refunded', className: 'badge-soft-secondary' },
-      counselor: 'Teena Mathew',
-      previousSchool: 'St. Mary High School',
-      documents: documentBadges,
-    },
-  },
-  {
-    id: 'ADM202505',
-    name: 'Mia Bennett',
-    avatar: 'assets/img/students/student-05.jpg',
-    admissionNo: 'ADM202505',
-    gender: 'Female',
-    statusKey: 'waitlisted',
-    status: { label: 'Waitlisted', className: 'is-new' },
-    classApplied: 'Class II',
-    parentName: 'Steven Bennett',
-    parentAvatar: 'assets/img/profiles/avatar-02.jpg',
-    parentPhone: '+1 65465 55667',
-    appliedDate: '10 Jun 2026',
-    source: 'Website',
-    search: 'mia bennett adm202505 class ii steven bennett waitlisted +1 65465 55667 website',
-    detail: {
-      gender: 'Female',
-      dob: '30 Apr 2017',
-      classApplied: 'Class II',
-      academicYear: '2024/2025',
-      source: 'Website',
-      parentName: 'Steven Bennett',
-      relationship: 'Father',
-      mobile: '+1 65465 55667',
-      email: 'steven@example.com',
-      address: '212 Cedar Court, Seattle, WA',
-      status: { label: 'Waitlisted', className: 'badge-soft-primary' },
-      interview: '30 Jul 2026',
-      feeStatus: { label: 'Unpaid', className: 'badge-soft-danger' },
-      counselor: 'Daniel Josua',
-      previousSchool: 'Bright Kids School',
-      documents: documentBadges,
-    },
-  },
-  {
-    id: 'ADM202506',
-    name: 'Noah Diaz',
-    avatar: 'assets/img/students/student-06.jpg',
-    admissionNo: 'ADM202506',
-    gender: 'Male',
-    statusKey: 'enrolled',
-    status: { label: 'Enrolled', className: 'is-completed' },
-    classApplied: 'Class I',
-    parentName: 'Patricia Diaz',
-    parentAvatar: 'assets/img/profiles/avatar-03.jpg',
-    parentPhone: '+1 65465 77882',
-    appliedDate: '05 Jun 2026',
-    source: 'Referral',
-    search: 'noah diaz adm202506 class i patricia diaz enrolled +1 65465 77882 referral',
-    detail: {
-      gender: 'Male',
-      dob: '18 Feb 2018',
-      classApplied: 'Class I',
-      academicYear: '2024/2025',
-      source: 'Referral',
-      parentName: 'Patricia Diaz',
-      relationship: 'Father',
-      mobile: '+1 65465 77882',
-      email: 'patricia@example.com',
-      address: '45 Elm Street, Portland, OR',
-      status: { label: 'Enrolled', className: 'badge-soft-success' },
-      interview: '05 Jul 2026',
-      feeStatus: { label: 'Paid', className: 'badge-soft-success' },
-      counselor: 'Hellana Robert',
-      previousSchool: 'Happy Hearts Kinder',
-      documents: documentBadges,
-    },
-  },
-];
+/**
+ * The grid now loads real applications from the API (see admissions.live.ts).
+ * This stays exported (empty) so any older import keeps compiling.
+ */
+export const admissionRows: AdmissionRow[] = [];
 
 /* -------------------------------------------------------------------------- */
 /*                            Summary analytics cards                          */
@@ -283,14 +73,15 @@ export interface SummaryCard {
   label: string;
 }
 
+/** Values are placeholders; the grid computes the real numbers from the API rows. */
 export const summaryCards: SummaryCard[] = [
-  { id: 'total', accent: 'bg-primary-transparent text-primary', icon: 'ti ti-file-description', value: '3,654', label: 'Total Applications' },
-  { id: 'pending', accent: 'bg-warning-transparent text-warning', icon: 'ti ti-clock-hour-4', value: '218', label: 'Pending Review' },
-  { id: 'review', accent: 'bg-info-transparent text-info', icon: 'ti ti-file-search', value: '142', label: 'Under Review' },
-  { id: 'interviews', accent: 'bg-purple-transparent text-purple', icon: 'ti ti-calendar-event', value: '96', label: 'Interviews' },
-  { id: 'feePending', accent: 'bg-danger-transparent text-danger', icon: 'ti ti-cash-off', value: '74', label: 'Fee Pending' },
-  { id: 'approved', accent: 'bg-success-transparent text-success', icon: 'ti ti-circle-check', value: '2,845', label: 'Approved' },
-  { id: 'enrolled', accent: 'bg-teal-transparent text-teal', icon: 'ti ti-user-check', value: '2,613', label: 'Enrolled' },
+  { id: 'total', accent: 'bg-primary-transparent text-primary', icon: 'ti ti-file-description', value: '0', label: 'Total Applications' },
+  { id: 'pending', accent: 'bg-warning-transparent text-warning', icon: 'ti ti-clock-hour-4', value: '0', label: 'Pending Review' },
+  { id: 'review', accent: 'bg-info-transparent text-info', icon: 'ti ti-file-search', value: '0', label: 'Under Review' },
+  { id: 'interviews', accent: 'bg-purple-transparent text-purple', icon: 'ti ti-calendar-event', value: '0', label: 'Interviews' },
+  { id: 'feePending', accent: 'bg-danger-transparent text-danger', icon: 'ti ti-cash-off', value: '0', label: 'Fee Pending' },
+  { id: 'approved', accent: 'bg-success-transparent text-success', icon: 'ti ti-circle-check', value: '0', label: 'Approved' },
+  { id: 'enrolled', accent: 'bg-teal-transparent text-teal', icon: 'ti ti-user-check', value: '0', label: 'Enrolled' },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -330,14 +121,10 @@ export interface AdvancedFilter {
 }
 
 export const advancedFilters: AdvancedFilter[] = [
-  { inputId: 'academic-year', key: 'year', fieldLabel: 'Academic Year', label: 'Year', options: ['2024/2025', '2023/2024'] },
   { inputId: 'admission-status', key: 'status', fieldLabel: 'Admission Status', label: 'Status', options: ['Pending', 'Under Review', 'Approved', 'Rejected', 'Waitlisted', 'Enrolled'] },
-  { inputId: 'class-applied', key: 'class', fieldLabel: 'Class Applied', label: 'Class', options: ['Class I', 'Class II', 'Class III', 'Class IV'] },
-  { inputId: 'interview', key: 'interview', fieldLabel: 'Interview', label: 'Interview', options: ['Not Scheduled', 'Scheduled', 'Completed', 'No-Show'] },
-  { inputId: 'payment', key: 'payment', fieldLabel: 'Payment', label: 'Payment', options: ['Unpaid', 'Partial', 'Paid'] },
-  { inputId: 'source-2', key: 'source', fieldLabel: 'Source', label: 'Source', options: ['Walk-in', 'Website', 'Referral', 'Campaign'] },
-  { inputId: 'counselor', key: 'counselor', fieldLabel: 'Counselor', label: 'Counselor', options: ['Teena Mathew', 'Daniel Josua', 'Hellana Robert'] },
-  { inputId: 'gender', key: 'gender', fieldLabel: 'Gender', label: 'Gender', options: ['Male', 'Female'] },
+  { inputId: 'class-applied', key: 'class', fieldLabel: 'Class Applied', label: 'Class', options: ['Class I', 'Class II', 'Class III', 'Class IV', 'Class V'] },
+  { inputId: 'source-2', key: 'source', fieldLabel: 'Source', label: 'Source', options: ['Walk-in', 'Website', 'Referral', 'Other'] },
+  { inputId: 'gender', key: 'gender', fieldLabel: 'Gender', label: 'Gender', options: ['Male', 'Female', 'Other'] },
 ];
 
 export type ColumnId = 'applicant' | 'status' | 'class' | 'parent' | 'applied';
@@ -428,6 +215,8 @@ export interface RowMenuItem {
   label: string;
   icon: string;
   to?: string;
+  /** When true the row id is appended as `?id=` to `to`. */
+  withId?: boolean;
   modal?: AdmissionModalId;
   action?: string;
   danger?: boolean;
@@ -435,7 +224,7 @@ export interface RowMenuItem {
 }
 
 export const rowMenu: RowMenuItem[] = [
-  { label: 'View Application', icon: 'ti ti-eye', to: routes.admissionDetails },
+  { label: 'View Application', icon: 'ti ti-eye', to: routes.admissionDetails, withId: true },
   { label: 'Edit Application', icon: 'ti ti-edit', to: routes.addAdmission },
   { label: 'Verify Documents', icon: 'ti ti-file-check', modal: 'documentVerification' },
   { label: 'Schedule Interview', icon: 'ti ti-calendar-event', modal: 'scheduleInterview' },

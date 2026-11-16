@@ -1,4 +1,4 @@
-export interface DetailField {
+﻿export interface DetailField {
   label: string;
   value: string;
 }
@@ -80,7 +80,7 @@ export const personalDetails: DetailField[] = [
   { label: 'Nationality', value: 'American' },
   { label: 'Mother Tongue', value: 'English' },
 ];
-export const personalAddress = '3521 Franklin Street, New York, NY 10001';
+export let personalAddress = '3521 Franklin Street, New York, NY 10001';
 
 export const academicDetails: DetailField[] = [
   { label: 'Class Applied', value: 'I' },
@@ -96,7 +96,7 @@ export const medicalDetails: DetailField[] = [
   { label: 'Medical Conditions', value: 'None' },
   { label: 'Medications', value: 'N/A' },
 ];
-export const medicalDoctorContact = 'Dr. Smith · +1 65465 10000';
+export let medicalDoctorContact = 'Dr. Smith · +1 65465 10000';
 
 export interface GuardianCard {
   name: string;
@@ -229,3 +229,11 @@ export type AdmissionDetailsModalId =
   | 'importApplications'
   | 'delete'
   | 'uploadDocument';
+
+
+export const setPersonalAddress = (value: string) => {
+  personalAddress = value;
+};
+export const setMedicalDoctorContact = (value: string) => {
+  medicalDoctorContact = value;
+};

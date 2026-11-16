@@ -271,6 +271,7 @@ const ListLeaves = React.lazy(() => import("../views/hrm/leaves/list-leaves"));
 const Localization = React.lazy(() => import("../views/settings/websiteSettings/localization"));
 const LockScreen = React.lazy(() => import("../views/auth/lockScreen"));
 const Login = React.lazy(() => import("../views/auth/login/login"));
+const ChangePassword = React.lazy(() => import("../views/auth/changePassword"));
 const Login2 = React.lazy(() => import("../views/auth/login/login-2"));
 const Login3 = React.lazy(() => import("../views/auth/login/login-3"));
 const Manageusers = React.lazy(() => import("../views/userManagement/manage-users"));
@@ -2404,6 +2405,11 @@ export const authRoutes = [
   {
     path: routes.login,
     element: <Login />,
+    route: Route,
+  },
+  {
+    path: routes.changePassword,
+    element: <ChangePassword />,
     route: Route,
   },
   {

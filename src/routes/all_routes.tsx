@@ -279,6 +279,7 @@ export const all_routes = {
   forgotPassword3:      "/forgot-password-3",
   lockScreen:           "/lock-screen",
   login:                "/login",
+  changePassword:       "/change-password",
   login2:               "/login-2",
   login3:               "/login-3",
   pages:                "/pages",

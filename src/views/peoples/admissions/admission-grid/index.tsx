@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ToastStack from '@components/ui/ToastStack';
 import { all_routes } from '@/routes/all_routes';
 import { useToasts } from '@hooks/useToasts';
@@ -22,7 +22,6 @@ import type {
 } from './data/admissions.data';
 import {
   actionToasts,
-  admissionRows,
   advancedFilters,
   exportActions,
   quickFilters,
@@ -31,6 +30,7 @@ import {
   summaryCards,
   tableHeaders,
 } from './data/admissions.data';
+import { loadAdmissionRows } from './data/admissions.live';
 
 const routes = all_routes;
 
@@ -57,6 +57,8 @@ const sortValue = (row: AdmissionRow, key: SortKey): string => {
 };
 
 const AdmissionGrid = () => {
+  const navigate = useNavigate();
+
   /* ---------------------------------- State --------------------------------- */
   const [search, setSearch] = useState('');
   const [view, setView] = useState('all');
@@ -69,7 +71,8 @@ const AdmissionGrid = () => {
   const [exportOpen, setExportOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
 
-  const [roster, setRoster] = useState<AdmissionRow[]>(admissionRows);
+  const [roster, setRoster] = useState<AdmissionRow[]>([]);
+  const [loadError, setLoadError] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
   const [expanded, setExpanded] = useState<string[]>([]);
   const [rowMenuOpen, setRowMenuOpen] = useState<string | null>(null);
@@ -86,10 +89,22 @@ const AdmissionGrid = () => {
   const workspaceRef = useRef<HTMLDivElement>(null);
   const { toasts, push, dismiss } = useToasts();
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => setLoading(false), 850);
-    return () => window.clearTimeout(timer);
+  /* Loads the real applications from the API. `quiet` skips the skeleton (used after create / refresh). */
+  const load = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true);
+    try {
+      setRoster(await loadAdmissionRows());
+      setLoadError('');
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : 'Could not load admissions');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   /* -------------------------------- Filtering ------------------------------- */
 
@@ -162,6 +177,21 @@ const AdmissionGrid = () => {
     return counts;
   }, [roster]);
 
+  /* Top summary cards: counted from the real applications instead of the mock numbers. */
+  const cards = useMemo(() => {
+    const count = (fn: (row: AdmissionRow) => boolean) => String(roster.filter(fn).length);
+    const byLabel: Record<string, string> = {
+      'Total Applications': String(roster.length),
+      'Pending Review': count((r) => r.statusKey === 'pending'),
+      'Under Review': count((r) => r.statusKey === 'review'),
+      Interviews: '0',
+      'Fee Pending': count((r) => r.detail.feeStatus.label === 'Unpaid'),
+      Approved: count((r) => r.statusKey === 'approved'),
+      Enrolled: count((r) => r.statusKey === 'approved'),
+    };
+    return summaryCards.map((card) => ({ ...card, value: byLabel[card.label] ?? '0' }));
+  }, [roster]);
+
   const chips: FilterChip[] = useMemo(
     () =>
       advancedFilters
@@ -184,13 +214,12 @@ const AdmissionGrid = () => {
     [push],
   );
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback(async () => {
     setRefreshing(true);
-    window.setTimeout(() => {
-      setRefreshing(false);
-      toast('refresh');
-    }, 700);
-  }, [toast]);
+    await load(true);
+    setRefreshing(false);
+    toast('refresh');
+  }, [load, toast]);
 
   const exportCsv = useCallback(() => {
     const header = ['Applicant', 'Application No', 'Status', 'Class Applied', 'Parent', 'Applied Date'];
@@ -361,10 +390,15 @@ const AdmissionGrid = () => {
   const handleRowMenu = useCallback(
     (row: AdmissionRow, item: RowMenuItem) => {
       setRowMenuOpen(null);
+      if (item.to) {
+        /* "View Application" carries the real application id to the details page. */
+        navigate(item.withId ? `${item.to}?id=${row.id}` : item.to);
+        return;
+      }
       if (item.modal) openModal(item.modal, row);
       else if (item.action) runAction(item.action);
     },
-    [openModal, runAction],
+    [navigate, openModal, runAction],
   );
 
   const handleBulkAction = useCallback(
@@ -466,7 +500,7 @@ const AdmissionGrid = () => {
 
           {/* Summary analytics cards */}
           <div className="row g-3 mb-4">
-            {summaryCards.map((card) => (
+            {cards.map((card) => (
               <div className="col-xl col-lg-3 col-md-4 col-sm-6 d-flex" key={card.id}>
                 <div className="card card-hover w-100 mb-0">
                   <div className="card-body d-flex align-items-center p-3">
@@ -483,6 +517,8 @@ const AdmissionGrid = () => {
             ))}
           </div>
           {/* /Summary analytics cards */}
+
+          {loadError ? <div className="alert alert-danger">{loadError}</div> : null}
 
           {/* Admissions List */}
           <div className="card">
@@ -601,6 +637,7 @@ const AdmissionGrid = () => {
         onOpenModal={(modal) => setActiveModal(modal)}
         onToast={push}
         onConfirmDelete={confirmDelete}
+        onCreated={() => void load(true)}
       />
 
       <ToastStack toasts={toasts} onDismiss={dismiss} id="admToasts" />

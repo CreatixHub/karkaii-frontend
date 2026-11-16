@@ -13,6 +13,7 @@ export const endpoints = {
     refresh: '/auth/refresh',
     me: '/auth/me',
     switchOrganization: '/auth/switch-organization',
+    changePassword: '/auth/change-password',
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
   },
@@ -21,8 +22,20 @@ export const endpoints = {
     create: '/organizations',
   },
 
+  classes: {
+    list: '/classes',
+  },
+
+  admissions: {
+    list: '/admissions',
+    create: '/admissions',
+    detail: (id: string) => `/admissions/${id}`,
+    accept: (id: string) => `/admissions/${id}/accept`,
+  },
+
   students: {
     list: '/students',
+    me: '/students/me',
     create: '/students',
     detail: (id: string) => `/students/${id}`,
     update: (id: string) => `/students/${id}`,
