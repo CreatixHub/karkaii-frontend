@@ -1,86 +1,83 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import ImageWithBasePath from '@core/common/imageWithBasePath';
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import Modal from '@components/ui/Modal';
 import ToastStack from '@components/ui/ToastStack';
 import { ActionLink } from '@components/workspace';
-import { all_routes } from '@/routes/all_routes';
 import { useToasts } from '@hooks/useToasts';
-import type { Account } from './data/profile.data';
-import { ACCOUNT, statsFor } from './data/profile.data';
+import { useAuth } from '@hooks/useAuth';
+import { roleHomeRoute } from '@features/auth/roleHome';
+import { getMyStudent } from '@services/students/students.me';
+import { changePassword } from '@services/auth/changePassword';
+import { accountFrom, statsFor } from './data/profile.data';
 
-const routes = all_routes;
-
-type ProfileDialog = 'personal' | 'address' | 'password' | null;
-
-/** One labelled input, the shape the template repeats down both cards. */
-const Field = ({
-  id,
-  label,
-  value,
-  placeholder,
-  type = 'text',
-  onChange,
-  readOnly = false,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  placeholder: string;
-  type?: string;
-  onChange?: (value: string) => void;
-  readOnly?: boolean;
-}) => (
+/** One labelled, read-only value. */
+const Field = ({ id, label, value, placeholder }: { id: string; label: string; value: string; placeholder: string }) => (
   <>
     <label className="form-label" htmlFor={id}>
       {label}
     </label>
-    <input
-      type={type}
-      className="form-control"
-      placeholder={placeholder}
-      id={id}
-      value={value}
-      readOnly={readOnly}
-      onChange={(event) => onChange?.(event.target.value)}
-    />
+    <input type="text" className="form-control" placeholder={placeholder} id={id} value={value} readOnly />
   </>
 );
 
 const Profile = () => {
   const { toasts, push, dismiss } = useToasts();
+  const { user } = useAuth();
 
-  const [account, setAccount] = useState<Account>(ACCOUNT);
-  const [dialog, setDialog] = useState<ProfileDialog>(null);
-  const [draft, setDraft] = useState<Account>(ACCOUNT);
-  const [passwordShown, setPasswordShown] = useState(false);
+  const [student, setStudent] = useState<unknown>(null);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' });
 
+  // Students have a student record (address etc.); other roles simply don't.
+  const load = useCallback(async () => {
+    try {
+      setStudent(await getMyStudent());
+    } catch {
+      setStudent(null);
+    }
+  }, []);
+
   useEffect(() => {
-    if (dialog === 'personal' || dialog === 'address') setDraft(account);
-    if (dialog === 'password') setPasswords({ current: '', next: '', confirm: '' });
-  }, [dialog, account]);
+    void load();
+  }, [load]);
 
-  const stats = statsFor(account);
+  const account = useMemo(() => accountFrom(user, student), [user, student]);
+  const mustChange = Boolean((user as { mustChangePassword?: boolean } | null)?.mustChangePassword);
+  const stats = statsFor(account, mustChange);
+  const initials =
+    `${account.firstName.charAt(0)}${account.lastName.charAt(0)}`.toUpperCase() || '?';
 
-  const saveDetails = (event: FormEvent) => {
-    event.preventDefault();
-    setAccount(draft);
-    push(dialog === 'address' ? 'Address information saved' : 'Personal information saved');
-    setDialog(null);
+  const openPassword = () => {
+    setPasswords({ current: '', next: '', confirm: '' });
+    setPasswordOpen(true);
   };
 
-  const savePassword = (event: FormEvent) => {
+  const savePassword = async (event: FormEvent) => {
     event.preventDefault();
+    if (passwords.next.length < 8) {
+      push('New password must be at least 8 characters', 'danger');
+      return;
+    }
     if (passwords.next !== passwords.confirm) {
       push('The two new passwords do not match', 'danger');
       return;
     }
-    push('Password changed');
-    setDialog(null);
-  };
+    if (passwords.next === passwords.current) {
+      push('New password must be different from the current one', 'danger');
+      return;
+    }
 
-  const set = (field: keyof Account) => (value: string) =>
-    setDraft((current) => ({ ...current, [field]: value }));
+    setSaving(true);
+    try {
+      await changePassword({ currentPassword: passwords.current, newPassword: passwords.next });
+      push('Password changed');
+      setPasswordOpen(false);
+    } catch (err) {
+      push(err instanceof Error ? err.message : 'Could not change the password', 'danger');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <>
@@ -92,7 +89,7 @@ const Profile = () => {
               <nav>
                 <ol className="breadcrumb mb-0">
                   <li className="breadcrumb-item">
-                    <a href={routes.adminDashboard}>Dashboard</a>
+                    <a href={roleHomeRoute(user?.role ?? 'admin')}>Dashboard</a>
                   </li>
                   <li className="breadcrumb-item">Settings</li>
                   <li className="breadcrumb-item active" aria-current="page">
@@ -107,7 +104,7 @@ const Profile = () => {
                   className="btn btn-outline-light bg-white btn-icon"
                   ariaLabel="Refresh"
                   onClick={() => {
-                    setAccount(ACCOUNT);
+                    void load();
                     push('Profile reloaded');
                   }}
                 >
@@ -140,37 +137,17 @@ const Profile = () => {
             <div className="settings-right-sidebar me-md-3 border-0">
               <div className="card">
                 <div className="card-header">
-                  <h4 className="fs-16 fw-medium">Personal Information</h4>
+                  <h4 className="fs-16 fw-medium">My Account</h4>
                 </div>
-                <div className="card-body">
-                  <div className="settings-profile-upload">
-                    <span className="profile-pic">
-                      <ImageWithBasePath src={account.photo} alt="Profile" />
-                    </span>
-                    <div className="title-upload">
-                      <h5>Edit Your Photo</h5>
-                      <ActionLink className="me-2" onClick={() => push('Photo removed')}>
-                        Delete{' '}
-                      </ActionLink>
-                      <ActionLink className="text-primary" onClick={() => push('Choose a new photo')}>
-                        Update
-                      </ActionLink>
-                    </div>
-                  </div>
-                  <div className="profile-uploader profile-uploader-two mb-0">
-                    <span className="upload-icon">
-                      <i className="ti ti-upload" />
-                    </span>
-                    <div className="drag-upload-btn bg-transparent me-0 border-0">
-                      <p className="upload-btn">
-                        <span>Click to Upload</span> or drag and drop{' '}
-                      </p>
-                      <h6>JPG or PNG</h6>
-                      <h6>(Max 450 x 450 px)</h6>
-                    </div>
-                    <input type="file" className="form-control" multiple id="image_sign" />
-                    <div id="frames" />
-                  </div>
+                <div className="card-body text-center">
+                  <span
+                    className="avatar avatar-xxl rounded-circle bg-primary-transparent text-primary fs-24 fw-semibold d-inline-flex align-items-center justify-content-center mb-3"
+                    style={{ width: 90, height: 90 }}
+                  >
+                    {initials}
+                  </span>
+                  <h5 className="mb-1">{[account.firstName, account.lastName].filter(Boolean).join(' ') || '-'}</h5>
+                  <p className="text-muted mb-0">{account.userName || ''}</p>
                 </div>
               </div>
             </div>
@@ -179,129 +156,46 @@ const Profile = () => {
               <div className="d-md-flex">
                 <div className="flex-fill">
                   <div className="card">
-                    <div className="card-header d-flex justify-content-between align-items-center">
+                    <div className="card-header">
                       <h5>Personal Information</h5>
-                      <ActionLink
-                        className="btn btn-primary btn-sm"
-                        onClick={() => setDialog('personal')}
-                      >
-                        <i className="ti ti-edit me-2" />
-                        Edit
-                      </ActionLink>
                     </div>
                     <div className="card-body">
                       <div className="d-block d-xl-flex">
                         <div className="mb-3 flex-fill me-xl-3 me-0">
-                          <Field
-                            id="first-name"
-                            label="First Name"
-                            placeholder="Enter First Name"
-                            value={account.firstName}
-                            readOnly
-                          />
+                          <Field id="first-name" label="First Name" placeholder="-" value={account.firstName} />
                         </div>
                         <div className="mb-3 flex-fill">
-                          <Field
-                            id="last-name"
-                            label="Last Name"
-                            placeholder="Enter Last Name"
-                            value={account.lastName}
-                            readOnly
-                          />
+                          <Field id="last-name" label="Last Name" placeholder="-" value={account.lastName} />
                         </div>
                       </div>
                       <div className="mb-3">
-                        <Field
-                          id="email-address"
-                          label="Email Address"
-                          type="email"
-                          placeholder="Enter Email"
-                          value={account.email}
-                          readOnly
-                        />
+                        <Field id="email-address" label="Email Address" placeholder="-" value={account.email} />
                       </div>
                       <div className="d-block d-xl-flex">
                         <div className="mb-3 flex-fill me-xl-3 me-0">
-                          <Field
-                            id="user-name"
-                            label="User Name"
-                            placeholder="Enter User Name"
-                            value={account.userName}
-                            readOnly
-                          />
+                          <Field id="user-name" label="User Name" placeholder="-" value={account.userName} />
                         </div>
                         <div className="mb-3 flex-fill">
-                          <Field
-                            id="phone-number"
-                            label="Phone Number"
-                            placeholder="Enter Phone Number"
-                            value={account.phone}
-                            readOnly
-                          />
+                          <Field id="phone-number" label="Phone Number" placeholder="-" value={account.phone} />
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="card">
-                    <div className="card-header d-flex justify-content-between align-items-center">
+                    <div className="card-header">
                       <h5>Address Information</h5>
-                      <ActionLink
-                        className="btn btn-primary btn-sm"
-                        onClick={() => setDialog('address')}
-                      >
-                        <i className="ti ti-edit me-2" />
-                        Edit
-                      </ActionLink>
                     </div>
                     <div className="card-body">
                       <div className="mb-3">
-                        <Field
-                          id="address"
-                          label="Address"
-                          placeholder="Enter Address"
-                          value={account.address}
-                          readOnly
-                        />
+                        <Field id="address" label="Address" placeholder="-" value={account.address} />
                       </div>
                       <div className="d-block d-xl-flex">
                         <div className="mb-3 flex-fill me-xl-3 me-0">
-                          <Field
-                            id="country"
-                            label="Country"
-                            placeholder="Enter Country"
-                            value={account.country}
-                            readOnly
-                          />
+                          <Field id="city" label="City" placeholder="-" value={account.city} />
                         </div>
                         <div className="mb-3 flex-fill">
-                          <Field
-                            id="state-province"
-                            label="State / Province"
-                            placeholder="Enter State"
-                            value={account.state}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-                      <div className="d-block d-xl-flex">
-                        <div className="mb-3 flex-fill me-xl-3 me-0">
-                          <Field
-                            id="city"
-                            label="City"
-                            placeholder="City"
-                            value={account.city}
-                            readOnly
-                          />
-                        </div>
-                        <div className="mb-3 flex-fill">
-                          <Field
-                            id="postal-code"
-                            label="Postal Code"
-                            placeholder="Enter Postal Code"
-                            value={account.postalCode}
-                            readOnly
-                          />
+                          <Field id="postal-code" label="Postal Code" placeholder="-" value={account.postalCode} />
                         </div>
                       </div>
                     </div>
@@ -310,41 +204,16 @@ const Profile = () => {
                   <div className="card">
                     <div className="card-header d-flex justify-content-between align-items-center">
                       <h5>Password</h5>
-                      <ActionLink
-                        className="btn btn-primary btn-sm"
-                        onClick={() => setDialog('password')}
-                      >
+                      <ActionLink className="btn btn-primary btn-sm" onClick={openPassword}>
                         Change
                       </ActionLink>
                     </div>
                     <div className="card-body">
-                      <div className="mb-3">
-                        <label className="form-label" htmlFor="current-password">
-                          Current Password
-                        </label>
-                        <div className="pass-group d-flex">
-                          <input
-                            type={passwordShown ? 'text' : 'password'}
-                            autoComplete="current-password"
-                            className="pass-input form-control"
-                            id="current-password"
-                            value=""
-                            readOnly
-                          />
-                          <span
-                            className={`ti toggle-password ${passwordShown ? 'ti-eye' : 'ti-eye-off'}`}
-                            role="button"
-                            tabIndex={0}
-                            aria-label={passwordShown ? 'Hide password' : 'Show password'}
-                            onClick={() => setPasswordShown((current) => !current)}
-                            onKeyDown={(event) => {
-                              if (event.key !== 'Enter' && event.key !== ' ') return;
-                              event.preventDefault();
-                              setPasswordShown((current) => !current);
-                            }}
-                          />
-                        </div>
-                      </div>
+                      <p className="mb-0 text-muted">
+                        {mustChange
+                          ? 'You are using a temporary password. Please change it.'
+                          : 'Use Change to set a new password.'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -355,148 +224,17 @@ const Profile = () => {
       </div>
 
       <Modal
-        open={dialog === 'personal'}
-        onClose={() => setDialog(null)}
-        title="Edit Personal Information"
-        onSubmit={saveDetails}
-        footer={
-          <>
-            <ActionLink className="btn btn-light me-2" onClick={() => setDialog(null)}>
-              Cancel
-            </ActionLink>
-            <button type="submit" className="btn btn-primary">
-              Save Changes
-            </button>
-          </>
-        }
-      >
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <Field
-              id="edit-first-name"
-              label="First Name"
-              placeholder="Enter First Name"
-              value={draft.firstName}
-              onChange={set('firstName')}
-            />
-          </div>
-          <div className="col-md-6 mb-3">
-            <Field
-              id="edit-last-name"
-              label="Last Name"
-              placeholder="Enter Last Name"
-              value={draft.lastName}
-              onChange={set('lastName')}
-            />
-          </div>
-          <div className="col-md-12 mb-3">
-            <Field
-              id="edit-email"
-              label="Email Address"
-              type="email"
-              placeholder="Enter Email"
-              value={draft.email}
-              onChange={set('email')}
-            />
-          </div>
-          <div className="col-md-6 mb-3">
-            <Field
-              id="edit-user-name"
-              label="User Name"
-              placeholder="Enter User Name"
-              value={draft.userName}
-              onChange={set('userName')}
-            />
-          </div>
-          <div className="col-md-6 mb-0">
-            <Field
-              id="edit-phone"
-              label="Phone Number"
-              placeholder="Enter Phone Number"
-              value={draft.phone}
-              onChange={set('phone')}
-            />
-          </div>
-        </div>
-      </Modal>
-
-      <Modal
-        open={dialog === 'address'}
-        onClose={() => setDialog(null)}
-        title="Edit Address Information"
-        onSubmit={saveDetails}
-        footer={
-          <>
-            <ActionLink className="btn btn-light me-2" onClick={() => setDialog(null)}>
-              Cancel
-            </ActionLink>
-            <button type="submit" className="btn btn-primary">
-              Save Changes
-            </button>
-          </>
-        }
-      >
-        <div className="row">
-          <div className="col-md-12 mb-3">
-            <Field
-              id="edit-address"
-              label="Address"
-              placeholder="Enter Address"
-              value={draft.address}
-              onChange={set('address')}
-            />
-          </div>
-          <div className="col-md-6 mb-3">
-            <Field
-              id="edit-country"
-              label="Country"
-              placeholder="Enter Country"
-              value={draft.country}
-              onChange={set('country')}
-            />
-          </div>
-          <div className="col-md-6 mb-3">
-            <Field
-              id="edit-state"
-              label="State / Province"
-              placeholder="Enter State"
-              value={draft.state}
-              onChange={set('state')}
-            />
-          </div>
-          <div className="col-md-6 mb-3">
-            <Field
-              id="edit-city"
-              label="City"
-              placeholder="City"
-              value={draft.city}
-              onChange={set('city')}
-            />
-          </div>
-          <div className="col-md-6 mb-0">
-            <Field
-              id="edit-postal"
-              label="Postal Code"
-              placeholder="Enter Postal Code"
-              value={draft.postalCode}
-              onChange={set('postalCode')}
-            />
-          </div>
-        </div>
-      </Modal>
-
-      <Modal
-        open={dialog === 'password'}
-        onClose={() => setDialog(null)}
+        open={passwordOpen}
+        onClose={() => setPasswordOpen(false)}
         title="Change Password"
         onSubmit={savePassword}
         footer={
           <>
-            <ActionLink className="btn btn-light me-2" onClick={() => setDialog(null)}>
+            <ActionLink className="btn btn-light me-2" onClick={() => setPasswordOpen(false)}>
               Cancel
             </ActionLink>
-            <button type="submit" className="btn btn-primary">
-              Change Password
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving ? 'Saving...' : 'Change Password'}
             </button>
           </>
         }
@@ -511,9 +249,8 @@ const Profile = () => {
             id="pw-current"
             autoComplete="current-password"
             value={passwords.current}
-            onChange={(event) =>
-              setPasswords((current) => ({ ...current, current: event.target.value }))
-            }
+            onChange={(event) => setPasswords((current) => ({ ...current, current: event.target.value }))}
+            required
           />
         </div>
         <div className="mb-3">
@@ -527,7 +264,9 @@ const Profile = () => {
             autoComplete="new-password"
             value={passwords.next}
             onChange={(event) => setPasswords((current) => ({ ...current, next: event.target.value }))}
+            required
           />
+          <div className="form-text">At least 8 characters.</div>
         </div>
         <div className="mb-0">
           <label className="form-label" htmlFor="pw-confirm">
@@ -539,9 +278,8 @@ const Profile = () => {
             id="pw-confirm"
             autoComplete="new-password"
             value={passwords.confirm}
-            onChange={(event) =>
-              setPasswords((current) => ({ ...current, confirm: event.target.value }))
-            }
+            onChange={(event) => setPasswords((current) => ({ ...current, confirm: event.target.value }))}
+            required
           />
         </div>
       </Modal>

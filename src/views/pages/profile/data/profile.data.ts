@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------ *
- * The account                                                        *
+ * The account: built from the signed-in login (+ student record)    *
  * ------------------------------------------------------------------ */
 
 export interface Account {
@@ -16,60 +16,78 @@ export interface Account {
   postalCode: string;
 }
 
+/** Empty account: nothing is invented while the real data loads. */
 export const ACCOUNT: Account = {
-  photo: 'assets/img/profiles/avatar-27.jpg',
-  firstName: 'Kevin',
-  lastName: 'Larry',
-  email: 'kevin@example.com',
-  userName: 'kevin.larry',
-  phone: '+1 82392 37359',
-  address: '3495 Red Hawk Road',
-  country: 'United States',
-  state: 'California',
-  city: 'Los Angeles',
-  postalCode: '90017',
+  photo: '',
+  firstName: '',
+  lastName: '',
+  email: '',
+  userName: '',
+  phone: '',
+  address: '',
+  country: '',
+  state: '',
+  city: '',
+  postalCode: '',
+};
+
+const str = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
+
+/**
+ * Builds the account from the login user and (for students) the student record.
+ * Reads fields defensively so a missing field simply stays empty.
+ */
+export const accountFrom = (user: unknown, student: unknown): Account => {
+  const u = (user ?? {}) as Record<string, unknown>;
+  const s = (student ?? {}) as Record<string, unknown>;
+
+  let firstName = str(s.firstName);
+  let lastName = str(s.lastName);
+  if (!firstName) {
+    const full = str(u.fullName) || str(u.name) || str(s.fullName);
+    const [first = '', ...rest] = full.split(/\s+/).filter(Boolean);
+    firstName = first;
+    lastName = rest.join(' ');
+  }
+
+  return {
+    photo: '',
+    firstName,
+    lastName,
+    email: str(u.email),
+    userName: str(u.username) || str(u.userName),
+    phone: str(u.phone),
+    address: [str(s.addressLine1), str(s.addressLine2)].filter(Boolean).join(', '),
+    country: '',
+    state: '',
+    city: str(s.cityName) || str(s.city),
+    postalCode: str(s.postalCode),
+  };
 };
 
 /* ------------------------------------------------------------------ *
  * What the tiles read                                                *
  * ------------------------------------------------------------------ */
 
-/** Two-factor is on, which is what makes the security tile read Strong. */
-export const TWO_FACTOR = true;
-export const UNREAD = 2;
-export const LAST_LOGIN = '1 Day Ago';
-
-/** Every field the completeness tile counts. */
-const FIELDS: (keyof Account)[] = [
-  'firstName',
-  'lastName',
-  'email',
-  'userName',
-  'phone',
-  'address',
-  'country',
-  'state',
-  'city',
-  'postalCode',
-];
+/** Only the identity fields count towards completeness. */
+const FIELDS: (keyof Account)[] = ['firstName', 'lastName', 'email', 'userName', 'phone'];
 
 export const completenessOf = (account: Account) => {
   const filled = FIELDS.filter((field) => account[field].trim() !== '').length;
   return Math.round((filled / FIELDS.length) * 100);
 };
 
-/** What the caption under the figure says about it. */
 export const completenessNote = (percent: number) => {
   if (percent === 100) return 'Nothing left to fill';
-  if (percent >= 90) return 'Almost done';
+  if (percent >= 80) return 'Almost done';
   if (percent >= 50) return 'Getting there';
   return 'Just started';
 };
 
-export const securityOf = (twoFactor: boolean) =>
-  twoFactor
-    ? { value: 'Strong', note: '2FA Enabled', tint: 'success' }
-    : { value: 'Weak', note: '2FA Off', tint: 'danger' };
+export const securityOf = (mustChangePassword: boolean) =>
+  mustChangePassword
+    ? { value: 'Action needed', note: 'Temporary password', tint: 'danger' }
+    : { value: 'Good', note: 'Password set by you', tint: 'success' };
 
 export interface ProfileStat {
   id: string;
@@ -80,9 +98,9 @@ export interface ProfileStat {
   note: string;
 }
 
-export const statsFor = (account: Account): ProfileStat[] => {
+export const statsFor = (account: Account, mustChangePassword: boolean): ProfileStat[] => {
   const complete = completenessOf(account);
-  const security = securityOf(TWO_FACTOR);
+  const security = securityOf(mustChangePassword);
 
   return [
     {
@@ -105,17 +123,17 @@ export const statsFor = (account: Account): ProfileStat[] => {
       id: 'inbox',
       tint: 'warning',
       icon: 'ti ti-bell',
-      value: String(UNREAD),
+      value: '-',
       label: 'Unread',
-      note: 'Inbox',
+      note: 'Not available yet',
     },
     {
       id: 'login',
       tint: 'info',
       icon: 'ti ti-clock-hour-4',
-      value: LAST_LOGIN,
+      value: '-',
       label: 'Last Login',
-      note: 'Active Session',
+      note: 'Not available yet',
     },
   ];
 };

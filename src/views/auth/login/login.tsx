@@ -94,14 +94,15 @@ const Login = () => {
                           </select>
                         </div>
                         <div className="mb-3 ">
-                          <label className="form-label">Email Address</label>
+                          <label className="form-label">Email or Phone Number</label>
                           <div className="input-icon mb-3 position-relative">
                             <span className="input-icon-addon">
-                              <i className="ti ti-mail" />
+                              <i className="ti ti-user" />
                             </span>
                             <input
-                              type="email"
+                              type="text"
                               name="email"
+                              placeholder="Email, phone number or admission no."
                               autoComplete="username"
                               value={form.values.email}
                               onChange={form.handleChange}

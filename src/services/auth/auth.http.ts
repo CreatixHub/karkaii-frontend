@@ -19,8 +19,10 @@ interface BackendUser {
   name: string;
   email: string;
   role: UserRole;
+  username?: string | null;
   avatar?: string | null;
   phone?: string | null;
+  mustChangePassword?: boolean;
   organization?: { id: string; slug: string; name: string; roles: string[] } | null;
 }
 
@@ -36,6 +38,9 @@ function toAuthUser(u: BackendUser): AuthUser {
     role: u.role,
     permissions: FULL_ACCESS_ROLES.has(u.role) ? ['*'] : [],
     avatarUrl: u.avatar ?? null,
+    username: u.username ?? null,
+    phone: u.phone ?? null,
+    mustChangePassword: u.mustChangePassword ?? false,
     organization: u.organization ?? null,
   };
 }
@@ -94,12 +99,16 @@ function withSignupServerMessage(error: unknown): never {
 
 export const authHttpService: AuthService = {
   async login(credentials: LoginCredentials) {
-    // `skipAuth` — there is no session yet, so no Authorization header.
-    // Only email + password are sent: `rememberMe` is a client-side storage choice, not part of the API.
+    // `skipAuth` - there is no session yet, so no Authorization header.
+    // The sign-in field accepts an email OR a username (a student's phone number / admission number):
+    // a value containing "@" is sent as `email`, anything else as `username`.
+    // `rememberMe` is a client-side storage choice, not part of the API.
+    const identifier = credentials.email.trim();
+    const who = identifier.includes('@') ? { email: identifier } : { username: identifier };
     try {
       const response = await apiClient.post<LoginResponse>(
         endpoints.auth.login,
-        { email: credentials.email, password: credentials.password },
+        { ...who, password: credentials.password },
         { skipAuth: true, skipRefresh: true },
       );
       return toSession(response);

@@ -1,11 +1,13 @@
+import { useEffect, useState } from 'react';
 import DateField from '@components/ui/DateField';
 import Modal from '@components/ui/Modal';
 import CommonSelect from '@core/common/commonSelect';
 import ImageWithBasePath from '@core/common/imageWithBasePath';
 import { useForm } from '@hooks/useForm';
 import { required } from '@utils/validation';
+import { buildAdmissionPayload, createAdmission, listClasses } from '@services/admissions/admissions.api';
+import type { ClassOption } from '@services/admissions/admissions.api';
 import type { AdmissionModalId, AdmissionRow } from '../data/admissions.data';
-
 
 const toOptions = (values: string[]) => values.map((value) => ({ value, label: value }));
 
@@ -20,6 +22,8 @@ export interface AdmissionModalsProps {
   onOpenModal: (modal: AdmissionModalId) => void;
   onToast: (message: string) => void;
   onConfirmDelete: () => void;
+  /** Called after a new application is saved, so the list can reload. */
+  onCreated?: () => void;
 }
 
 const AdmissionModals = ({
@@ -29,8 +33,19 @@ const AdmissionModals = ({
   onOpenModal,
   onToast,
   onConfirmDelete,
+  onCreated,
 }: AdmissionModalsProps) => {
   const admissionNo = row?.admissionNo ?? 'ADM202501';
+
+  /* Real classes from the backend (the "Class Applying For" dropdown). */
+  const [classes, setClasses] = useState<ClassOption[]>([]);
+  useEffect(() => {
+    if (active !== 'newAdmission') return;
+    listClasses()
+      .then(setClasses)
+      .catch(() => onToast('Could not load classes from the server'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
 
   /* ------------------------------ New Admission ------------------------------ */
   const newAdmissionForm = useForm<
@@ -39,12 +54,17 @@ const AdmissionModals = ({
       lastName: string;
       gender: string;
       dob: string;
+      bloodGroup: string;
+      studentPhone: string;
       classApplyingFor: string;
       parentName: string;
       mobile: string;
       email: string;
       source: string;
+      address: string;
+      needsTransport: string;
       previousSchool: string;
+      previousClass: string;
     },
     string
   >({
@@ -53,22 +73,56 @@ const AdmissionModals = ({
       lastName: '',
       gender: 'Male',
       dob: '',
-      classApplyingFor: 'Class I',
+      bloodGroup: '',
+      studentPhone: '',
+      classApplyingFor: '',
       parentName: '',
       mobile: '',
       email: '',
       source: 'Walk-in',
+      address: '',
+      needsTransport: 'No',
       previousSchool: '',
+      previousClass: '',
     },
     validationSchema: {
       firstName: required('Enter a first name.'),
       lastName: required('Enter a last name.'),
+      dob: required('Select the date of birth.'),
+      classApplyingFor: required('Select a class.'),
+      parentName: required('Enter the parent name.'),
+      mobile: required('Enter the parent mobile number.'),
     },
-    onSubmit: async () => 'Application created successfully',
+    onSubmit: async (v) => {
+      const { payload, error } = buildAdmissionPayload(
+        {
+          'first-name': v.firstName,
+          'last-name': v.lastName,
+          gender: v.gender,
+          'date-of-birth': v.dob,
+          'blood-group': v.bloodGroup,
+          'student-phone': v.studentPhone,
+          'class-applied': v.classApplyingFor,
+          'parent-guardian-name': v.parentName,
+          phone: v.mobile,
+          email: v.email,
+          address: v.address,
+          'transport-required': v.needsTransport,
+          'application-source': v.source,
+          'previous-school': v.previousSchool,
+          'previous-class': v.previousClass,
+        },
+        classes,
+      );
+      if (!payload) throw new Error(error ?? 'Please complete the form');
+      await createAdmission(payload);
+      return 'Application created successfully';
+    },
     onSuccess: (message) => {
       onToast(message);
       newAdmissionForm.reset();
       onClose();
+      onCreated?.();
     },
   });
 
@@ -185,11 +239,16 @@ const AdmissionModals = ({
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={newAdmissionForm.isSubmitting}>
-              Create Application
+              {newAdmissionForm.isSubmitting ? 'Saving...' : 'Create Application'}
             </button>
           </>
         }
       >
+        {newAdmissionForm.submitError && (
+          <div className="alert alert-danger py-2" role="alert">
+            {newAdmissionForm.submitError.message}
+          </div>
+        )}
         <h5 className="mb-3 fs-15">Applicant Details</h5>
         <div className="row">
           <div className="col-12 col-lg-6">
@@ -244,7 +303,7 @@ const AdmissionModals = ({
           <div className="col-12 col-lg-4">
             <div className="mb-3">
               <label className="form-label" htmlFor="date-of-birth">
-                Date of Birth
+                Date of Birth <span className="text-danger">*</span>
               </label>
               <div className="date-pic">
                 <DateField
@@ -257,18 +316,86 @@ const AdmissionModals = ({
                   <i className="ti ti-calendar" />
                 </span>
               </div>
+              {fieldError(newAdmissionForm.errors.dob, newAdmissionForm.touched.dob)}
             </div>
           </div>
           <div className="col-12 col-lg-4">
             <div className="mb-3">
               <label className="form-label" htmlFor="class-applying-for">
-                Class Applying For
+                Class Applying For <span className="text-danger">*</span>
               </label>
               <CommonSelect
                 inputId="class-applying-for"
-                options={toOptions(['Class I', 'Class II', 'Class III', 'Class IV'])}
-                value={{ value: newAdmissionForm.values.classApplyingFor, label: newAdmissionForm.values.classApplyingFor }}
+                options={toOptions(classes.map((c) => c.name))}
+                value={
+                  newAdmissionForm.values.classApplyingFor
+                    ? { value: newAdmissionForm.values.classApplyingFor, label: newAdmissionForm.values.classApplyingFor }
+                    : null
+                }
                 onChange={(option) => newAdmissionForm.setFieldValue('classApplyingFor', option?.value ?? '')}
+              />
+              {fieldError(newAdmissionForm.errors.classApplyingFor, newAdmissionForm.touched.classApplyingFor)}
+            </div>
+          </div>
+          <div className="col-12 col-lg-4">
+            <div className="mb-3">
+              <label className="form-label" htmlFor="student-phone">
+                Student Phone
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Used as the login username"
+                id="student-phone"
+                name="studentPhone"
+                value={newAdmissionForm.values.studentPhone}
+                onChange={newAdmissionForm.handleChange}
+              />
+            </div>
+          </div>
+          <div className="col-12 col-lg-4">
+            <div className="mb-3">
+              <label className="form-label" htmlFor="blood-group">
+                Blood Group
+              </label>
+              <CommonSelect
+                inputId="blood-group"
+                options={toOptions(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])}
+                value={
+                  newAdmissionForm.values.bloodGroup
+                    ? { value: newAdmissionForm.values.bloodGroup, label: newAdmissionForm.values.bloodGroup }
+                    : null
+                }
+                onChange={(option) => newAdmissionForm.setFieldValue('bloodGroup', option?.value ?? '')}
+              />
+            </div>
+          </div>
+          <div className="col-12 col-lg-4">
+            <div className="mb-3">
+              <label className="form-label" htmlFor="needs-transport">
+                Needs Transport
+              </label>
+              <CommonSelect
+                inputId="needs-transport"
+                options={toOptions(['No', 'Yes'])}
+                value={{ value: newAdmissionForm.values.needsTransport, label: newAdmissionForm.values.needsTransport }}
+                onChange={(option) => newAdmissionForm.setFieldValue('needsTransport', option?.value ?? 'No')}
+              />
+            </div>
+          </div>
+          <div className="col-12 col-lg-12">
+            <div className="mb-3">
+              <label className="form-label" htmlFor="address">
+                Address
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter address"
+                id="address"
+                name="address"
+                value={newAdmissionForm.values.address}
+                onChange={newAdmissionForm.handleChange}
               />
             </div>
           </div>
@@ -278,7 +405,7 @@ const AdmissionModals = ({
           <div className="col-12 col-lg-6">
             <div className="mb-3">
               <label className="form-label" htmlFor="parent-name">
-                Parent Name
+                Parent Name <span className="text-danger">*</span>
               </label>
               <input
                 type="text"
@@ -288,13 +415,15 @@ const AdmissionModals = ({
                 name="parentName"
                 value={newAdmissionForm.values.parentName}
                 onChange={newAdmissionForm.handleChange}
+                onBlur={newAdmissionForm.handleBlur}
               />
+              {fieldError(newAdmissionForm.errors.parentName, newAdmissionForm.touched.parentName)}
             </div>
           </div>
           <div className="col-12 col-lg-6">
             <div className="mb-3">
               <label className="form-label" htmlFor="mobile-number">
-                Mobile Number
+                Parent Mobile Number <span className="text-danger">*</span>
               </label>
               <input
                 type="text"
@@ -304,7 +433,9 @@ const AdmissionModals = ({
                 name="mobile"
                 value={newAdmissionForm.values.mobile}
                 onChange={newAdmissionForm.handleChange}
+                onBlur={newAdmissionForm.handleBlur}
               />
+              {fieldError(newAdmissionForm.errors.mobile, newAdmissionForm.touched.mobile)}
             </div>
           </div>
           <div className="col-12 col-lg-6">
@@ -336,7 +467,7 @@ const AdmissionModals = ({
               />
             </div>
           </div>
-          <div className="col-12 col-lg-12">
+          <div className="col-12 col-lg-8">
             <div className="mb-0">
               <label className="form-label" htmlFor="previous-school">
                 Previous School
@@ -348,6 +479,22 @@ const AdmissionModals = ({
                 id="previous-school"
                 name="previousSchool"
                 value={newAdmissionForm.values.previousSchool}
+                onChange={newAdmissionForm.handleChange}
+              />
+            </div>
+          </div>
+          <div className="col-12 col-lg-4">
+            <div className="mb-0">
+              <label className="form-label" htmlFor="previous-class">
+                Previous Class
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="e.g. Class I"
+                id="previous-class"
+                name="previousClass"
+                value={newAdmissionForm.values.previousClass}
                 onChange={newAdmissionForm.handleChange}
               />
             </div>

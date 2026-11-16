@@ -31,6 +31,11 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
+  // Students get a trimmed header: no quick-create (+), no apps grid,
+  // and no admin links in the profile menu. Every other role is unchanged.
+  const isStudent = user?.role === "student";
+  const hideForStudent = isStudent ? " d-none" : "";
+
   const handleLogout = async () => {
     await logout();
     navigate(routes.login, { replace: true });
@@ -229,8 +234,8 @@ const Header = () => {
                 </div>
               </div>
 
-              {/* Add New */}
-              <div className="pe-1">
+              {/* Add New (hidden for students) */}
+              <div className={`pe-1${hideForStudent}`}>
                 <div className="dropdown">
                   <Link
                     to="#"
@@ -395,8 +400,8 @@ const Header = () => {
                 </div>
               </div>
 
-              {/* Apps Launcher */}
-              <div className="pe-1 mui-hide-sm">
+              {/* Apps Launcher (hidden for students) */}
+              <div className={`pe-1 mui-hide-sm${hideForStudent}`}>
                 <div className="dropdown">
                   <Link
                     to="#"
@@ -485,7 +490,10 @@ const Header = () => {
                       <i className="ti ti-settings" />
                       Settings
                     </Link>
-                    <Link className="dropdown-item" to={routes.activity}>
+                    <Link
+                      className={`dropdown-item${hideForStudent}`}
+                      to={routes.activity}
+                    >
                       <i className="ti ti-activity" />
                       Activity
                       <span className="badge bg-primary rounded-pill ms-auto">
@@ -493,13 +501,16 @@ const Header = () => {
                       </span>
                     </Link>
                     <Link
-                      className="dropdown-item"
+                      className={`dropdown-item${hideForStudent}`}
                       to={routes.membershipTransaction}
                     >
                       <i className="ti ti-wallet" />
                       Billing
                     </Link>
-                    <Link className="dropdown-item" to={routes.rolesPermissions}>
+                    <Link
+                      className={`dropdown-item${hideForStudent}`}
+                      to={routes.rolesPermissions}
+                    >
                       <i className="ti ti-shield-lock" />
                       Privacy &amp; Security
                     </Link>

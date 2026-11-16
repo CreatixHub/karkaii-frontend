@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ImageWithBasePath from '@core/common/imageWithBasePath';
 import { all_routes } from '@/routes/all_routes';
+import { getMyStudent } from '@services/students/students.me';
+import type { MyStudent } from '@services/students/students.me';
 import type { StudentModalId } from '../data/studentDashboard.data';
 import { heroStats, quickActions, studentProfile } from '../data/studentDashboard.data';
 
@@ -11,12 +13,41 @@ export interface StudentHeroProps {
   onOpenModal: (modal: StudentModalId) => void;
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const prettyDate = (iso: string): string => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? '');
+  return m ? `${m[3]} ${MONTHS[Number(m[2]) - 1] ?? m[2]} ${m[1]}` : iso;
+};
+
+const humanize = (s: string): string => {
+  const t = s.replace(/_/g, ' ');
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
+
 const StudentHero = ({ onOpenModal }: StudentHeroProps) => {
   const [now, setNow] = useState(() => new Date());
+  const [me, setMe] = useState<MyStudent | null>(null);
+  const [meError, setMeError] = useState('');
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(timer);
+  }, []);
+
+  /* The signed-in student's OWN record - the server only ever returns the caller's own row. */
+  useEffect(() => {
+    let alive = true;
+    getMyStudent()
+      .then((student) => {
+        if (alive) setMe(student);
+      })
+      .catch((e: unknown) => {
+        if (alive) setMeError(e instanceof Error ? e.message : 'Could not load your profile');
+      });
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const time = now.toLocaleTimeString('en-US', {
@@ -30,6 +61,27 @@ const StudentHero = ({ onOpenModal }: StudentHeroProps) => {
     month: 'long',
     year: 'numeric',
   });
+
+  const name = me ? me.fullName || [me.firstName, me.lastName].filter(Boolean).join(' ') : meError ? 'Profile unavailable' : 'Loading...';
+
+  const chips: { icon: string; label: string }[] = me
+    ? [
+        { icon: 'ti ti-id-badge-2', label: me.admissionNo },
+        ...(me.houseName ? [{ icon: 'ti ti-flag', label: me.houseName }] : []),
+        { icon: 'ti ti-calendar', label: `DOB ${prettyDate(me.dob)}` },
+        { icon: 'ti ti-circle-check', label: humanize(me.status) },
+      ]
+    : [];
+
+  /* Marks, GPA, rank etc. have no backend yet, so no one else's sample numbers are shown here. */
+  const stats = heroStats.map((stat) => ({
+    ...stat,
+    ring: undefined,
+    value: '-',
+    valueSuffix: undefined,
+    icon: stat.icon ?? 'ti ti-chart-pie',
+    iconClass: stat.iconClass ?? 'bg-teal-transparent text-teal',
+  }));
 
   return (
     <div className="card-profile mb-3 position-relative overflow-hidden">
@@ -51,24 +103,14 @@ const StudentHero = ({ onOpenModal }: StudentHeroProps) => {
           </div>
 
           <div>
-            <div className="card-profile-greeting">{studentProfile.greeting}</div>
-            <div className="card-profile-name">{studentProfile.name}</div>
+            <div className="card-profile-greeting">Welcome back</div>
+            <div className="card-profile-name">{name}</div>
+            {meError ? <div className="text-danger fs-13">{meError}</div> : null}
             <div className="card-profile-meta d-flex align-items-center flex-wrap">
-              {studentProfile.chips.map((chip) => (
+              {chips.map((chip) => (
                 <span className="filter-chip" key={chip.label}>
                   <i className={chip.icon} />
                   {chip.label}
-                </span>
-              ))}
-            </div>
-            <div className="card-profile-badges d-flex align-items-center flex-wrap">
-              {studentProfile.badges.map((badge) => (
-                <span
-                  key={badge.label}
-                  className={`badge badge-sm rounded-pill ${badge.className} d-inline-flex align-items-center gap-1`}
-                >
-                  <i className={`${badge.icon} fs-14`} />
-                  {badge.label}
                 </span>
               ))}
             </div>
@@ -80,33 +122,17 @@ const StudentHero = ({ onOpenModal }: StudentHeroProps) => {
         <div className="card-profile-clock text-lg-end">
           <div className="card-profile-time">{time}</div>
           <div className="card-profile-date">{date}</div>
-          <span className="badge badge-soft-success mt-2">
-            <i className="ti ti-circle-check me-1" />
-            Present today
-          </span>
         </div>
       </div>
 
       <div className="card-profile-stats position-relative">
-        {heroStats.map((stat) => (
+        {stats.map((stat) => (
           <div className="card-profile-stat d-flex align-items-center" key={stat.id}>
-            {stat.ring !== undefined ? (
-              <span
-                className={`card-profile-ring ${stat.ringClass ?? ''} flex-shrink-0`}
-                style={{ '--v': stat.ring } as React.CSSProperties}
-              >
-                <i>{stat.ring}%</i>
-              </span>
-            ) : (
-              <span className={`avatar avatar-md avatar-icon ${stat.iconClass ?? ''}`}>
-                <i className={stat.icon} />
-              </span>
-            )}
+            <span className={`avatar avatar-md avatar-icon ${stat.iconClass}`}>
+              <i className={stat.icon} />
+            </span>
             <div className="tx">
-              <b>
-                {stat.value}
-                {stat.valueSuffix ? <small>{stat.valueSuffix}</small> : null}
-              </b>
+              <b>{stat.value}</b>
               <span>{stat.label}</span>
             </div>
           </div>

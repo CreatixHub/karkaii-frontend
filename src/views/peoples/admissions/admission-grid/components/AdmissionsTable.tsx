@@ -124,11 +124,11 @@ const AdmissionsTable = ({
                 {columns.applicant ? (
                   <td>
                     <div className="dt-user">
-                      <Link to={routes.admissionDetails} className="dt-avatar">
+                      <Link to={`${routes.admissionDetails}?id=${row.id}`} className="dt-avatar">
                         <ImageWithBasePath src={row.avatar} alt={row.name} />
                       </Link>
                       <div>
-                        <Link to={routes.admissionDetails} className="dt-name">
+                        <Link to={`${routes.admissionDetails}?id=${row.id}`} className="dt-name">
                           {row.name}
                         </Link>
                         <div className="dt-sub">
@@ -167,7 +167,7 @@ const AdmissionsTable = ({
                 {columns.applied ? <td>{row.appliedDate}</td> : null}
                 <td>
                   <div className="dt-actions">
-                    <Link to={routes.admissionDetails} className="dt-ib" title="View Application" aria-label="View">
+                    <Link to={`${routes.admissionDetails}?id=${row.id}`} className="dt-ib" title="View Application" aria-label="View">
                       <i className="ti ti-eye" />
                     </Link>
                     <Link to={routes.addAdmission} className="dt-ib" title="Edit" aria-label="Edit">
