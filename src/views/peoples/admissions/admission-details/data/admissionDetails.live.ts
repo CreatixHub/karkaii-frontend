@@ -162,7 +162,7 @@ export function applyAdmission(a: ApiAdmissionDetail): void {
     parentPhone: a.guardianPhone,
   });
 
-  for (const card of summaryCards as Array<Record<string, unknown>>) {
+  for (const card of summaryCards as unknown as Array<Record<string, unknown>>) {
     switch (card.id) {
       case 'status':
         card.value = st.label;
