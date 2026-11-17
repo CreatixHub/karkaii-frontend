@@ -1,7 +1,9 @@
 name: Deploy frontend
 
-# Every push to main (merged PR) builds the app and publishes it at http://<droplet>/app/
-# One-time setup for the secrets below:  bash deploy/scripts/setup-ci-deploy.sh   (in the karkaii monorepo, see DEPLOY.md)
+# Every push to main builds the app in REAL-API mode (.env.production: VITE_USE_MOCK_API=false,
+# VITE_AUTH_ENABLED=true, VITE_API_BASE_URL=/api) and publishes it at the droplet's web root, where nginx
+# forwards /api to the Express backend on the same origin (see deploy/nginx/karkaii.conf).
+# One-time setup for the secrets below:  bash deploy/scripts/setup-ci-deploy.sh --repo <owner>/karkaii-frontend --path /var/www/karkaii-frontend
 # Re-deploy without a new commit: GitHub -> Actions -> "Deploy frontend" -> Run workflow.
 
 on:
@@ -18,8 +20,8 @@ permissions:
   contents: read
 
 env:
-  SITE_DIR: /var/www/karkaii-site          # nginx `root`; the app is served from $SITE_DIR/app
-  STAGE_DIR: /var/www/karkaii-site.deploy  # where the new build is uploaded first (outside the web root)
+  SITE_DIR: /var/www/karkaii-frontend          # nginx `root`
+  STAGE_DIR: /var/www/karkaii-frontend.deploy  # where the new build is uploaded first (outside the web root)
 
 jobs:
   deploy:
@@ -35,13 +37,8 @@ jobs:
 
       - run: npm ci
 
-      - name: Build
+      - name: Build (mode=production reads .env.production - real API, same-origin /api)
         run: npm run build            # tsc + vite; a type error stops the deploy here
-        env:
-          VITE_BASE_PATH: /app/
-          # Prototype mode (sample data, no login). To use the real API later, change these and add VITE_API_BASE_URL: /api
-          VITE_USE_MOCK_API: 'true'
-          VITE_AUTH_ENABLED: 'false'
 
       - name: Check the build is complete
         run: test -f dist/index.html
@@ -61,9 +58,9 @@ jobs:
           REMOTE: ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }}
         run: |
           SSH="ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes"
-          $SSH "$REMOTE" "rm -rf '$STAGE_DIR/app.new'"
+          $SSH "$REMOTE" "rm -rf '$STAGE_DIR/new'"
           # --link-dest: files that did not change are hard-linked from the live copy, so only the delta is sent
-          rsync -az --delete --link-dest="$SITE_DIR/app" -e "$SSH" dist/ "$REMOTE:$STAGE_DIR/app.new/"
+          rsync -az --delete --link-dest="$SITE_DIR" -e "$SSH" dist/ "$REMOTE:$STAGE_DIR/new/"
 
       - name: Publish (swap, check, roll back if broken)
         env:
@@ -74,29 +71,30 @@ jobs:
           set -euo pipefail
           SITE="$1"; STAGE="$2"
 
-          [ -f "$STAGE/app.new/index.html" ] || { echo "Upload is incomplete - live site untouched." >&2; exit 1; }
-          chmod -R a+rX "$STAGE/app.new"
+          [ -f "$STAGE/new/index.html" ] || { echo "Upload is incomplete - live site untouched." >&2; exit 1; }
+          chmod -R a+rX "$STAGE/new"
 
-          # swap: live -> app.prev, new -> live   (two renames; the site is never half-updated)
-          rm -rf "$STAGE/app.prev"
-          if [ -d "$SITE/app" ]; then mv "$SITE/app" "$STAGE/app.prev"; fi
-          mv "$STAGE/app.new" "$SITE/app"
+          # swap: live -> prev, new -> live   (two renames; the site is never half-updated)
+          rm -rf "$STAGE/prev"
+          if [ -d "$SITE" ]; then mv "$SITE" "$STAGE/prev"; fi
+          mv "$STAGE/new" "$SITE"
 
           # ask nginx for what a visitor would request (not the disk)
           smoke() {
             local home deep
-            home="$(curl -fsS --max-time 15 http://127.0.0.1/app/)" || return 1
+            home="$(curl -fsS --max-time 15 http://127.0.0.1/)" || return 1
             grep -qi 'karkaii' <<<"$home" || return 1
-            deep="$(curl -fsS --max-time 15 -o /dev/null -w '%{http_code}' http://127.0.0.1/app/students)" || return 1
+            # any client-side route must fall back to index.html (SPA), not 404
+            deep="$(curl -fsS --max-time 15 -o /dev/null -w '%{http_code}' http://127.0.0.1/login)" || return 1
             [ "$deep" = 200 ]
           }
 
           if smoke; then
-            echo "Released. Previous build kept in $STAGE/app.prev"
+            echo "Released. Previous build kept in $STAGE/prev"
           else
             echo "New build fails the check - rolling back." >&2
-            rm -rf "$SITE/app"
-            if [ -d "$STAGE/app.prev" ]; then mv "$STAGE/app.prev" "$SITE/app"; fi
+            rm -rf "$SITE"
+            if [ -d "$STAGE/prev" ]; then mv "$STAGE/prev" "$SITE"; fi
             exit 1
           fi
           REMOTE_SCRIPT
