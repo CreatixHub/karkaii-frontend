@@ -1,9 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import ImageWithBasePath from '@core/common/imageWithBasePath';
 import { all_routes } from '@/routes/all_routes';
 import type { TeacherCard } from '../data/teachers.data';
-import { metricFields } from '../data/teachers.data';
 import { ActionLink } from '@components/workspace';
 
 const routes = all_routes;
@@ -31,6 +29,12 @@ const TeacherCardItem = ({
 }: TeacherCardItemProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Every link opens THIS teacher.
+  const fullProfile = `${routes.teacherDetails}?id=${teacher.key}`;
+  const editLink = `${routes.editTeacher}?id=${teacher.key}`;
+  const timetableLink = `${routes.teachersRoutine}?id=${teacher.key}`;
+  const hasEmail = teacher.email !== '—';
+
   useEffect(() => {
     if (!menuOpen) return;
     const close = (event: MouseEvent) => {
@@ -44,9 +48,6 @@ const TeacherCardItem = ({
     onToggleMenu(null);
     run();
   };
-
-  // The template varies the name heading between h4, h5 and h6 across cards.
-  const Heading = teacher.heading.tag;
 
   return (
     <div
@@ -99,45 +100,31 @@ const TeacherCardItem = ({
                   </button>
                 </li>
                 <li>
-                  <Link className="dropdown-item rounded-1" to={routes.editTeacher} onClick={() => onToggleMenu(null)}>
+                  <Link className="dropdown-item rounded-1" to={fullProfile} onClick={() => onToggleMenu(null)}>
+                    <i className="ti ti-user me-2" />
+                    Full Profile
+                  </Link>
+                </li>
+                <li>
+                  <Link className="dropdown-item rounded-1" to={editLink} onClick={() => onToggleMenu(null)}>
                     <i className="ti ti-edit-circle me-2" />
                     Edit Teacher
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item rounded-1" to={routes.classTimetable} onClick={() => onToggleMenu(null)}>
+                  <Link className="dropdown-item rounded-1" to={timetableLink} onClick={() => onToggleMenu(null)}>
                     <i className="ti ti-table me-2" />
                     View Timetable
                   </Link>
                 </li>
-                <li>
-                  <Link className="dropdown-item rounded-1" to={routes.classes} onClick={() => onToggleMenu(null)}>
-                    <i className="ti ti-school me-2" />
-                    View Classes
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item rounded-1" to={routes.email} onClick={() => onToggleMenu(null)}>
-                    <i className="ti ti-mail me-2" />
-                    Send Email
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className="dropdown-item rounded-1"
-                    to={routes.attendanceReport}
-                    onClick={() => onToggleMenu(null)}
-                  >
-                    <i className="ti ti-calendar-check me-2" />
-                    Attendance Report
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item rounded-1" to={routes.payroll} onClick={() => onToggleMenu(null)}>
-                    <i className="ti ti-moneybag me-2" />
-                    Payroll Details
-                  </Link>
-                </li>
+                {hasEmail ? (
+                  <li>
+                    <a className="dropdown-item rounded-1" href={`mailto:${teacher.email}`}>
+                      <i className="ti ti-mail me-2" />
+                      Send Email
+                    </a>
+                  </li>
+                ) : null}
                 <li>
                   <button
                     type="button"
@@ -169,34 +156,27 @@ const TeacherCardItem = ({
         <div className="card-body">
           <div className="bg-light-300 rounded-2 p-3 mb-3">
             <div className="d-flex align-items-center">
+              {/* No photo is stored yet: show the teacher's initials. */}
               <button
                 type="button"
-                className={`avatar avatar-lg${teacher.online ? ' online' : ''} flex-shrink-0 border-0 bg-transparent p-0`}
+                className="avatar avatar-lg flex-shrink-0 border-0 rounded-circle bg-light fw-bold text-dark d-flex align-items-center justify-content-center"
                 aria-label={`View ${teacher.name}'s profile`}
                 onClick={() => onProfile(teacher)}
               >
-                <ImageWithBasePath
-                  src={teacher.avatar}
-                  className="img-fluid rounded-circle flex-shrink-0"
-                  alt="img"
-                />
+                {teacher.initials}
               </button>
               <div className="ms-2 overflow-hidden">
                 <div className="d-flex align-items-center flex-wrap gap-1 mb-1">
-                  <Heading className={teacher.heading.className}>
+                  <h5 className="text-dark text-truncate mb-0 fs-15 fw-medium">
                     <ActionLink
                       className="dt-name text-dark border-0 bg-transparent p-0"
                       onClick={() => onProfile(teacher)}
                     >
                       {teacher.name}
                     </ActionLink>
-                  </Heading>
+                  </h5>
                   <span className={`badge ${teacher.employment.className}`}>{teacher.employment.label}</span>
                 </div>
-                <span className="fs-12 text-muted d-block">
-                  <i className="ti ti-building-community me-1" />
-                  {teacher.department}
-                </span>
                 <span className="fs-12 text-muted d-block">
                   <i className="ti ti-certificate me-1" />
                   {teacher.qualification}
@@ -205,7 +185,7 @@ const TeacherCardItem = ({
             </div>
           </div>
 
-          <div className="row g-2 mb-3">
+          <div className="row g-2 mb-0">
             <div className="col-12 col-sm-6">
               <p className="mb-0 fs-12">Subject</p>
               <p className="text-dark mb-0">
@@ -243,49 +223,13 @@ const TeacherCardItem = ({
               </p>
             </div>
             <div className="col-12 col-sm-6">
-              <p className="mb-0 fs-12">Branch</p>
+              <p className="mb-0 fs-12">Joined</p>
               <p className="text-dark text-truncate mb-0">
-                <i className="ti ti-building text-muted me-1" />
-                {teacher.branch}
+                <i className="ti ti-calendar-plus text-muted me-1" />
+                {teacher.joined}
               </p>
             </div>
           </div>
-
-          <div className="border rounded-2 p-2 mb-3">
-            <div className="d-flex align-items-center justify-content-between flex-wrap gap-1 fs-12 text-muted">
-              <span>
-                <i className="ti ti-login me-1" />
-                {teacher.lastLogin}
-              </span>
-              <span>
-                <i className="ti ti-calendar-plus me-1" />
-                {teacher.joined}
-              </span>
-            </div>
-          </div>
-
-          <p className="fs-12 text-uppercase text-muted mb-2">Summary Metrics</p>
-          {teacher.metrics.map((metric, index) => (
-            <div className={index === teacher.metrics.length - 1 ? 'mb-0' : 'mb-2'} key={metricFields[index].label}>
-              <div className="d-flex align-items-center justify-content-between mb-1">
-                <span className="fs-12">
-                  <i className={`${metricFields[index].icon} me-1`} />
-                  {metricFields[index].label}
-                </span>
-                <span className="fs-12 fw-medium text-dark">{metric.value}%</span>
-              </div>
-              <div className="progress progress-xs">
-                <div
-                  className={`progress-bar ${metric.bar}`}
-                  role="progressbar"
-                  style={{ width: `${metric.value}%` }}
-                  aria-valuenow={metric.value}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                />
-              </div>
-            </div>
-          ))}
         </div>
 
         <div className="card-footer d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -299,27 +243,23 @@ const TeacherCardItem = ({
               <i className="ti ti-eye" />
             </button>
             <Link
-              to={routes.editTeacher}
+              to={editLink}
               className="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 p-0"
               aria-label="Edit"
             >
               <i className="ti ti-edit" />
             </Link>
             <Link
-              to={routes.classTimetable}
+              to={timetableLink}
               className="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 p-0"
               aria-label="Timetable"
             >
               <i className="ti ti-table" />
             </Link>
           </div>
-          <button
-            type="button"
-            className="btn btn-light btn-sm fw-semibold"
-            onClick={() => onProfile(teacher)}
-          >
+          <Link to={fullProfile} className="btn btn-light btn-sm fw-semibold">
             View Details
-          </button>
+          </Link>
         </div>
       </div>
     </div>

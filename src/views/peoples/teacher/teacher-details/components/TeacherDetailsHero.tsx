@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import ImageWithBasePath from '@core/common/imageWithBasePath';
 import { all_routes } from '@/routes/all_routes';
-import { teacherProfile } from '../data/teacherProfile.data';
 import type { HeroMoreAction } from '../data/teacherDetailsWorkspace.data';
-import { heroMeta, heroMoreMenu } from '../data/teacherDetailsWorkspace.data';
+import { heroMoreMenu } from '../data/teacherDetailsWorkspace.data';
+import type { LiveProfile } from '../data/teacherProfileLive';
 
 const routes = all_routes;
 
 export interface TeacherDetailsHeroProps {
+  profile: LiveProfile;
   onSendMessage: () => void;
   onLoginDetails: () => void;
   onPrint: () => void;
@@ -16,6 +16,7 @@ export interface TeacherDetailsHeroProps {
 }
 
 const TeacherDetailsHero = ({
+  profile,
   onSendMessage,
   onLoginDetails,
   onPrint,
@@ -23,6 +24,7 @@ const TeacherDetailsHero = ({
 }: TeacherDetailsHeroProps) => {
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+  const editLink = `${routes.editTeacher}?id=${profile.id}`;
 
   useEffect(() => {
     if (!moreOpen) return;
@@ -40,39 +42,46 @@ const TeacherDetailsHero = ({
     };
   }, [moreOpen]);
 
+  // Only real facts about this teacher.
+  const meta = [
+    { id: 'qualification', icon: 'ti ti-school', label: 'Qualification', value: profile.qualification },
+    { id: 'joined', icon: 'ti ti-calendar', label: 'Joined', value: profile.joinedOn },
+    { id: 'phone', icon: 'ti ti-phone', label: 'Phone', value: profile.phone },
+    { id: 'email', icon: 'ti ti-mail', label: 'Email', value: profile.email },
+  ];
+
   return (
     <div className="card card-hover mb-3">
       <div className="card-body">
         <div className="d-xl-flex align-items-start justify-content-between">
           <div className="d-sm-flex align-items-center flex-lg-nowrap flex-wrap gap-3">
-            <span className="avatar avatar-xxl rounded flex-shrink-0 me-sm-3 mb-3 mb-sm-0">
-              <ImageWithBasePath
-                src={teacherProfile.avatar}
-                className="img-fluid rounded"
-                alt={teacherProfile.name}
-              />
+            {/* No photo is stored yet: show the teacher's initials. */}
+            <span
+              className="avatar avatar-xxl rounded flex-shrink-0 me-sm-3 mb-3 mb-sm-0 d-flex align-items-center justify-content-center fw-bold bg-light text-dark"
+              style={{ fontSize: 32 }}
+            >
+              {profile.initials}
             </span>
             <div>
               <div className="d-flex align-items-center flex-wrap gap-2 mb-2">
-                <h4 className="mb-0">{teacherProfile.name}</h4>
-                <span className="badge bg-primary-transparent text-primary">{teacherProfile.id}</span>
-                <span className="badge badge-soft-success d-inline-flex align-items-center">
+                <h4 className="mb-0">{profile.name}</h4>
+                <span className="badge bg-primary-transparent text-primary">{profile.employeeNo}</span>
+                <span className={`badge ${profile.statusClass} d-inline-flex align-items-center`}>
                   <i className="ti ti-circle-filled fs-5 me-1" />
-                  {teacherProfile.status}
+                  {profile.statusLabel}
                 </span>
               </div>
               <div className="d-flex align-items-center flex-wrap gap-3 gap-xl-4 text-muted fs-13 mb-3">
-                {heroMeta.map((item) => (
+                {meta.map((item) => (
                   <span key={item.id}>
                     <i className={`${item.icon} me-1`} />
-                    {item.label ? `${item.label}: ` : null}
-                    <span className="text-dark fw-medium">{item.value}</span>
+                    {item.label}: <span className="text-dark fw-medium">{item.value}</span>
                   </span>
                 ))}
               </div>
               <div className="d-flex align-items-center flex-wrap gap-2">
                 <Link
-                  to={routes.editTeacher}
+                  to={editLink}
                   className="btn btn-sm btn-outline-light bg-white d-inline-flex align-items-center"
                 >
                   <i className="ti ti-edit me-1" />
@@ -86,26 +95,30 @@ const TeacherDetailsHero = ({
                   <i className="ti ti-message-2 me-1" />
                   Send Message
                 </button>
-                <a
-                  href={`mailto:${teacherProfile.email}`}
-                  className="btn btn-sm btn-outline-light bg-white d-inline-flex align-items-center"
-                >
-                  <i className="ti ti-mail me-1" />
-                  Email
-                </a>
-                <a
-                  href="tel:+14654884498"
-                  className="btn btn-sm btn-outline-light bg-white d-inline-flex align-items-center"
-                >
-                  <i className="ti ti-phone me-1" />
-                  Call
-                </a>
+                {profile.hasEmail ? (
+                  <a
+                    href={`mailto:${profile.email}`}
+                    className="btn btn-sm btn-outline-light bg-white d-inline-flex align-items-center"
+                  >
+                    <i className="ti ti-mail me-1" />
+                    Email
+                  </a>
+                ) : null}
+                {profile.hasPhone ? (
+                  <a
+                    href={`tel:${profile.phone}`}
+                    className="btn btn-sm btn-outline-light bg-white d-inline-flex align-items-center"
+                  >
+                    <i className="ti ti-phone me-1" />
+                    Call
+                  </a>
+                ) : null}
               </div>
             </div>
           </div>
           <div className="d-flex align-items-center flex-wrap gap-2 mt-3 mt-xl-0">
             <Link
-              to={routes.editTeacher}
+              to={editLink}
               className="btn btn-outline-light bg-white d-inline-flex align-items-center"
             >
               <i className="ti ti-edit-circle me-1" />
