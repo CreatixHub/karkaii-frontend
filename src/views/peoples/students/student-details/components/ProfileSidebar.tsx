@@ -2,7 +2,7 @@ import ImageWithBasePath from '@core/common/imageWithBasePath';
 import { ChipSet, MetaList } from './primitives';
 import type { ProfileAction } from '../data/studentProfileActions';
 import {
-  address,
+  addressInfo,
   aiInsights,
   hostelRows,
   languages,
@@ -11,6 +11,7 @@ import {
   medicalRows,
   parentsAndGuardians,
   personalInformation,
+  profileState,
   transportEta,
   transportRows,
 } from '../data/studentProfile.data';
@@ -44,7 +45,7 @@ const ProfileSidebar = ({ onAction }: ProfileSidebarProps) => (
             Address
           </span>
           <p className="value mb-0 mt-1" style={{ fontWeight: 500 }}>
-            {address}
+            {addressInfo.value || '—'}
           </p>
         </div>
       </div>
@@ -99,7 +100,8 @@ const ProfileSidebar = ({ onAction }: ProfileSidebarProps) => (
       </div>
     </div>
 
-    {/* Transport */}
+    {/* Transport (sample only) */}
+    {profileState.live ? null : (
     <div className="card">
       <div className="card-header">
         <h5 className="profile-card-title accent-info">
@@ -151,7 +153,10 @@ const ProfileSidebar = ({ onAction }: ProfileSidebarProps) => (
       </div>
     </div>
 
-    {/* Hostel */}
+    )}
+
+    {/* Hostel (sample only) */}
+    {profileState.live ? null : (
     <div className="card">
       <div className="card-header">
         <h5 className="profile-card-title accent-purple">
@@ -166,6 +171,8 @@ const ProfileSidebar = ({ onAction }: ProfileSidebarProps) => (
       </div>
     </div>
 
+    )}
+
     {/* Medical Record */}
     <div className="card">
       <div className="card-header">
@@ -178,6 +185,8 @@ const ProfileSidebar = ({ onAction }: ProfileSidebarProps) => (
       </div>
       <div className="card-body">
         <MetaList rows={medicalRows} oneCol>
+          {profileState.live ? null : (
+          <>
           <div>
             <span className="meta-key">Vaccinations</span>
             <span className="value">
@@ -191,15 +200,20 @@ const ProfileSidebar = ({ onAction }: ProfileSidebarProps) => (
             <span className="meta-key">{medicalDoctor.key}</span>
             <span className="value">{medicalDoctor.value}</span>
           </div>
+          </>
+          )}
         </MetaList>
+        {profileState.live ? null : (
         <div className="alert alert-light border mt-2 mb-0" style={{ fontSize: 12.5 }}>
           <i className="ti ti-notes me-1" />
           {medicalNote}
         </div>
+        )}
       </div>
     </div>
 
-    {/* AI Insights */}
+    {/* AI Insights (sample only) */}
+    {profileState.live ? null : (
     <div className="card">
       <div className="card-body">
         <div className="profile-insight">
@@ -235,6 +249,7 @@ const ProfileSidebar = ({ onAction }: ProfileSidebarProps) => (
         </div>
       </div>
     </div>
+    )}
   </div>
 );
 

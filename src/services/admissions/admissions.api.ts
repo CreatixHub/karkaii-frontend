@@ -28,6 +28,7 @@ export interface CreateAdmissionPayload {
   needsTransport?: boolean;
   previousSchool?: string;
   previousClass?: string;
+  photoFileId?: string; // an uploaded photo (see services/files)
   source: 'walk_in' | 'website' | 'referral' | 'agent' | 'event' | 'other';
 }
 
@@ -102,8 +103,8 @@ export function buildAdmissionPayload(
       guardianEmail: get('email') || undefined,
       addressLine1: get('address') || undefined,
       needsTransport: get('transport-required') === 'Yes',
-      previousSchool: get('previous-school') || undefined,
-      previousClass: get('previous-class') || undefined,
+      previousSchool: get('school-name') || get('previous-school') || undefined,
+      previousClass: get('last-class-attended') || get('previous-class') || undefined,
       source: SOURCE_MAP[get('application-source')] ?? 'walk_in',
     },
   };

@@ -43,6 +43,49 @@ export const heroContacts = [
   { id: 'message', icon: 'ti ti-message', className: 'c-amber', title: 'Message', action: 'message' },
 ] as const;
 
+/* ------------------------ Live-student state (see .live.ts) ----------------- */
+
+/** True once a real student has been loaded; hides the sample-only cards. */
+export const profileState = { live: false };
+
+/** Name / numbers used by downloads and receipts. */
+export const studentSummary = {
+  name: 'Janet Daniel',
+  admissionNo: 'AD1256589',
+  classLabel: 'III - A',
+  dob: '25 Jan 2008',
+  bloodGroup: 'O +ve',
+  guardianName: 'Robert Daniel',
+  guardianPhone: '+1 809 095 5468',
+  guardianEmail: 'robert.d@example.com',
+  status: 'Active',
+};
+
+export const academicInformation: MetaRow[] = [
+  { key: 'Admission Date', value: '18 Mar 2024' },
+  { key: 'Admission No', value: 'AD1256589' },
+  { key: 'Roll No', value: '35013' },
+  { key: 'Class / Section', value: 'III - A' },
+  { key: 'Batch', value: '2024 Morning' },
+  { key: 'Academic Year', value: '2024 / 2025' },
+  { key: 'House', value: 'Red House' },
+  { key: 'Class Teacher', value: 'Mr. Teresa Susan' },
+  { key: 'Previous School', value: 'Oxford Matriculation, TX' },
+  { key: 'Roll of Honour', value: '3 times' },
+];
+
+export const profileText = (): string =>
+  [
+    'KARKAII ACADEMY — STUDENT PROFILE',
+    '====================================',
+    `Name: ${studentSummary.name}`,
+    `Admission No: ${studentSummary.admissionNo}`,
+    `Class: ${studentSummary.classLabel}`,
+    `DOB: ${studentSummary.dob}   Blood Group: ${studentSummary.bloodGroup}`,
+    `Guardian: ${studentSummary.guardianName} (${studentSummary.guardianPhone})`,
+    'Generated from the Student 360 Profile.',
+  ].join('\n');
+
 /* ----------------------------- Executive overview -------------------------- */
 
 export interface OverviewTile {
@@ -89,6 +132,8 @@ export const personalInformation: MetaRow[] = [
 
 export const languages = ['English', 'Spanish', 'French'];
 export const address = '911 Deer Ridge Drive, Cedar Rapids, IA 52402, USA';
+/** Mutable copy used by the page; the live loader overwrites it. */
+export const addressInfo = { value: address };
 
 /* ----------------------------- Parent & guardian --------------------------- */
 

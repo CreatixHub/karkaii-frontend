@@ -1,0 +1,18 @@
+
+===== src\views\peoples\students\student-details\index.tsx =====
+
+===== src\views\peoples\students\student-details\components\ProfileHero.tsx =====
+
+===== src\views\peoples\students\student-details\components\ProfileSidebar.tsx =====
+
+===== src\views\peoples\students\student-details\components\ProfileSkeleton.tsx =====
+
+===== src\views\peoples\students\student-details\components\ExecutiveOverview.tsx =====
+
+===== src\views\peoples\students\student-details\components\panes\OverviewPane.tsx =====
+
+===== src\views\peoples\students\student-details\data\studentProfile.data.ts =====
+
+===== src\views\peoples\students\student-grid\components\StudentCardItem.tsx =====
+
+===== src\views\peoples\admissions\admission-details\data\admissionDetails.live.ts =====

@@ -349,7 +349,7 @@ const StudentDayWise = React.lazy(() => import("../views/report/attendance-repor
 const StudentAttendanceHistory = React.lazy(() => import("../views/peoples/students/student-attendance-history"));
 const StudentWallet = React.lazy(() => import("../views/peoples/students/student-wallet"));
 const StudentDocumentsPage = React.lazy(() => import("../views/peoples/students/student-documents"));
-const StudentDetails = React.lazy(() => import("../views/peoples/students/student-details"));
+const StudentDetails = React.lazy(() => import("../views/peoples/students/student-details/details-index.tsx"));
 const StudentFees = React.lazy(() => import("../views/peoples/students/student-details/studentFees"));
 const StudentGrid = React.lazy(() => import("../views/peoples/students/student-grid/index.tsx"));
 const StudentIdCards = React.lazy(() => import("../views/peoples/students/student-id-cards"));

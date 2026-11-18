@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DateField from '@components/ui/DateField';
 import Modal from '@components/ui/Modal';
 import CommonSelect from '@core/common/commonSelect';
-import ImageWithBasePath from '@core/common/imageWithBasePath';
+import AuthImage from '@components/ui/AuthImage';
 import { useForm } from '@hooks/useForm';
 import { email as emailRule, required } from '@utils/validation';
 import type { ConfirmOptions, ProfileAction, ProfileModalId } from '../data/studentProfileActions';
 import type { PaymentTarget } from '../components/panes/FeesPane';
+import { heroIdentity, studentSummary } from '../data/studentProfile.data';
 import {
   collectPaymentTypes,
   feesGroups,
@@ -22,12 +23,48 @@ const PAY_METHODS = [
   { id: 'netbank', icon: 'ti ti-building-bank', label: 'Net Banking' },
 ];
 
-const ID_CARD_ROWS = [
-  { key: 'Admission No', value: 'AD1256589' },
-  { key: 'Class', value: 'III - A' },
-  { key: 'Date of Birth', value: '25 Jan 2008' },
-  { key: 'Blood Group', value: 'O +ve', valueClass: 'text-danger' },
+const shown = (value: string): string => (value && value !== '-' ? value : '-');
+
+/** Read at render time, so it always reflects the student that was loaded. */
+const idCardRows = () => [
+  { key: 'Admission No', value: shown(studentSummary.admissionNo), valueClass: undefined },
+  { key: 'Class', value: shown(studentSummary.classLabel), valueClass: undefined },
+  { key: 'Date of Birth', value: shown(studentSummary.dob), valueClass: undefined },
+  { key: 'Blood Group', value: shown(studentSummary.bloodGroup), valueClass: 'text-danger' },
 ];
+
+/**
+ * Prints only the ID card, in its own window, with background colours forced on
+ * (browsers drop them by default, which made the card print black and white).
+ */
+const printIdCard = (onBlocked: () => void) => {
+  const card = document.querySelector('.idcard');
+  if (!card) return;
+  const win = window.open('', '_blank', 'width=520,height=760');
+  if (!win) {
+    onBlocked();
+    return;
+  }
+  const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+    .map((node) => node.outerHTML)
+    .join('');
+  win.document.open();
+  win.document.write(`<!doctype html><html><head><meta charset="utf-8" />
+<base href="${window.location.origin}/" /><title>Student ID Card</title>${styles}
+<style>
+  html, body { background: #fff !important; margin: 0; }
+  body { display: flex; justify-content: center; padding: 24px; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  @page { margin: 10mm; }
+</style></head><body>${card.outerHTML}</body></html>`);
+  win.document.close();
+  win.addEventListener('load', () => {
+    window.setTimeout(() => {
+      win.focus();
+      win.print();
+    }, 500);
+  });
+};
 
 const toOptions = (values: string[]) => values.map((value) => ({ value, label: value }));
 
@@ -86,7 +123,7 @@ const StudentProfileModals = ({
 
   /* --------------------------------- Email --------------------------------- */
   const emailForm = useForm<{ to: string; subject: string; body: string }, void>({
-    initialValues: { to: 'robert.d@example.com', subject: '', body: '' },
+    initialValues: { to: '', subject: '', body: '' },
     validationSchema: {
       to: emailRule('Please enter a valid email.'),
       subject: required('Please enter a subject.'),
@@ -95,6 +132,12 @@ const StudentProfileModals = ({
     onSubmit: async () => undefined,
     onSuccess: () => settle('Email sent successfully', emailForm.reset),
   });
+
+  // Fill the recipient with the loaded student's guardian each time the email pop-up opens.
+  useEffect(() => {
+    if (active === 'email') emailForm.setFieldValue('to', shown(studentSummary.guardianEmail) === '-' ? '' : studentSummary.guardianEmail);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
 
   /* -------------------------------- Meeting -------------------------------- */
   const meetingForm = useForm<{ title: string; date: string; time: string; with: string }, void>({
@@ -205,7 +248,7 @@ const StudentProfileModals = ({
           <input
             type="text"
             className="form-control"
-            value="Robert Daniel (Parent of Janet Daniel)"
+            value={`${studentSummary.guardianName} (Parent of ${studentSummary.name})`}
             readOnly
             id="recipient"
           />
@@ -329,9 +372,9 @@ const StudentProfileModals = ({
           <span className="avatar avatar-xl rounded-circle flex-shrink-0 bg-success-transparent text-success mb-3 mx-auto d-flex align-items-center justify-content-center">
             <i className="ti ti-phone fs-24" />
           </span>
-          <h5 className="mb-1">Robert Daniel</h5>
+          <h5 className="mb-1">{studentSummary.guardianName}</h5>
           <p className="text-muted mb-1">Parent / Guardian</p>
-          <h4 className="mb-3">+1 809 095 5468</h4>
+          <h4 className="mb-3">{studentSummary.guardianPhone}</h4>
           <div className="d-flex justify-content-center gap-2">
             {cancelButton}
             <button type="button" className="btn btn-success call-now" onClick={onClose}>
@@ -527,7 +570,13 @@ const StudentProfileModals = ({
             <button type="button" className="btn btn-light" onClick={onClose}>
               Close
             </button>
-            <button type="button" className="btn btn-primary" onClick={() => onAction('print')}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() =>
+                printIdCard(() => onToast('Allow pop-ups for this site to print the ID card.', 'danger'))
+              }
+            >
               <i className="ti ti-printer me-1" />
               Print ID
             </button>
@@ -546,14 +595,14 @@ const StudentProfileModals = ({
             <div className="idcard-wave" />
           </div>
           <div className="idcard-photo-wrap">
-            <ImageWithBasePath src="assets/img/students/student-01.jpg" alt="Janet Daniel" />
+            <AuthImage src={heroIdentity.photo} alt={studentSummary.name} />
           </div>
           <div className="idcard-identity">
-            <h5>Janet Daniel</h5>
+            <h5>{studentSummary.name}</h5>
             <span className="idcard-role">STUDENT</span>
           </div>
           <div className="idcard-info">
-            {ID_CARD_ROWS.map((row) => (
+            {idCardRows().map((row) => (
               <div className="idcard-row" key={row.key}>
                 <span>{row.key}</span>
                 <b className={row.valueClass}>{row.value}</b>
@@ -562,11 +611,10 @@ const StudentProfileModals = ({
           </div>
           <div className="idcard-barcode">
             <div className="idcard-bars" />
-            <span>AD1256589</span>
+            <span>{studentSummary.admissionNo}</span>
           </div>
           <div className="idcard-foot">
-            <i className="ti ti-map-pin" />
-            123 Education Blvd &nbsp;·&nbsp; Valid till 31 Mar 2025
+            Agaram Soft Technologies
           </div>
         </div>
       </Modal>
@@ -667,7 +715,7 @@ const StudentProfileModals = ({
               <input
                 type="text"
                 className="form-control"
-                placeholder="Robert Daniel"
+                placeholder={studentSummary.guardianName}
                 id="name-on-card"
                 name="name"
                 value={payForm.values.name}
@@ -733,7 +781,7 @@ const StudentProfileModals = ({
         onClose={onClose}
         title="Collect Fees"
         dialogClassName="modal-lg"
-        titleAccessory={<span className="badge badge-sm bg-primary ms-2">AD1256589</span>}
+        titleAccessory={<span className="badge badge-sm bg-primary ms-2">{studentSummary.admissionNo}</span>}
         onSubmit={collectForm.handleSubmit}
         footer={
           <>
@@ -751,10 +799,10 @@ const StudentProfileModals = ({
             <div className="col-lg-3 col-md-6">
               <div className="d-flex align-items-center mb-3">
                 <span className="avatar avatar-md me-2">
-                  <ImageWithBasePath src="assets/img/students/student-01.jpg" alt="Janet" />
+                  <AuthImage src={heroIdentity.photo} alt={studentSummary.name} />
                 </span>
                 <span className="d-flex flex-column">
-                  <span className="text-dark">Janet</span>III, A
+                  <span className="text-dark">{studentSummary.name}</span>{studentSummary.classLabel}
                 </span>
               </div>
             </div>

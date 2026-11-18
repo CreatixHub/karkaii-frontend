@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import ImageWithBasePath from '@core/common/imageWithBasePath';
+import AuthImage from '@components/ui/AuthImage';
 import { all_routes } from '@/routes/all_routes';
 import type { StudentCard } from '../data/students.data';
 import type { StudentModalId } from '../data/studentsWorkspace.data';
@@ -88,13 +88,13 @@ const StudentCardItem = ({
                   </button>
                 </li>
                 <li>
-                  <Link className="dropdown-item rounded-1" to={routes.studentDetail} onClick={() => onToggleMenu(null)}>
+                  <Link className="dropdown-item rounded-1" to={`${routes.studentDetail}?id=${student.id}`} onClick={() => onToggleMenu(null)}>
                     <i className="ti ti-eye me-2" />
                     View Profile
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item rounded-1" to={routes.editStudent} onClick={() => onToggleMenu(null)}>
+                  <Link className="dropdown-item rounded-1" to={`${routes.editStudent}?id=${student.id}`} onClick={() => onToggleMenu(null)}>
                     <i className="ti ti-edit-circle me-2" />
                     Edit Student
                   </Link>
@@ -161,8 +161,8 @@ const StudentCardItem = ({
         <div className="card-body pb-2">
           {/* identity */}
           <div className="d-flex align-items-center gap-2 mb-3">
-            <Link to={routes.studentDetail} className="avatar avatar-lg flex-shrink-0">
-              <ImageWithBasePath
+            <Link to={`${routes.studentDetail}?id=${student.id}`} className="avatar avatar-lg flex-shrink-0">
+              <AuthImage
                 src={student.avatar}
                 className="img-fluid rounded-circle flex-shrink-0"
                 alt={student.name}
@@ -174,7 +174,7 @@ const StudentCardItem = ({
             </Link>
             <div className="flex-fill overflow-hidden">
               <h4 className="mb-0 text-truncate fs-15 fw-medium">
-                <Link to={routes.studentDetail}>{student.name}</Link>
+                <Link to={`${routes.studentDetail}?id=${student.id}`}>{student.name}</Link>
               </h4>
               <p className="fs-12 text-muted mb-1 text-truncate">{student.meta}</p>
               <div className="d-flex align-items-center flex-wrap gap-1">

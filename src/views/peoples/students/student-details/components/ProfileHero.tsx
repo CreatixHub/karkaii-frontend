@@ -1,4 +1,4 @@
-import ImageWithBasePath from '@core/common/imageWithBasePath';
+import AuthImage from '@components/ui/AuthImage';
 import { Counter, ProfileBar } from './primitives';
 import type { ProfileAction } from '../data/studentProfileActions';
 import { heroContacts, heroIdentity, heroRings } from '../data/studentProfile.data';
@@ -13,7 +13,7 @@ const ProfileHero = ({ revealed, onAction }: ProfileHeroProps) => (
     <div className="card-body profile-hero accent-primary">
       <div className="hero-grid">
         <div className="hero-photo">
-          <ImageWithBasePath src={heroIdentity.photo} alt={heroIdentity.name} />
+          <AuthImage src={heroIdentity.photo} alt={heroIdentity.name} />
           <span className="presence" title="Online" />
         </div>
 

@@ -1,7 +1,7 @@
 /**
  * The application's single HTTP client.
  *
- * No component, hook or page should ever call `fetch` directly — they call a
+ * No component, hook or page should ever call `fetch` directly â€” they call a
  * service, and the service calls this client. That keeps base URLs, auth
  * headers, timeouts and error normalization in exactly one place.
  *
@@ -237,6 +237,27 @@ class ApiClient {
 
   delete<T>(path: string, options?: RequestOptions): Promise<T> {
     return this.request<T>('DELETE', path, undefined, options);
+  }
+
+  /**
+   * Downloads a binary response (an image, a PDF...) as a Blob. Same sign-in and silent token refresh as
+   * the JSON calls, which a plain <img src> cannot do because it cannot send the Authorization header.
+   */
+  async getBlob(path: string, options?: RequestOptions): Promise<Blob> {
+    const attempt = () =>
+      fetch(buildUrl(this.baseUrl, path, options?.query), {
+        method: 'GET',
+        signal: options?.signal,
+        credentials: 'include',
+        headers: this.buildHeaders({ ...options, headers: { ...options?.headers, Accept: '*/*' } }, false),
+      });
+
+    let response = await attempt();
+    if (response.status === HTTP_STATUS.UNAUTHORIZED && !options?.skipRefresh && this.refreshHandler) {
+      if (await this.refreshOnce()) response = await attempt();
+    }
+    if (!response.ok) throw createHttpError(response.status, undefined, undefined);
+    return response.blob();
   }
 
   private buildHeaders(
