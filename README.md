@@ -7,6 +7,10 @@ Transport, Hostel, Communication and Settings modules.
 This is the **React + Vite** build. A Next.js (App Router) build of the same
 template lives in `../`.
 
+**Working on a change?** See [`CONTRIBUTING.md`](./CONTRIBUTING.md) first — short-lived branches off
+`main`, how to open a PR, and where to watch CI. `main` is protected: a PR needs a passing check and
+one approval before it can merge.
+
 ---
 
 ## Getting Started
@@ -129,6 +133,40 @@ With `VITE_AUTH_ENABLED=false` (the default) `ProtectedRoute` and `RoleGuard`
 render their children unconditionally, so every route stays reachable. Flip it to
 `true` once a real auth API is connected and the same components start enforcing
 the session.
+
+---
+
+## Test Accounts (role-based dashboard testing)
+
+One account per role, all in the same test school (`karkaii-test-school`), seeded
+against the real backend via the signup + "add member" endpoints — not mock data.
+Use these with `VITE_USE_MOCK_API=false` / `VITE_AUTH_ENABLED=true` (see
+`.env.development`) to verify each role lands on its own dashboard after login,
+and that `DashboardGuard` (`src/components/routing/DashboardGuard.tsx`) redirects
+away from another role's dashboard if you type its URL directly.
+
+All passwords: `Test@12345`
+
+| Role | Email | Expected landing page |
+| --- | --- | --- |
+| owner | `owner@karkaii.test` | `/admin-dashboard` |
+| admin | `admin@karkaii.test` | `/admin-dashboard` |
+| teacher | `teacher@karkaii.test` | `/teacher-dashboard` |
+| student | `student@karkaii.test` | `/student-dashboard` |
+| parent | `parent@karkaii.test` | `/parent-dashboard` |
+| accountant | `accountant@karkaii.test` | `/admin-dashboard` |
+| receptionist | `receptionist@karkaii.test` | `/admin-dashboard` |
+| librarian | `librarian@karkaii.test` | `/admin-dashboard` |
+| warden | `warden@karkaii.test` | `/admin-dashboard` |
+| transport_manager | `transport_manager@karkaii.test` | `/admin-dashboard` |
+| nurse | `nurse@karkaii.test` | `/admin-dashboard` |
+| security | `security@karkaii.test` | `/admin-dashboard` |
+
+Every non-teacher/student/parent role shares the admin dashboard today (see the
+comment in `src/features/auth/roleHome.ts`) — that's expected, not a bug.
+
+These are test-only accounts on a disposable school; don't reuse this password
+anywhere real.
 
 ---
 
