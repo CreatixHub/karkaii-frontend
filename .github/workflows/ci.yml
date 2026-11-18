@@ -1,0 +1,34 @@
+name: CI
+
+# Runs on every pull request targeting main: lint + typecheck + production build. This is the
+# required status check the branch ruleset gates merges on - a PR cannot merge into main until
+# this passes. (Separate from deploy.yml, which only runs on push to main, after a PR has merged.)
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint (informational only - 180+ pre-existing errors, not a merge gate yet)
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build (tsc + vite - a type error stops the job here)
+        run: npm run build

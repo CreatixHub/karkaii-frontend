@@ -6,6 +6,10 @@ logs
 *.log
 .env
 .env.*
+# .env.production holds no secrets (only public VITE_* build config) and MUST be committed - CI
+# builds from a clean checkout, so without this tracked, every CI build silently loses its config
+# and falls back to prototype/mock mode.
+!.env.production
 .vscode/*
 !.vscode/extensions.json
 .idea
