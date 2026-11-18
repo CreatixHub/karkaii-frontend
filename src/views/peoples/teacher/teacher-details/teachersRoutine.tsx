@@ -11,6 +11,7 @@ import TeacherRoutineModals from './modals/TeacherRoutineModals';
 import type { TeacherRoutineModalId } from './modals/TeacherRoutineModals';
 import type { RoutinePeriod } from './data/teacherRoutine.data';
 import { buildRoutineStats, routinePeriods, routineWeek } from './data/teacherRoutine.data';
+import { useTeacherRoutine } from './hooks/useTeacherRoutine';
 
 const routes = all_routes;
 
@@ -23,7 +24,11 @@ const TeachersRoutine = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const stats = useMemo(() => buildRoutineStats(routineWeek), []);
+  // Real data when the page is opened as /teachers-routine?id=<teacher id>; otherwise the sample data.
+  const live = useTeacherRoutine();
+  const week = live.week ?? routineWeek;
+  const sampleStats = useMemo(() => buildRoutineStats(routineWeek), []);
+  const stats = live.stats ?? sampleStats;
 
   // Close the period menu on an outside click, as Bootstrap's dropdown does.
   useEffect(() => {
@@ -40,8 +45,11 @@ const TeachersRoutine = () => {
 
   const closeModal = useCallback(() => {
     setActiveModal(null);
-    if (location.hash) navigate(location.pathname, { replace: true });
-  }, [location.hash, location.pathname, navigate]);
+    if (location.hash) navigate(location.pathname + location.search, { replace: true });
+  }, [location.hash, location.pathname, location.search, navigate]);
+
+  const noPeriods =
+    live.id !== null && !live.loading && !live.error && week.every((day) => day.slots.length === 0);
 
   return (
     <>
@@ -164,8 +172,15 @@ const TeachersRoutine = () => {
                       </div>
                     </div>
                     <div className="card-body">
+                      {live.id && live.loading ? <p className="text-muted">Loading time table…</p> : null}
+                      {live.error ? <div className="alert alert-danger">{live.error}</div> : null}
+                      {noPeriods ? (
+                        <div className="alert alert-info">
+                          No periods are scheduled for this teacher yet. Add them in the Timetable screen.
+                        </div>
+                      ) : null}
                       <div className="d-flex flex-nowrap overflow-auto">
-                        {routineWeek.map((day) => (
+                        {week.map((day) => (
                           <RoutineDayColumn day={day} key={day.id} />
                         ))}
                       </div>

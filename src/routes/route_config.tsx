@@ -396,6 +396,7 @@ const TypiconIcons = React.lazy(() => import("../views/uiInterface/icons/typicon
 const Typography = React.lazy(() => import("../views/uiInterface/base-ui/typography"));
 const UnderMaintenance = React.lazy(() => import("../views/pages/underMaintenance"));
 const WeatherIcons = React.lazy(() => import("../views/uiInterface/icons/weathericons"));
+const SchoolStrengthReport = React.lazy(() => import("../views/reports/school-strength"));
 
 const routes = all_routes;
 
@@ -844,9 +845,14 @@ export const publicRoutes = [
     element: <CustomFields />,
     route: Route,
   },
-  {
+    {
     path: routes.customReports,
     element: <CustomReports />,
+    route: Route,
+  },
+  {
+    path: routes.schoolStrengthReport,
+    element: <SchoolStrengthReport />,
     route: Route,
   },
   {

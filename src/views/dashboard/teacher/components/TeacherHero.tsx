@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import ImageWithBasePath from '@core/common/imageWithBasePath';
 import type { TeacherModalId } from '../data/teacherDashboard.data';
-import { heroStats, quickActions, teacherProfile } from '../data/teacherDashboard.data';
+import { heroStats, quickActions } from '../data/teacherDashboard.data';
+import { formatDuration, initials, profileCompletion, todayTotals } from '../data/summaryCalc';
+import { useTeacherSummary } from '../hooks/useTeacherSummary';
 
 export interface TeacherHeroProps {
   onOpenModal: (modal: TeacherModalId) => void;
@@ -13,8 +14,11 @@ function greetingForHour(hour: number): string {
   return 'Good evening';
 }
 
+const DASH = '—';
+
 const TeacherHero = ({ onOpenModal }: TeacherHeroProps) => {
   const [now, setNow] = useState(() => new Date());
+  const { status, staff, timetable } = useTeacherSummary();
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -33,6 +37,29 @@ const TeacherHero = ({ onOpenModal }: TeacherHeroProps) => {
     year: 'numeric',
   });
 
+  const name = staff?.fullName || staff?.firstName || (status === 'loading' ? '' : 'Teacher');
+
+  // Only real facts about this teacher.
+  const chips: { icon: string; label: string }[] = [];
+  if (staff?.employeeNo) chips.push({ icon: 'ti ti-id-badge-2', label: staff.employeeNo });
+  if (staff?.qualification) chips.push({ icon: 'ti ti-school', label: staff.qualification });
+
+  const totals = timetable ? todayTotals(timetable, now) : null;
+  const completion = profileCompletion(staff);
+
+  // Icons and styling come from the template list; every value is computed from the database.
+  const liveStats = heroStats
+    .filter((stat) => !/\bai\b|score/i.test(stat.label))
+    .map((stat) => {
+      const label = stat.label.toLowerCase();
+      let value: string = DASH;
+      if (label.includes('schedule')) value = totals ? String(totals.periods) : DASH;
+      else if (label.includes('hour')) value = totals ? formatDuration(totals.minutes) : DASH;
+      else if (label.includes('upcoming')) value = totals ? String(totals.upcoming) : DASH;
+      else if (label.includes('complet')) value = 'Profile';
+      return { ...stat, value, ring: label.includes('complet') ? completion : undefined };
+    });
+
   return (
     <div className="card-profile mb-3 position-relative overflow-hidden">
       <div className="card-profile-grid position-relative align-items-center">
@@ -48,18 +75,19 @@ const TeacherHero = ({ onOpenModal }: TeacherHeroProps) => {
               if (event.key === 'Enter' || event.key === ' ') onOpenModal('profile');
             }}
           >
-            <ImageWithBasePath
-              src={teacherProfile.photo}
-              alt="Teacher"
-              className="rounded"
-            />
-            <span className="on" title="Online" />
+            {/* No photo is stored yet: show the teacher's initials. */}
+            <div
+              className="rounded d-flex align-items-center justify-content-center fw-bold"
+              style={{ width: '100%', height: '100%', minHeight: 120, background: '#e9ecef', fontSize: 36 }}
+            >
+              {initials(name)}
+            </div>
           </div>
           <div>
             <div className="card-profile-greeting">{greetingForHour(now.getHours())} 👋</div>
-            <div className="card-profile-name">{teacherProfile.name}</div>
+            <div className="card-profile-name">{name || '\u00A0'}</div>
             <div className="card-profile-meta d-flex align-items-center flex-wrap">
-              {teacherProfile.chips.map((chip) => (
+              {chips.map((chip) => (
                 <span className="filter-chip" key={chip.label}>
                   <i className={chip.icon} />
                   {chip.label}
@@ -72,15 +100,11 @@ const TeacherHero = ({ onOpenModal }: TeacherHeroProps) => {
         <div className="card-profile-clock text-lg-end">
           <div className="card-profile-time">{time}</div>
           <div className="card-profile-date">{date}</div>
-          <span className="badge badge-soft-success mt-2">
-            <i className="ti ti-circle-check" />
-            On campus
-          </span>
         </div>
       </div>
 
       <div className="card-profile-stats position-relative">
-        {heroStats.map((stat) => (
+        {liveStats.map((stat) => (
           <div className="card-profile-stat d-flex align-items-center" key={stat.id}>
             {stat.ring !== undefined ? (
               <span

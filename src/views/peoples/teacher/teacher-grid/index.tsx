@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import ToastStack from '@components/ui/ToastStack';
 import { all_routes } from '@/routes/all_routes';
 import { useToasts } from '@hooks/useToasts';
+import { deleteTeacher } from '@services/staff/staff.list';
 import SummaryStrip from './components/SummaryStrip';
 import TeacherCardItem from './components/TeacherCardItem';
 import TeacherGridSkeleton from './components/TeacherGridSkeleton';
@@ -12,7 +13,7 @@ import WorkspaceToolbar from './components/WorkspaceToolbar';
 import type { ToolbarMenu } from './components/WorkspaceToolbar';
 import TeacherModals from './modals/TeacherModals';
 import type { TeacherCard } from './data/teachers.data';
-import { teachers } from './data/teachers.data';
+import { useTeacherCards } from './hooks/useTeacherCards';
 import type { SortKey, TeacherModalId } from './data/teachersWorkspace.data';
 import {
   actionToasts,
@@ -30,13 +31,11 @@ const routes = all_routes;
 const matchesFilter = (teacher: TeacherCard, id: string, value: string) => {
   switch (id) {
     case 'class':
-      return teacher.classLevels.includes(value);
+      return teacher.classNames.includes(value);
     case 'subject':
-      return teacher.subject === value;
+      return teacher.subjectNames.includes(value);
     case 'status':
       return teacher.status === value;
-    case 'academic-year':
-      return teacher.year === value;
     default:
       return true;
   }
@@ -48,14 +47,14 @@ const compareBy = (sort: SortKey) => (a: TeacherCard, b: TeacherCard) => {
       return a.subject.localeCompare(b.subject) || a.name.localeCompare(b.name);
     case 'name':
       return a.name.localeCompare(b.name);
-    // "Recently updated" is the order the cards ship in, so it leaves them be.
+    // "Recently updated" keeps the order the server sends the teachers in.
     case 'recent':
     default:
       return 0;
   }
 };
 
-/** The seven columns `exportCsv()` wrote, in the same order. */
+/** The columns of the CSV export. */
 const CSV_COLUMNS: [string, (teacher: TeacherCard) => string][] = [
   ['Teacher', (teacher) => teacher.name],
   ['ID', (teacher) => teacher.id],
@@ -66,24 +65,27 @@ const CSV_COLUMNS: [string, (teacher: TeacherCard) => string][] = [
   ['Phone', (teacher) => teacher.phone],
 ];
 
+const unique = (items: string[]) => Array.from(new Set(items)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
 const TeacherGrid = () => {
+  // The roster is the school's real teachers, loaded from the database.
+  const { teachers: roster, status: loadStatus, error: loadError, reload } = useTeacherCards();
+  const loading = loadStatus === 'loading';
+
   const [search, setSearch] = useState('');
   const [view, setView] = useState('all');
   const [filters, setFilters] = useState<Record<string, string>>({});
-  // The template ships the Sort menu with "Recently updated" already active.
   const [sort, setSort] = useState<SortKey>('recent');
   const [openMenu, setOpenMenu] = useState<ToolbarMenu>(null);
   const [headerMenu, setHeaderMenu] = useState<'export' | 'bulk' | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
 
-  const [roster, setRoster] = useState<TeacherCard[]>(teachers);
   const [selected, setSelected] = useState<string[]>([]);
   const [cardMenu, setCardMenu] = useState<string | null>(null);
   const [profile, setProfile] = useState<TeacherCard | null>(null);
   const [activeModal, setActiveModal] = useState<TeacherModalId | null>(null);
   const [doomed, setDoomed] = useState<TeacherCard | null>(null);
 
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -97,7 +99,6 @@ const TeacherGrid = () => {
 
     return roster
       .filter((teacher) => {
-        // The template's own `data-search` haystack, used verbatim.
         if (term && !teacher.search.includes(term)) return false;
         if (view !== 'all' && teacher.status !== view) return false;
 
@@ -109,6 +110,16 @@ const TeacherGrid = () => {
       .sort(compareBy(sort));
   }, [roster, search, view, filters, sort]);
 
+  // The Class / Subject / Status selects list what the school really has.
+  const filterOptions = useMemo<Record<string, string[]>>(
+    () => ({
+      class: unique(roster.flatMap((teacher) => teacher.classNames)),
+      subject: unique(roster.flatMap((teacher) => teacher.subjectNames)),
+      status: ['Active', 'Inactive'],
+    }),
+    [roster],
+  );
+
   const pageCount = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
   const currentPage = Math.min(page, pageCount);
   const shown = filtered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -118,7 +129,6 @@ const TeacherGrid = () => {
     [roster],
   );
 
-  // The template hardcoded these badges; they are derived from the roster here.
   const viewCounts = useMemo(
     () =>
       savedViews.reduce<Record<string, number>>((acc, item) => {
@@ -137,16 +147,19 @@ const TeacherGrid = () => {
     [countBy],
   );
 
-  const summaryValues = useMemo(
-    () => ({
+  // Every figure is computed from the real teachers.
+  const summaryValues = useMemo(() => {
+    const thisYear = new Date().getFullYear();
+    return {
+      total: String(roster.length),
       selected: String(selected.length),
       active: String(countBy('Active')),
       inactive: String(countBy('Inactive')),
-      graduated: String(new Set(roster.map((teacher) => teacher.subject)).size),
+      new: String(roster.filter((teacher) => teacher.joinedYear === thisYear).length),
+      graduated: String(new Set(roster.flatMap((teacher) => teacher.subjectNames)).size),
       filtered: String(filtered.length),
-    }),
-    [selected.length, countBy, roster, filtered.length],
-  );
+    };
+  }, [selected.length, countBy, roster, filtered.length]);
 
   /* ----------------------------- Toolbar plumbing ---------------------------- */
 
@@ -171,30 +184,14 @@ const TeacherGrid = () => {
     setPage(1);
   }, []);
 
-  // The template's refresh button had no script; here it replays the skeleton.
-  const runReveal = useCallback((delay: number, message?: string) => {
-    setLoading(true);
-    const timer = window.setTimeout(() => {
-      setLoading(false);
-      if (message) push(message);
-    }, delay);
-    return () => window.clearTimeout(timer);
-  }, [push]);
-
-  // The template revealed the live content 850ms after load; so does this.
-  useEffect(() => {
-    const timer = window.setTimeout(() => setLoading(false), 850);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  const refresh = useCallback(() => {
-    runReveal(700, actionToasts.refresh);
-  }, [runReveal]);
+  // Refresh re-reads the teachers from the database.
+  const refresh = useCallback(async () => {
+    await reload();
+    push(actionToasts.refresh);
+  }, [reload, push]);
 
   const toggleFullscreen = useCallback(() => {
     const next = !fullscreen;
-    // The `.is-fullscreen` class carries the styling and is the fallback when
-    // the native API is unavailable, exactly as the template's script had it.
     if (next) workspaceRef.current?.requestFullscreen?.().catch(() => undefined);
     else if (document.fullscreenElement) document.exitFullscreen();
     setFullscreen(next);
@@ -262,7 +259,7 @@ const TeacherGrid = () => {
     window.setTimeout(() => URL.revokeObjectURL(url), 1500);
   }, [filtered]);
 
-  /** The `data-cls-action` router the template's script implemented. */
+  /** The action router behind the header and bulk menus. */
   const runAction = useCallback(
     (action: string) => {
       setHeaderMenu(null);
@@ -274,15 +271,24 @@ const TeacherGrid = () => {
     [exportCsv, push],
   );
 
-  const confirmDelete = useCallback(() => {
+  // Delete is real: the teachers are removed on the server, then the list is re-read.
+  const confirmDelete = useCallback(async () => {
     const keys = doomed ? [doomed.key] : selected;
-    setRoster((current) => current.filter((teacher) => !keys.includes(teacher.key)));
-    setSelected((current) => current.filter((key) => !keys.includes(key)));
     setActiveModal(null);
     setDoomed(null);
-    push(keys.length > 1 ? `${keys.length} teachers deleted.` : 'Teacher deleted.');
-  }, [doomed, selected, push]);
+    try {
+      await Promise.all(keys.map((key) => deleteTeacher(key)));
+      setSelected((current) => current.filter((key) => !keys.includes(key)));
+      await reload();
+      push(keys.length > 1 ? `${keys.length} teachers deleted.` : 'Teacher deleted.');
+    } catch (e) {
+      await reload();
+      push(`Could not delete: ${e instanceof Error ? e.message : 'please try again.'}`);
+    }
+  }, [doomed, selected, reload, push]);
 
+  const noTeachersYet = loadStatus === 'ready' && roster.length === 0;
+  const isEmpty = !loading && filtered.length === 0;
   const rangeFrom = filtered.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
   const rangeTo = Math.min(currentPage * rowsPerPage, filtered.length);
 
@@ -309,8 +315,6 @@ const TeacherGrid = () => {
                 </ol>
               </nav>
             </div>
-            {/* Page-level actions. Grid-level actions (search, filters, views,
-                refresh) live in the workspace toolbar instead. */}
             <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
               <div className="me-2 mb-2">
                 <button
@@ -415,6 +419,16 @@ const TeacherGrid = () => {
           </div>
           {/* /Page Header */}
 
+          {/* Could not load the teachers */}
+          {loadStatus === 'error' ? (
+            <div className="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
+              <span>{loadError || 'Could not load the teachers.'}</span>
+              <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => void reload()}>
+                Try again
+              </button>
+            </div>
+          ) : null}
+
           {/* Teachers Grid */}
           <div className="card">
             <div
@@ -449,7 +463,7 @@ const TeacherGrid = () => {
                 onSaveView={() => push(actionToasts.save_view)}
                 sort={sort}
                 onSort={setSort}
-                onRefresh={refresh}
+                onRefresh={() => void refresh()}
                 fullscreen={fullscreen}
                 onFullscreen={toggleFullscreen}
                 openMenu={openMenu}
@@ -458,6 +472,7 @@ const TeacherGrid = () => {
                 onClearChip={clearChip}
                 matchCount={filtered.length}
                 totalCount={roster.length}
+                filterOptions={filterOptions}
               />
 
               {/* ===================== SELECT ALL ===================== */}
@@ -533,7 +548,7 @@ const TeacherGrid = () => {
                 </div>
 
                 {/* Card grid */}
-                <div className="row g-3" id="clsBody" hidden={filtered.length === 0}>
+                <div className="row g-3" id="clsBody" hidden={isEmpty}>
                   {shown.map((teacher) => (
                     <TeacherCardItem
                       key={teacher.key}
@@ -553,22 +568,32 @@ const TeacherGrid = () => {
                 </div>
 
                 {/* Empty state */}
-                <div
-                  className={`workspace-empty-state${filtered.length === 0 ? ' show' : ''}`}
-                  id="clsEmpty"
-                >
+                <div className={`workspace-empty-state${isEmpty ? ' show' : ''}`} id="clsEmpty">
                   <div className="workspace-empty-art">
                     <i className="ti ti-mood-empty" />
                   </div>
-                  <h5>No teachers match your filters</h5>
-                  <p>
-                    Try adjusting your search terms or clearing the active filters to see more
-                    results.
-                  </p>
-                  <button type="button" className="btn btn-primary" onClick={resetFilters}>
-                    <i className="ti ti-rotate me-1" />
-                    Reset filters
-                  </button>
+                  {noTeachersYet ? (
+                    <>
+                      <h5>No teachers yet</h5>
+                      <p>Add your first teacher and they will appear here.</p>
+                      <Link to={routes.addTeacher} className="btn btn-primary">
+                        <i className="ti ti-square-rounded-plus me-1" />
+                        Add Teacher
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <h5>No teachers match your filters</h5>
+                      <p>
+                        Try adjusting your search terms or clearing the active filters to see more
+                        results.
+                      </p>
+                      <button type="button" className="btn btn-primary" onClick={resetFilters}>
+                        <i className="ti ti-rotate me-1" />
+                        Reset filters
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 {/* Pagination footer */}
@@ -609,7 +634,7 @@ const TeacherGrid = () => {
           setDoomed(null);
         }}
         onToast={push}
-        onConfirmDelete={confirmDelete}
+        onConfirmDelete={() => void confirmDelete()}
       />
     </>
   );

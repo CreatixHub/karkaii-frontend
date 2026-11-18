@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import ToastStack from '@components/ui/ToastStack';
 import { all_routes } from '@/routes/all_routes';
 import { useToasts } from '@hooks/useToasts';
+import { deleteTeacher } from '@services/staff/staff.list';
 import TeacherListSkeleton from './components/TeacherListSkeleton';
 import TeacherSummaryStrip from './components/TeacherSummaryStrip';
 import TeacherTableRow from './components/TeacherTableRow';
@@ -11,7 +12,7 @@ import TeacherWorkspaceToolbar from './components/TeacherWorkspaceToolbar';
 import type { ToolbarMenu } from './components/TeacherWorkspaceToolbar';
 import TeacherListModals from './modals/TeacherListModals';
 import type { Teacher } from './data/teachers.data';
-import { teachers } from './data/teachers.data';
+import { useTeachers } from './hooks/useTeachers';
 import type {
   ColumnKey,
   Density,
@@ -31,22 +32,34 @@ import {
 
 const routes = all_routes;
 
-/** `"III A"` / `"IX (C) , X (C)"` → the roman-numeral tokens it names. */
-const classTokens = (value: string) =>
-  value.split(/[^A-Za-z]+/).filter(Boolean).map((token) => token.toUpperCase());
+const DASH = '—';
 
-/** `"25 Mar 2024"` → a sortable timestamp, as the template's script did. */
+/** `"Grade 6, Grade 7"` -> the class names it lists. */
+const classNames = (value: string) =>
+  value
+    .split(',')
+    .map((part) => part.trim().toLowerCase())
+    .filter((part) => part && part !== DASH);
+
+/** `"Maths, English"` -> the subjects it lists. */
+const subjectNames = (value: string) =>
+  value
+    .split(',')
+    .map((part) => part.trim())
+    .filter((part) => part && part !== DASH);
+
+/** `"25 Mar 2024"` -> a sortable timestamp. */
 const joinTime = (value: string) => new Date(value).getTime() || 0;
 
 const matchesFilter = (teacher: Teacher, id: string, value: string) => {
   switch (id) {
     case 'class':
-      return classTokens(teacher.classes).includes(value.toUpperCase());
+      return classNames(teacher.classes).includes(value.trim().toLowerCase());
     case 'subject':
-      return teacher.subject === value;
+      return subjectNames(teacher.subject).some((s) => s.toLowerCase() === value.trim().toLowerCase());
     case 'status':
       return teacher.status === value;
-    // The rows carry no academic year, only a join date — an option matches
+    // The rows carry no academic year, only a join date: an option matches
     // when it spans the year the teacher joined.
     case 'academic-year':
       return value.includes(teacher.dateOfJoin.slice(-4));
@@ -67,7 +80,7 @@ const compareBy = (sort: SortKey) => (a: Teacher, b: Teacher) => {
       return joinTime(a.dateOfJoin) - joinTime(b.dateOfJoin);
     case 'name':
       return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-    // "Recently updated" is the order the rows ship in.
+    // "Recently updated" is the order the server sends the rows in.
     case 'recent':
     default:
       return 0;
@@ -75,7 +88,10 @@ const compareBy = (sort: SortKey) => (a: Teacher, b: Teacher) => {
 };
 
 const TeacherList = () => {
-  const [roster, setRoster] = useState<Teacher[]>(teachers);
+  // The roster is the school's real teachers, loaded from the database.
+  const { teachers: roster, status: loadStatus, error: loadError, reload } = useTeachers();
+  const loading = loadStatus === 'loading';
+
   const [search, setSearch] = useState('');
   const [view, setView] = useState('all');
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -90,7 +106,6 @@ const TeacherList = () => {
   const [openMenu, setOpenMenu] = useState<ToolbarMenu>(null);
   const [exportOpen, setExportOpen] = useState(false);
 
-  const [loading, setLoading] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -138,7 +153,7 @@ const TeacherList = () => {
     [roster],
   );
 
-  // The template hardcoded these badges; they are derived from the roster here.
+  // Badge counts are derived from the real roster.
   const viewCounts = useMemo(
     () =>
       savedViews.reduce<Record<string, number>>((acc, item) => {
@@ -162,7 +177,8 @@ const TeacherList = () => {
       selected: selected.length,
       active: countBy('Active'),
       inactive: countBy('Inactive'),
-      graduated: new Set(roster.map((teacher) => teacher.subject)).size,
+      // distinct subjects actually taught by the school's teachers
+      graduated: new Set(roster.flatMap((teacher) => subjectNames(teacher.subject))).size,
       filtered: filtered.length,
     }),
     [selected.length, countBy, roster, filtered.length],
@@ -220,7 +236,7 @@ const TeacherList = () => {
       setSort(key);
       setSortAsc(asc);
       if (key === 'recent') {
-        push('Showing the most recently updated teachers first.', 'info');
+        push('Showing the teachers in the order they were added.', 'info');
         return;
       }
       const label =
@@ -248,20 +264,11 @@ const TeacherList = () => {
     push('All columns restored.');
   }, [push]);
 
-  // The template's refresh button had no script; here it replays the skeleton.
-  const refresh = useCallback(() => {
-    setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
-      action('refresh');
-    }, 700);
-  }, [action]);
-
-  // First paint: the template never added `is-loaded`, so the skeleton stayed.
-  useEffect(() => {
-    const timer = window.setTimeout(() => setLoading(false), 850);
-    return () => window.clearTimeout(timer);
-  }, []);
+  // Refresh re-reads the teachers from the database.
+  const refresh = useCallback(async () => {
+    await reload();
+    action('refresh');
+  }, [reload, action]);
 
   const toggleFullscreen = useCallback(() => {
     const node = workspaceRef.current;
@@ -362,15 +369,23 @@ const TeacherList = () => {
     setActiveModal(modal);
   }, []);
 
-  const confirmDelete = useCallback(() => {
+  // Delete is real: the teacher is removed on the server, then the list is re-read.
+  const confirmDelete = useCallback(async () => {
     const doomed = modalTeacher ? [modalTeacher.key] : selected;
-    setRoster((current) => current.filter((teacher) => !doomed.includes(teacher.key)));
-    setSelected((current) => current.filter((key) => !doomed.includes(key)));
     setActiveModal(null);
-    push(doomed.length > 1 ? `${doomed.length} teachers deleted.` : 'Teacher deleted.');
-  }, [modalTeacher, selected, push]);
+    try {
+      await Promise.all(doomed.map((key) => deleteTeacher(key)));
+      setSelected((current) => current.filter((key) => !doomed.includes(key)));
+      await reload();
+      push(doomed.length > 1 ? `${doomed.length} teachers deleted.` : 'Teacher deleted.');
+    } catch (e) {
+      await reload();
+      push(`Could not delete: ${e instanceof Error ? e.message : 'please try again.'}`);
+    }
+  }, [modalTeacher, selected, reload, push]);
 
-  const isEmpty = filtered.length === 0;
+  const noTeachersYet = loadStatus === 'ready' && roster.length === 0;
+  const isEmpty = !loading && filtered.length === 0;
   const rangeFrom = isEmpty ? 0 : pageStart + 1;
   const rangeTo = pageStart + pageRows.length;
 
@@ -492,6 +507,16 @@ const TeacherList = () => {
           </div>
           {/* /Page Header */}
 
+          {/* Could not load the teachers */}
+          {loadStatus === 'error' ? (
+            <div className="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
+              <span>{loadError || 'Could not load the teachers.'}</span>
+              <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => void reload()}>
+                Try again
+              </button>
+            </div>
+          ) : null}
+
           {/* Teachers List */}
           <div className="card">
             <div
@@ -524,7 +549,7 @@ const TeacherList = () => {
                 onResetColumns={resetColumns}
                 density={density}
                 onDensity={setDensity}
-                onRefresh={refresh}
+                onRefresh={() => void refresh()}
                 fullscreen={fullscreen}
                 onFullscreen={toggleFullscreen}
                 openMenu={openMenu}
@@ -717,15 +742,28 @@ const TeacherList = () => {
                   <div className="workspace-empty-art">
                     <i className="ti ti-mood-empty" />
                   </div>
-                  <h5>No teachers match your filters</h5>
-                  <p>
-                    Try adjusting your search terms or clearing the active filters to see more
-                    results.
-                  </p>
-                  <button type="button" className="btn btn-primary" onClick={resetFilters}>
-                    <i className="ti ti-rotate me-1" />
-                    Reset filters
-                  </button>
+                  {noTeachersYet ? (
+                    <>
+                      <h5>No teachers yet</h5>
+                      <p>Add your first teacher and they will appear here.</p>
+                      <Link to={routes.addTeacher} className="btn btn-primary">
+                        <i className="ti ti-square-rounded-plus me-1" />
+                        Add Teacher
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <h5>No teachers match your filters</h5>
+                      <p>
+                        Try adjusting your search terms or clearing the active filters to see more
+                        results.
+                      </p>
+                      <button type="button" className="btn btn-primary" onClick={resetFilters}>
+                        <i className="ti ti-rotate me-1" />
+                        Reset filters
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 {/* Pagination footer */}
@@ -758,7 +796,7 @@ const TeacherList = () => {
         teacher={modalTeacher}
         onClose={() => setActiveModal(null)}
         onToast={push}
-        onConfirmDelete={confirmDelete}
+        onConfirmDelete={() => void confirmDelete()}
       />
 
       <ToastStack toasts={toasts} onDismiss={dismiss} id="clsToasts" />

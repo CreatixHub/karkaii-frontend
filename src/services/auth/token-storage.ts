@@ -1,34 +1,28 @@
 /**
  * The only module permitted to read or write auth tokens.
  *
- * Centralizing this means swapping localStorage for cookies, sessionStorage or
- * an in-memory-only strategy later is a single-file change.
+ * Session rule: a sign-in belongs to ONE browser tab. Everything lives in
+ * sessionStorage (per tab, gone when the tab closes), so a new tab or a pasted
+ * link never inherits a session and always starts at the login page. A reload
+ * of the same tab keeps the session.
  *
- * Security notes:
- *  - Tokens in localStorage are readable by any script on the origin, so they
- *    are vulnerable to XSS. For production, prefer httpOnly cookies issued by
- *    the backend; in that case `getAccessToken` returns null and the client
- *    simply sends credentials instead. Both paths are supported.
- *  - A `persist: false` login keeps the token in memory only, so it disappears
- *    when the tab closes.
+ * The server's httpOnly refresh cookie is shared by all tabs, so it must never
+ * restore a session by itself: `canRestoreSession()` only says yes when THIS tab
+ * has signed in.
  */
 
 import { STORAGE_KEYS } from '@constants/app.constants';
 import type { AuthUser } from './auth.types';
 
-const EPHEMERAL_KEY = 'karkaii.auth.ephemeral';
+const TAB_SESSION_KEY = 'karkaii.auth.tab-session';
 
-/** The "Remember me" choice of the current sign-in; null until known (see `isPersisted`). */
-let persistMode: boolean | null = null;
-
-/** Used when `rememberMe` is false, and as a fallback if storage is blocked. */
 let inMemoryAccessToken: string | null = null;
 let inMemoryRefreshToken: string | null = null;
 
-/** Private-mode browsers can throw on access; never let that crash the app. */
+/** Storage can throw in private mode; never let that crash the app. */
 function safeGet(key: string): string | null {
   try {
-    return window.localStorage.getItem(key);
+    return window.sessionStorage.getItem(key);
   } catch {
     return null;
   }
@@ -36,19 +30,31 @@ function safeGet(key: string): string | null {
 
 function safeSet(key: string, value: string): void {
   try {
-    window.localStorage.setItem(key, value);
+    window.sessionStorage.setItem(key, value);
   } catch {
-    // Storage unavailable — the in-memory copy still serves this session.
+    // The in-memory copy still serves this page load.
   }
 }
 
 function safeRemove(key: string): void {
   try {
-    window.localStorage.removeItem(key);
+    window.sessionStorage.removeItem(key);
   } catch {
     // Nothing to do.
   }
 }
+
+/** Sign-ins from older versions of the app were kept in localStorage; remove them once. */
+function dropLegacyLocalStorage(): void {
+  try {
+    window.localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+    window.localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+    window.localStorage.removeItem(STORAGE_KEYS.USER);
+  } catch {
+    // Nothing to do.
+  }
+}
+dropLegacyLocalStorage();
 
 export const tokenStorage = {
   getAccessToken(): string | null {
@@ -59,28 +65,17 @@ export const tokenStorage = {
     return inMemoryRefreshToken ?? safeGet(STORAGE_KEYS.REFRESH_TOKEN);
   },
 
-  /**
-   * @param persist When false the token is held in memory only and is lost on
-   * reload — the correct behaviour for a "do not remember me" login.
-   */
-  setTokens(
-    accessToken: string,
-    refreshToken?: string,
-    persist = true,
-  ): void {
+  /** `_persist` is accepted for compatibility ("Remember me" no longer widens a session beyond its tab). */
+  setTokens(accessToken: string, refreshToken?: string, _persist = true): void {
     inMemoryAccessToken = accessToken;
     inMemoryRefreshToken = refreshToken ?? null;
-    persistMode = persist;
-
-    if (!persist) return;
-
     safeSet(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
     if (refreshToken) safeSet(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    safeSet(TAB_SESSION_KEY, '1');
   },
 
-  /** Caches the user so a reload can render immediately, before `me` resolves. */
-  setUser(user: AuthUser, persist = true): void {
-    if (!persist) return;
+  /** Caches the user so a reload of this tab can render immediately, before `me` resolves. */
+  setUser(user: AuthUser, _persist = true): void {
     safeSet(STORAGE_KEYS.USER, JSON.stringify(user));
   },
 
@@ -98,52 +93,32 @@ export const tokenStorage = {
   clear(): void {
     inMemoryAccessToken = null;
     inMemoryRefreshToken = null;
-    persistMode = null;
     safeRemove(STORAGE_KEYS.ACCESS_TOKEN);
     safeRemove(STORAGE_KEYS.REFRESH_TOKEN);
     safeRemove(STORAGE_KEYS.USER);
-    try {
-      window.sessionStorage.removeItem(EPHEMERAL_KEY);
-    } catch {
-      // Nothing to do.
-    }
+    safeRemove(TAB_SESSION_KEY);
+    dropLegacyLocalStorage();
   },
 
   hasSession(): boolean {
     return this.getAccessToken() !== null;
   },
 
-  /**
-   * True when the current sign-in chose "Remember me". The in-memory choice wins; the stored user (only
-   * written for remembered sign-ins) answers after a reload, before anything has called `setTokens`.
-   */
+  /** Kept for compatibility: every sign-in is per-tab now. */
   isPersisted(): boolean {
-    return persistMode ?? safeGet(STORAGE_KEYS.USER) !== null;
+    return false;
   },
 
-  /**
-   * "Remember me" off: the server's refresh cookie still lives for days, so remember in sessionStorage
-   * (per tab, gone when the browser closes) that THIS tab may silently restore its session on reload.
-   */
+  /** Kept for compatibility: `setTokens` already marks this tab. */
   markEphemeralSession(): void {
-    try {
-      window.sessionStorage.setItem(EPHEMERAL_KEY, '1');
-    } catch {
-      // Without sessionStorage a reload simply asks the user to sign in again.
-    }
+    safeSet(TAB_SESSION_KEY, '1');
   },
 
   /**
-   * Whether a reload may try to restore the session from the refresh cookie: only for "Remember me"
-   * sign-ins, or the tab that signed in without it. A fresh browser session after a non-remembered login
-   * must sign in again.
+   * Whether the app may restore a session on start-up (from the refresh cookie or the cached user).
+   * True only for a tab that signed in itself, so a new tab always lands on the login page.
    */
   canRestoreSession(): boolean {
-    if (this.isPersisted()) return true;
-    try {
-      return window.sessionStorage.getItem(EPHEMERAL_KEY) === '1';
-    } catch {
-      return false;
-    }
+    return safeGet(TAB_SESSION_KEY) === '1';
   },
 };

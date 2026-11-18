@@ -8,8 +8,8 @@ export function roleLabel(role: UserRole | null | undefined): string {
 }
 
 /**
- * Where each role lands after signing in. Only four dashboards exist; every other staff role
- * (accountant, librarian, receptionist, warden, ...) uses the admin dashboard.
+ * Where each role lands after signing in. Four dashboards exist (admin, teacher, student, parent);
+ * every other staff role (accountant, librarian, receptionist, warden, ...) uses the admin dashboard.
  */
 export function roleHomeRoute(role: UserRole): string {
   switch (role) {

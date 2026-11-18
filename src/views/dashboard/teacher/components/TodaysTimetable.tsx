@@ -1,12 +1,14 @@
-import type { TeacherModalId } from '../data/teacherDashboard.data';
+import type { Lesson, TeacherModalId } from '../data/teacherDashboard.data';
 import { todaysLessons } from '../data/teacherDashboard.data';
 import WidgetHeader from '../../shared/WidgetHeader';
 
 export interface TodaysTimetableProps {
   onOpenModal: (modal: TeacherModalId) => void;
+  /** Real lessons for today; omit (or null) to show the sample lessons. */
+  lessons?: Lesson[] | null;
 }
 
-const TodaysTimetable = ({ onOpenModal }: TodaysTimetableProps) => (
+const TodaysTimetable = ({ onOpenModal, lessons }: TodaysTimetableProps) => (
   <div className="card-widget card-widget-body h-100">
     <WidgetHeader
       icon="ti ti-calendar-time"
@@ -25,7 +27,10 @@ const TodaysTimetable = ({ onOpenModal }: TodaysTimetableProps) => (
     </WidgetHeader>
 
     <div className="lesson-list d-flex flex-column">
-      {todaysLessons.map((lesson) => (
+      {lessons && lessons.length === 0 ? (
+        <p className="text-muted mb-0">No classes scheduled for today.</p>
+      ) : null}
+      {(lessons ?? todaysLessons).map((lesson) => (
         <div className={`lesson-item ${lesson.borderClass} align-items-center`} key={lesson.id}>
           <div className="lesson-time text-center">
             <b>{lesson.time}</b>

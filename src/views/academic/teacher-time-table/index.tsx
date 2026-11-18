@@ -1,416 +1,516 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import ToastStack from '@components/ui/ToastStack';
-import ImageWithBasePath from '@core/common/imageWithBasePath';
+import { Link, useSearchParams } from 'react-router-dom';
 import { all_routes } from '@/routes/all_routes';
-import { useToasts } from '@hooks/useToasts';
-import SchedulePanel from './components/SchedulePanel';
-import TimetableSkeleton from './components/TimetableSkeleton';
-import TimetableSlotCard from './components/TimetableSlotCard';
-import TimetableToolbar from './components/TimetableToolbar';
-import type { ToolbarMenu } from './components/TimetableToolbar';
-import AddTimeTableModal from './modals/AddTimeTableModal';
-import TimeTableModals from './modals/TimeTableModals';
-import type { ActiveSession, TimetableModalId } from './modals/TimeTableModals';
-import type {
-  CalendarViewId,
-  SavedViewId,
-  TimetableSlot,
-} from './data/teacherTimeTable.data';
+import { ACADEMIC_YEAR_ID } from '@services/admissions/admissions.api';
 import {
-  savedViews,
-  statFacts,
-  teacherProfile,
-  timetableWeek,
-} from './data/teacherTimeTable.data';
+  getMyAssignments,
+  getMyStaff,
+  getMyTimetable,
+  getStaffRecord,
+  listStaffAssignments,
+} from '@services/staff/staff.api';
+import type { MyAssignment, MyTimetableEntry } from '@services/staff/staff.api';
+import { listTeachers } from '@services/staff/staff.list';
+import type { StaffListItem } from '@services/staff/staff.list';
+import { listTeacherLessons } from '@services/timetable/teacher.lessons';
 
 const routes = all_routes;
 
-/** The Filters panel offers departments; the grid carries subjects. */
-const DEPARTMENT_SUBJECTS: Record<string, string[]> = {
-  Science: ['Physics', 'Science'],
-  Mathematics: ['Maths'],
-  Languages: [],
+const DAYS = [
+  { n: 1, name: 'Monday' },
+  { n: 2, name: 'Tuesday' },
+  { n: 3, name: 'Wednesday' },
+  { n: 4, name: 'Thursday' },
+  { n: 5, name: 'Friday' },
+  { n: 6, name: 'Saturday' },
+];
+
+const TONES = ['primary', 'info', 'success', 'warning', 'danger', 'secondary'];
+
+/** One lesson, whichever endpoint it came from. */
+interface Period {
+  id: string;
+  day: number;
+  start: number; // minutes after midnight
+  end: number;
+  subject: string;
+  grade: string;
+}
+
+interface Profile {
+  id: string | number;
+  name: string;
+  code: string;
+  phone: string | null;
+  qualification: string | null;
+  status: string | null;
+}
+
+type Mode = 'detect' | 'mine' | 'admin';
+type Load = 'loading' | 'ready' | 'error';
+
+/* --------------------------------- helpers -------------------------------- */
+
+const toMin = (value: unknown): number | null => {
+  if (typeof value !== 'string') return null;
+  const m = /^(\d{1,2}):(\d{2})/.exec(value.trim());
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null;
 };
 
-/** Which day columns each Week View mode shows. */
-const daysFor = (view: CalendarViewId, ids: string[]) => {
-  if (view === 'day') return ids.slice(0, 1);
-  if (view === 'workWeek') return ids.slice(0, 5);
-  return ids;
+const hhmm = (minutes: number) =>
+  `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+
+const pick = (obj: Record<string, unknown> | null | undefined, keys: string[]): unknown => {
+  if (!obj) return undefined;
+  for (const key of keys) if (obj[key] !== undefined && obj[key] !== null) return obj[key];
+  return undefined;
 };
 
-const searchHaystack = (slot: TimetableSlot, day: string) =>
-  [
-    day,
-    slot.subject,
-    slot.time,
-    ...slot.metas.map((meta) => meta.label),
-    ...slot.badges.map((badge) => badge.label),
-    slot.soloBadge?.label ?? '',
-  ]
-    .join(' ')
-    .toLowerCase();
+const duration = (minutes: number) => {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+};
+
+const toneOf = (subject: string) => {
+  let hash = 0;
+  for (const ch of subject) hash = (hash * 31 + ch.charCodeAt(0)) % 997;
+  return TONES[hash % TONES.length];
+};
+
+const gradeOf = (className?: string, sectionName?: string) =>
+  [className, sectionName].filter(Boolean).join(' - ') || '—';
+
+/** /staff/me/timetable entry -> Period (null when the slot has no readable times). */
+function fromMine(entry: MyTimetableEntry): Period | null {
+  const start = toMin(pick(entry.timeSlot, ['startsAt', 'starts_at', 'startTime', 'start']));
+  const end = toMin(pick(entry.timeSlot, ['endsAt', 'ends_at', 'endTime', 'end']));
+  if (start === null || end === null || end <= start) return null;
+  return {
+    id: String(entry.id),
+    day: entry.dayOfWeek,
+    start,
+    end,
+    subject: (pick(entry.subject, ['name', 'subjectName', 'code']) as string | undefined) ?? 'Lesson',
+    grade: gradeOf(entry.className, entry.sectionName),
+  };
+}
+
+const uniq = (items: string[]) => [...new Set(items.filter(Boolean))];
+
+/* ---------------------------------- page ---------------------------------- */
 
 const TeacherTimeTable = () => {
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState<Record<string, string>>({});
-  const [dateRange, setDateRange] = useState('');
-  const [calendarView, setCalendarView] = useState<CalendarViewId>('week');
-  const [savedView, setSavedView] = useState<SavedViewId>('full');
-  const [layout, setLayout] = useState<'grid' | 'list'>('grid');
-  const [fullscreen, setFullscreen] = useState(false);
-  const [openMenu, setOpenMenu] = useState<ToolbarMenu>(null);
+  const [searchParams] = useSearchParams();
+  const idParam = searchParams.get('id') ?? '';
 
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [slotMenu, setSlotMenu] = useState<string | null>(null);
-  const [activeModal, setActiveModal] = useState<TimetableModalId | null>(null);
-  const [session, setSession] = useState<ActiveSession | null>(null);
+  const [mode, setMode] = useState<Mode>(idParam ? 'admin' : 'detect');
+  const [teacherId, setTeacherId] = useState(idParam);
+  const [teachers, setTeachers] = useState<StaffListItem[]>([]);
 
-  const { toasts, push, dismiss } = useToasts();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [assignments, setAssignments] = useState<MyAssignment[]>([]);
+  const [periods, setPeriods] = useState<Period[]>([]);
 
-  /* -------------------------- Skeleton, as the script did ------------------- */
+  const [state, setState] = useState<Load>('loading');
+  const [error, setError] = useState('');
+  const [tick, setTick] = useState(0); // bumps to reload
 
-  // `class-timetable.js` flashed the skeleton for 700ms on first paint.
+  const reload = useCallback(() => setTick((n) => n + 1), []);
+
+  /* ----- detect whether this is a teacher (own timetable) or an admin ----- */
   useEffect(() => {
-    const timer = window.setTimeout(() => setLoading(false), 700);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  const refresh = useCallback(() => {
-    setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
-      push('Timetable refreshed');
-    }, 900);
-  }, [push]);
-
-  // The script cleared `.card-fullscreen` on Escape; so does this.
-  useEffect(() => {
-    if (!fullscreen) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setFullscreen(false);
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [fullscreen]);
-
-  // Close the open card menu on an outside click, as Bootstrap's dropdown does.
-  useEffect(() => {
-    if (!slotMenu) return;
-    const close = () => setSlotMenu(null);
-    document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
-  }, [slotMenu]);
-
-  // The template's orphaned Change Classroom dialog, reachable by fragment.
-  useEffect(() => {
-    if (location.hash === '#change_classroom') setActiveModal('changeClassroom');
-  }, [location.hash]);
-
-  /* -------------------------------- Filtering ------------------------------- */
-
-  const week = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    const badge = savedViews.find((view) => view.id === savedView)?.badge;
-    const department = filters.department ?? '';
-    const subject = filters.subject ?? '';
-    const visible = daysFor(
-      calendarView,
-      timetableWeek.map((day) => day.id),
-    );
-
-    return timetableWeek
-      .filter((day) => visible.includes(day.id))
-      .map((day) => ({
-        ...day,
-        slots: day.slots.filter((slot) => {
-          if (term && !searchHaystack(slot, day.name).includes(term)) return false;
-          if (badge && slot.soloBadge?.label !== badge) return false;
-          if (subject && slot.subject !== subject) return false;
-          if (department && !(DEPARTMENT_SUBJECTS[department] ?? []).includes(slot.subject)) {
-            return false;
-          }
-          return true;
-        }),
-      }))
-      .filter((day) => day.slots.length > 0);
-  }, [search, savedView, filters.department, filters.subject, calendarView]);
-
-  const resetFilters = useCallback(() => {
-    setFilters({});
-    setDateRange('');
-    setSearch('');
-    setSavedView('full');
-    setCalendarView('week');
-  }, []);
-
-  /* -------------------------------- Dialogs -------------------------------- */
-
-  const openModalFor = useCallback(
-    (modal: TimetableModalId, slot: TimetableSlot) => {
-      const day = timetableWeek.find((item) => item.slots.some((entry) => entry.id === slot.id));
-      setSession({
-        slot,
-        day: day?.name ?? '',
-        period: day ? day.slots.findIndex((entry) => entry.id === slot.id) + 1 : 1,
+    if (idParam) {
+      setMode('admin');
+      setTeacherId(idParam);
+      return;
+    }
+    let cancelled = false;
+    setState('loading');
+    getMyStaff()
+      .then(() => {
+        if (!cancelled) setMode('mine');
+      })
+      .catch(() => {
+        if (!cancelled) setMode('admin');
       });
-      setActiveModal(modal);
-    },
-    [],
-  );
+    return () => {
+      cancelled = true;
+    };
+  }, [idParam]);
 
-  const closeModal = useCallback(() => {
-    setActiveModal(null);
-    if (location.hash) navigate(location.pathname, { replace: true });
-  }, [location.hash, location.pathname, navigate]);
+  /* ------------------------ admin: the teacher picker ----------------------- */
+  useEffect(() => {
+    if (mode !== 'admin') return;
+    listTeachers()
+      .then(setTeachers)
+      .catch(() => setTeachers([]));
+  }, [mode]);
+
+  /* ------------------------------ load the data ----------------------------- */
+  useEffect(() => {
+    if (mode === 'detect') return;
+    if (mode === 'admin' && !teacherId) {
+      setProfile(null);
+      setAssignments([]);
+      setPeriods([]);
+      setState('ready');
+      return;
+    }
+
+    let cancelled = false;
+    setState('loading');
+    setError('');
+
+    (async () => {
+      try {
+        if (mode === 'mine') {
+          const [staff, mine, assigned] = await Promise.all([
+            getMyStaff(),
+            getMyTimetable(),
+            getMyAssignments().catch(() => [] as MyAssignment[]),
+          ]);
+          if (cancelled) return;
+          setProfile({
+            id: staff.id,
+            name: staff.fullName ?? ([staff.firstName, staff.lastName].filter(Boolean).join(' ') || '—'),
+            code: staff.employeeNo,
+            phone: staff.phone,
+            qualification: staff.qualification,
+            status: null,
+          });
+          setAssignments(assigned);
+          setPeriods(mine.map(fromMine).filter((p): p is Period => p !== null));
+        } else {
+          const [record, lessons, assigned] = await Promise.all([
+            getStaffRecord(teacherId),
+            listTeacherLessons(teacherId, ACADEMIC_YEAR_ID),
+            listStaffAssignments(teacherId).catch(() => [] as MyAssignment[]),
+          ]);
+          if (cancelled) return;
+          setProfile({
+            id: record.id,
+            name: [record.firstName, record.lastName].filter(Boolean).join(' ') || '—',
+            code: record.employeeNo,
+            phone: record.phone,
+            qualification: record.qualification,
+            status: record.status,
+          });
+          setAssignments(assigned);
+          setPeriods(
+            lessons
+              .map((row): Period | null => {
+                const start = toMin(row.startsAt);
+                const end = toMin(row.endsAt);
+                if (start === null || end === null || end <= start) return null;
+                return {
+                  id: String(row.id),
+                  day: row.dayOfWeek,
+                  start,
+                  end,
+                  subject: row.subjectName,
+                  grade: gradeOf(row.className, row.sectionName),
+                };
+              })
+              .filter((p): p is Period => p !== null),
+          );
+        }
+        setState('ready');
+      } catch (e) {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : 'Could not load the timetable.');
+        setState('error');
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mode, teacherId, tick]);
+
+  /* -------------------------------- derived -------------------------------- */
+  const byDay = useMemo(() => {
+    const map = new Map<number, Period[]>();
+    for (const day of DAYS) map.set(day.n, []);
+    for (const period of periods) map.get(period.day)?.push(period);
+    for (const list of map.values()) list.sort((a, b) => a.start - b.start);
+    return map;
+  }, [periods]);
+
+  const weeklyMinutes = periods.reduce((sum, p) => sum + (p.end - p.start), 0);
+  const subjectNames = uniq(assignments.map((a) => String(a.subject?.name ?? '')));
+  const classNames = uniq(assignments.map((a) => a.className));
+  const noLessons = state === 'ready' && periods.length === 0;
+  const today = new Date().getDay() === 0 ? 7 : new Date().getDay();
 
   return (
-    <>
-      {/* Page Wrapper */}
-      <div className="page-wrapper">
-        <div className="content timetable-page content-two">
-          {/* Page Header */}
-          <div className="d-md-flex d-block align-items-center justify-content-between flex-wrap gap-2 mb-3">
-            <div className="my-auto mb-2">
-              <h3 className="page-title mb-1">Teacher Time Table</h3>
-              <nav>
-                <ol className="breadcrumb mb-0">
-                  <li className="breadcrumb-item">
-                    <Link to={routes.adminDashboard}>Dashboard</Link>
-                  </li>
-                  <li className="breadcrumb-item">
-                    <Link to={routes.teacherGrid}>Teachers</Link>
-                  </li>
-                  <li className="breadcrumb-item active" aria-current="page">
-                    Time Table
-                  </li>
-                </ol>
-              </nav>
-            </div>
-            <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
-              <button
-                type="button"
-                className="btn btn-outline-light bg-white me-2 mb-2 d-inline-flex align-items-center"
-                aria-controls="ctt_panel"
-                aria-expanded={panelOpen}
-                onClick={() => setPanelOpen(true)}
-              >
-                <i className="ti ti-layout-sidebar-right-expand me-1" />
-                Info Panel
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary mb-2 d-inline-flex align-items-center"
-                onClick={() => setActiveModal('addTimeTable')}
-              >
+    <div className="page-wrapper">
+      <div className="content timetable-page content-two">
+        {/* Page Header */}
+        <div className="d-md-flex d-block align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <div className="my-auto mb-2">
+            <h3 className="page-title mb-1">Teacher Time Table</h3>
+            <nav>
+              <ol className="breadcrumb mb-0">
+                <li className="breadcrumb-item">
+                  <Link to={routes.adminDashboard}>Dashboard</Link>
+                </li>
+                <li className="breadcrumb-item">
+                  <Link to={routes.teacherGrid}>Teachers</Link>
+                </li>
+                <li className="breadcrumb-item active" aria-current="page">
+                  Time Table
+                </li>
+              </ol>
+            </nav>
+          </div>
+          <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
+            <button
+              type="button"
+              className="btn btn-outline-light bg-white me-2 mb-2 d-inline-flex align-items-center"
+              onClick={reload}
+            >
+              <i className="ti ti-refresh me-1" />
+              Refresh
+            </button>
+            {mode === 'admin' ? (
+              <Link to={routes.classTimetable} className="btn btn-primary mb-2 d-inline-flex align-items-center">
                 <i className="ti ti-square-rounded-plus me-1" />
                 Assign Timetable
-              </button>
+              </Link>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Admin: choose a teacher */}
+        {mode === 'admin' ? (
+          <div className="card mb-3">
+            <div className="card-body">
+              <label className="form-label" htmlFor="ttt-teacher">
+                Teacher
+              </label>
+              <select
+                id="ttt-teacher"
+                className="form-select"
+                value={teacherId}
+                onChange={(event) => setTeacherId(event.target.value)}
+              >
+                <option value="">Select a teacher</option>
+                {teachers.map((t) => (
+                  <option key={String(t.id)} value={String(t.id)}>
+                    {t.fullName} ({t.employeeNo})
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-          {/* /Page Header */}
+        ) : null}
 
-          {/* Skeleton Loader */}
-          {loading ? <TimetableSkeleton /> : null}
-          {/* /Skeleton Loader */}
+        {state === 'error' ? (
+          <div className="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
+            <span>{error || 'Could not load the timetable.'}</span>
+            <button type="button" className="btn btn-sm btn-outline-danger" onClick={reload}>
+              Try again
+            </button>
+          </div>
+        ) : null}
 
-          {!loading ? (
-            <div id="ctt_workspace">
-              {/* Premium Scheduling Toolbar */}
-              <TimetableToolbar
-                search={search}
-                onSearch={setSearch}
-                filters={filters}
-                onFilter={(id, value) =>
-                  setFilters((current) => ({ ...current, [id]: value }))
-                }
-                dateRange={dateRange}
-                onDateRange={setDateRange}
-                onResetFilters={resetFilters}
-                calendarView={calendarView}
-                onCalendarView={setCalendarView}
-                savedView={savedView}
-                onSavedView={setSavedView}
-                onSaveCurrentView={() => push('Current view saved')}
-                layout={layout}
-                onLayout={setLayout}
-                onExport={(id) => push(id === 'pdf' ? 'Export PDF started' : 'Export Excel started')}
-                onRefresh={refresh}
-                fullscreen={fullscreen}
-                onFullscreen={() => setFullscreen((on) => !on)}
-                onAssign={() => setActiveModal('addTimeTable')}
-                openMenu={openMenu}
-                onOpenMenu={setOpenMenu}
-              />
-              {/* /Premium Scheduling Toolbar */}
+        {state === 'loading' || mode === 'detect' ? (
+          <div className="card">
+            <div className="card-body text-center text-muted py-5">Loading…</div>
+          </div>
+        ) : null}
 
-              {/* Teacher Profile Header */}
-              <div className="card card-hover mb-3">
-                <div className="card-body">
-                  <div className="d-xl-flex align-items-center justify-content-between">
-                    <div className="d-sm-flex align-items-center mb-3 mb-xl-0">
-                      <span className="avatar avatar-xxl rounded flex-shrink-0 me-sm-3 mb-3 mb-sm-0">
-                        <ImageWithBasePath
-                          src={teacherProfile.avatar}
-                          className="img-fluid rounded"
-                          alt={teacherProfile.name}
-                        />
-                      </span>
-                      <div>
-                        <div className="d-flex align-items-center flex-wrap gap-2 mb-2">
-                          <h4 className="mb-0">{teacherProfile.name}</h4>
-                          <span className="badge bg-primary-transparent text-primary">
-                            {teacherProfile.code}
-                          </span>
-                          <span className="badge badge-soft-success d-inline-flex align-items-center">
-                            <i className="ti ti-circle-filled fs-5 me-1" />
-                            {teacherProfile.status}
-                          </span>
-                        </div>
-                        <div className="d-flex align-items-center flex-wrap gap-3 gap-xl-4 text-muted fs-13 mb-3">
-                          {teacherProfile.facts.map((fact) => (
-                            <span key={fact.label}>
-                              <i className={fact.icon} />
-                              {fact.label}: <span className="text-dark fw-medium">{fact.value}</span>
-                            </span>
-                          ))}
-                        </div>
-                        <div className="d-flex align-items-center flex-wrap gap-2">
-                          <a
-                            href={`tel:${teacherProfile.phone}`}
-                            className="btn btn-sm btn-outline-light bg-white d-inline-flex align-items-center"
-                          >
-                            <i className="ti ti-phone me-1" />
-                            Call
-                          </a>
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-outline-light bg-white d-inline-flex align-items-center"
-                            onClick={() => setActiveModal('meetingDetails')}
-                          >
-                            <i className="ti ti-mail me-1" />
-                            Message
-                          </button>
-                          <Link
-                            to={routes.teacherDetails}
-                            className="btn btn-sm btn-outline-light bg-white d-inline-flex align-items-center"
-                          >
-                            <i className="ti ti-user me-1" />
-                            Profile
-                          </Link>
-                        </div>
-                      </div>
+        {mode === 'admin' && !teacherId && state === 'ready' ? (
+          <div className="card">
+            <div className="card-body text-center text-muted py-5">
+              Choose a teacher to see their weekly timetable.
+            </div>
+          </div>
+        ) : null}
+
+        {/* Teacher header */}
+        {state === 'ready' && profile ? (
+          <div className="card card-hover mb-3">
+            <div className="card-body">
+              <div className="d-xl-flex align-items-center justify-content-between">
+                <div className="d-sm-flex align-items-center mb-3 mb-xl-0">
+                  <span className="avatar avatar-xxl rounded flex-shrink-0 me-sm-3 mb-3 mb-sm-0 bg-light fw-bold text-dark d-flex align-items-center justify-content-center">
+                    {profile.name
+                      .split(/\s+/)
+                      .filter(Boolean)
+                      .slice(0, 2)
+                      .map((part) => part[0]?.toUpperCase() ?? '')
+                      .join('') || '?'}
+                  </span>
+                  <div>
+                    <div className="d-flex align-items-center flex-wrap gap-2 mb-2">
+                      <h4 className="mb-0">{profile.name}</h4>
+                      <span className="badge bg-primary-transparent text-primary">{profile.code}</span>
+                      {profile.status ? (
+                        <span
+                          className={`badge ${
+                            profile.status === 'active' ? 'badge-soft-success' : 'badge-soft-warning'
+                          }`}
+                        >
+                          {profile.status === 'active' ? 'Active' : profile.status}
+                        </span>
+                      ) : null}
                     </div>
-                    <div className="d-flex align-items-center flex-wrap gap-4">
-                      {statFacts.map((fact) => (
-                        <div className="stat-fact" key={fact.id}>
-                          <span className={`stat-fact-icon ${fact.iconClass}`}>
-                            <i className={fact.icon} />
-                          </span>
-                          <div>
-                            <div className="stat-fact-value">{fact.value}</div>
-                            <div className="stat-fact-label">{fact.label}</div>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="d-flex align-items-center flex-wrap gap-3 gap-xl-4 text-muted fs-13 mb-3">
+                      <span>
+                        <i className="ti ti-certificate me-1" />
+                        Qualification:{' '}
+                        <span className="text-dark fw-medium">{profile.qualification || '—'}</span>
+                      </span>
+                      <span>
+                        <i className="ti ti-book me-1" />
+                        Subjects:{' '}
+                        <span className="text-dark fw-medium">
+                          {subjectNames.length > 0 ? subjectNames.join(', ') : '—'}
+                        </span>
+                      </span>
+                      <span>
+                        <i className="ti ti-users me-1" />
+                        Classes:{' '}
+                        <span className="text-dark fw-medium">
+                          {classNames.length > 0 ? classNames.join(', ') : '—'}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="d-flex align-items-center flex-wrap gap-2">
+                      {profile.phone ? (
+                        <a
+                          href={`tel:${profile.phone}`}
+                          className="btn btn-sm btn-outline-light bg-white d-inline-flex align-items-center"
+                        >
+                          <i className="ti ti-phone me-1" />
+                          Call
+                        </a>
+                      ) : null}
+                      <Link
+                        to={`${routes.teacherDetails}?id=${profile.id}`}
+                        className="btn btn-sm btn-outline-light bg-white d-inline-flex align-items-center"
+                      >
+                        <i className="ti ti-user me-1" />
+                        Profile
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+                <div className="d-flex align-items-center flex-wrap gap-4">
+                  <div className="stat-fact">
+                    <span className="stat-fact-icon bg-primary-transparent text-primary">
+                      <i className="ti ti-clock-hour-9" />
+                    </span>
+                    <div>
+                      <div className="stat-fact-value">{periods.length > 0 ? duration(weeklyMinutes) : '—'}</div>
+                      <div className="stat-fact-label">Weekly Teaching</div>
+                    </div>
+                  </div>
+                  <div className="stat-fact">
+                    <span className="stat-fact-icon bg-success-transparent text-success">
+                      <i className="ti ti-calendar-week" />
+                    </span>
+                    <div>
+                      <div className="stat-fact-value">{periods.length}</div>
+                      <div className="stat-fact-label">Lessons / Week</div>
+                    </div>
+                  </div>
+                  <div className="stat-fact">
+                    <span className="stat-fact-icon bg-info-transparent text-info">
+                      <i className="ti ti-users" />
+                    </span>
+                    <div>
+                      <div className="stat-fact-value">{classNames.length}</div>
+                      <div className="stat-fact-label">Classes Assigned</div>
                     </div>
                   </div>
                 </div>
               </div>
-              {/* /Teacher Profile Header */}
-
-              {/* Schedule Grid */}
-              {week.length > 0 ? (
-                <div className={`card mb-0${fullscreen ? ' card-fullscreen' : ''}`} id="ctt_card">
-                  <div className="card-body">
-                    <div
-                      className={`timetable-grid${layout === 'list' ? ' timetable-list' : ''}`}
-                      id="ctt_grid"
-                    >
-                      {week.map((day) => (
-                        <div className="timetable-day" key={day.id}>
-                          <div className="timetable-day-head">
-                            <span>
-                              <i className="ti ti-calendar-week me-1" />
-                              {day.name}
-                            </span>
-                            <span className="timetable-day-count">{day.slots.length} periods</span>
-                          </div>
-                          {day.slots.map((slot) => (
-                            <TimetableSlotCard
-                              key={slot.id}
-                              slot={slot}
-                              menuOpen={slotMenu === slot.id}
-                              onToggleMenu={setSlotMenu}
-                              onOpenModal={openModalFor}
-                            />
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-              {/* /Schedule Grid */}
-
-              {/* Empty State */}
-              {week.length === 0 ? (
-                <div className="card mb-0" id="ctt_empty">
-                  <div className="card-body text-center py-5">
-                    <div className="empty-state-art">
-                      <i className="ti ti-calendar-off" />
-                    </div>
-                    <h5 className="mb-1">No Teaching Schedule Found</h5>
-                    <p className="text-muted mb-3">
-                      This teacher has no assigned periods yet. Assign a timetable to schedule
-                      classes, duties and meetings across the week.
-                    </p>
-                    <button
-                      type="button"
-                      className="btn btn-primary d-inline-flex align-items-center mx-auto"
-                      onClick={() => setActiveModal('addTimeTable')}
-                    >
-                      <i className="ti ti-square-rounded-plus me-1" />
-                      Assign Timetable
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-              {/* /Empty State */}
             </div>
-          ) : null}
-          {/* /ctt_workspace */}
-        </div>
+          </div>
+        ) : null}
+
+        {/* Weekly grid */}
+        {state === 'ready' && profile && !noLessons ? (
+          <div className="card mb-0">
+            <div className="card-body">
+              <div className="timetable-grid">
+                {DAYS.map((day) => {
+                  const lessons = byDay.get(day.n) ?? [];
+                  return (
+                    <div className="timetable-day" key={day.n}>
+                      <div className="timetable-day-head">
+                        <span>
+                          <i className="ti ti-calendar-week me-1" />
+                          {day.name}
+                          {day.n === today ? <span className="badge badge-soft-primary ms-2">Today</span> : null}
+                        </span>
+                        <span className="timetable-day-count">{lessons.length} periods</span>
+                      </div>
+                      {lessons.length === 0 ? <p className="text-muted fs-13 mb-0 p-2">No lessons</p> : null}
+                      {lessons.map((lesson) => {
+                        const tone = toneOf(lesson.subject);
+                        return (
+                          <div className={`timetable-slot bg-transparent-${tone}`} key={lesson.id}>
+                            <div className="d-flex align-items-center gap-2 mb-2">
+                              <span className={`timetable-slot-icon text-${tone}`}>
+                                <i className="ti ti-book" />
+                              </span>
+                              <div className="overflow-hidden">
+                                <h6 className="timetable-slot-sub mb-0 text-truncate">{lesson.subject}</h6>
+                                <span className="timetable-slot-time">
+                                  <i className="ti ti-clock me-1" />
+                                  {hhmm(lesson.start)} - {hhmm(lesson.end)}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="d-flex align-items-center flex-wrap gap-2">
+                              <span className="timetable-slot-meta">
+                                <i className="ti ti-users me-1" />
+                                {lesson.grade}
+                              </span>
+                              <span className="timetable-slot-meta">
+                                <i className="ti ti-hourglass me-1" />
+                                {lesson.end - lesson.start} min
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {/* No lessons yet */}
+        {noLessons && profile ? (
+          <div className="card mb-0">
+            <div className="card-body text-center py-5">
+              <div className="empty-state-art">
+                <i className="ti ti-calendar-off" />
+              </div>
+              <h5 className="mb-1">No Teaching Schedule Found</h5>
+              <p className="text-muted mb-3">
+                {mode === 'admin'
+                  ? 'This teacher has no lessons yet. Add them under Academic → Time Table.'
+                  : 'You have no lessons scheduled yet. The school will add them to your timetable.'}
+              </p>
+              {mode === 'admin' ? (
+                <Link to={routes.classTimetable} className="btn btn-primary d-inline-flex align-items-center mx-auto">
+                  <i className="ti ti-square-rounded-plus me-1" />
+                  Open Time Table
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </div>
-      {/* /Page Wrapper */}
-
-      {/* Info Panel Offcanvas */}
-      <SchedulePanel open={panelOpen} onClose={() => setPanelOpen(false)} onToast={push} />
-      {/* /Info Panel Offcanvas */}
-
-      {/* Session dialogs */}
-      <TimeTableModals
-        active={activeModal}
-        session={session}
-        onClose={closeModal}
-        onOpen={setActiveModal}
-        onToast={push}
-      />
-
-      {/* Add Class Time Table */}
-      <AddTimeTableModal
-        open={activeModal === 'addTimeTable'}
-        onClose={closeModal}
-        onToast={push}
-      />
-      {/* /Add Class Time Table */}
-
-      <ToastStack toasts={toasts} onDismiss={dismiss} id="tttToast" />
-    </>
+    </div>
   );
 };
 

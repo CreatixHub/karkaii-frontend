@@ -297,6 +297,7 @@ export const all_routes = {
   twoStepVerification2: "/two-step-verification-2",
   twoStepVerification3: "/two-step-verification-3",
   underMaintenance:     "/under-maintenance",
+    schoolStrengthReport:  "/school-strength-report",
 
   // ---- UI Interface ----
   apexChat:          "/chart-apex",

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { all_routes } from '@/routes/all_routes';
 import ToastStack from '@components/ui/ToastStack';
@@ -19,7 +19,9 @@ import TeacherHero from './components/TeacherHero';
 import TeacherKpiGrid from './components/TeacherKpiGrid';
 import TodaysTimetable from './components/TodaysTimetable';
 import TeacherModals from './modals/TeacherModals';
+import { buildTodaysLessons } from './data/summaryCalc';
 import type { TeacherModalId } from './data/teacherDashboard.data';
+import { useTeacherSummary } from './hooks/useTeacherSummary';
 
 const routes = all_routes;
 
@@ -29,6 +31,16 @@ const TeacherDashboard = () => {
 
   const openModal = useCallback((modal: TeacherModalId) => setActiveModal(modal), []);
   const closeModal = useCallback(() => setActiveModal(null), []);
+
+  // Today's lessons come from the teacher's real timetable. The clock ticks every minute so
+  // Live / Next / Done stay correct without a refresh.
+  const { timetable } = useTeacherSummary();
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const todaysLessons = useMemo(() => buildTodaysLessons(timetable ?? [], now), [timetable, now]);
 
   return (
     <>
@@ -59,7 +71,7 @@ const TeacherDashboard = () => {
               {/* Timetable + AI */}
               <div className="row g-3 mb-3">
                 <div className="col-12 col-xl-8">
-                  <TodaysTimetable onOpenModal={openModal} />
+                  <TodaysTimetable onOpenModal={openModal} lessons={todaysLessons} />
                 </div>
                 <div className="col-12 col-xl-4">
                   <AiInsightsPanel />

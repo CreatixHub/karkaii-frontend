@@ -1,150 +1,240 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Offcanvas from '@components/ui/Offcanvas';
 import ToastStack from '@components/ui/ToastStack';
 import { all_routes } from '@/routes/all_routes';
-import { useReveal } from '@hooks/useReveal';
 import { useToasts } from '@hooks/useToasts';
-import SchedulePanel from './components/SchedulePanel';
-import TimetableSkeleton from './components/TimetableSkeleton';
-import TimetableSlotCard from './components/TimetableSlotCard';
-import TimetableToolbar from './components/TimetableToolbar';
-import type { ToolbarMenu } from './components/TimetableToolbar';
-import TimetableModals from './modals/TimetableModals';
-import type {
-  FilterKey,
-  LayoutView,
-  SlotMenuItem,
-  TimetableModalId,
-  TimetableSlot,
-} from './data/classTimeTable.data';
+import { ACADEMIC_YEAR_ID } from '@services/admissions/admissions.api';
+import { listClassOptions } from '@services/staff/staff.api';
+import type { SelectOption } from '@services/staff/staff.api';
 import {
-  actionToasts,
-  classProfile,
-  savedViews,
-  statFacts,
-  timetableWeek,
-} from './data/classTimeTable.data';
+  createEntry,
+  createTimeSlot,
+  deleteEntry,
+  listAllSections,
+  listEntries,
+  listSectionTeachers,
+  listTimeSlots,
+} from '@services/timetable/timetable.api';
+import type { SectionRow, SectionTeacherRow, TimeSlot, TimetableEntry } from '@services/timetable/timetable.api';
 
 const routes = all_routes;
 
-/** `class-timetable.js`: 700 ms on first paint, 900 ms after a refresh. */
-const REVEAL_MS = 700;
-const REFRESH_MS = 900;
+const DAYS = [
+  { n: 1, label: 'Monday' },
+  { n: 2, label: 'Tuesday' },
+  { n: 3, label: 'Wednesday' },
+  { n: 4, label: 'Thursday' },
+  { n: 5, label: 'Friday' },
+  { n: 6, label: 'Saturday' },
+];
+
+// The school day to start from: seven periods, two short breaks and a lunch.
+const STANDARD_PERIODS = [
+  { name: 'Period 1', startsAt: '09:00', endsAt: '09:45', isBreak: false },
+  { name: 'Period 2', startsAt: '09:45', endsAt: '10:30', isBreak: false },
+  { name: 'Short Break', startsAt: '10:30', endsAt: '10:45', isBreak: true },
+  { name: 'Period 3', startsAt: '10:45', endsAt: '11:30', isBreak: false },
+  { name: 'Period 4', startsAt: '11:30', endsAt: '12:15', isBreak: false },
+  { name: 'Lunch', startsAt: '12:15', endsAt: '13:30', isBreak: true },
+  { name: 'Period 5', startsAt: '13:30', endsAt: '14:15', isBreak: false },
+  { name: 'Period 6', startsAt: '14:15', endsAt: '15:00', isBreak: false },
+  { name: 'Short Break 2', startsAt: '15:00', endsAt: '15:15', isBreak: true },
+  { name: 'Period 7', startsAt: '15:15', endsAt: '16:00', isBreak: false },
+];
+
+const hhmm = (t: string) => t.slice(0, 5);
+const todayIso = () => new Date().toISOString().slice(0, 10);
+
+interface Cell {
+  day: number;
+  dayLabel: string;
+  slot: TimeSlot;
+}
 
 const ClassTimetable = () => {
-  /* ---------------------------------- State --------------------------------- */
-  const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState<Partial<Record<FilterKey, string>>>({});
-  const [savedView, setSavedView] = useState(savedViews[0].id);
-  const [layout, setLayout] = useState<LayoutView>('grid');
-  const [openMenu, setOpenMenu] = useState<ToolbarMenu>(null);
-  const [slotMenuOpen, setSlotMenuOpen] = useState<string | null>(null);
-  const [fullscreen, setFullscreen] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(false);
-
-  const [week, setWeek] = useState(timetableWeek);
-
-  const [activeModal, setActiveModal] = useState<TimetableModalId | null>(null);
-  const [modalSlot, setModalSlot] = useState<TimetableSlot | null>(null);
-
-  const [refreshing, setRefreshing] = useState(false);
-  const gridRef = useRef<HTMLDivElement>(null);
-
   const { toasts, push, dismiss } = useToasts();
-  const { loading: booting } = useReveal(REVEAL_MS);
-  const loading = booting || refreshing;
 
-  useEffect(() => {
-    if (!fullscreen) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setFullscreen(false);
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [fullscreen]);
+  const [classOptions, setClassOptions] = useState<SelectOption[]>([]);
+  const [sections, setSections] = useState<SectionRow[]>([]);
+  const [classId, setClassId] = useState('');
+  const [sectionId, setSectionId] = useState('');
 
-  useEffect(() => {
-    if (!slotMenuOpen) return;
-    const handlePointerDown = () => setSlotMenuOpen(null);
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
-  }, [slotMenuOpen]);
+  const [slots, setSlots] = useState<TimeSlot[]>([]);
+  const [assigned, setAssigned] = useState<SectionTeacherRow[]>([]);
+  const [entries, setEntries] = useState<TimetableEntry[]>([]);
 
-  /* -------------------------------- Filtering ------------------------------- */
+  const [booting, setBooting] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  /** Filters narrow the slots inside each day; a day with none left is dropped. */
-  const filteredWeek = useMemo(() => {
-    const term = search.trim().toLowerCase();
+  const [creatingSlots, setCreatingSlots] = useState(false);
 
-    return week
-      .map((day) => {
-        if (filters.day && filters.day !== day.label) return { ...day, slots: [] };
-        const slots = day.slots.filter((slot) => {
-          const haystack = `${slot.subject} ${slot.teacher.name} ${slot.room} ${day.label}`.toLowerCase();
-          if (term && !haystack.includes(term)) return false;
-          if (filters.teacher && slot.teacher.name !== filters.teacher) return false;
-          if (filters.subject && slot.subject !== filters.subject) return false;
-          if (filters.room && slot.room !== filters.room) return false;
-          return true;
-        });
-        return { ...day, slots };
-      })
-      .filter((day) => day.slots.length > 0);
-  }, [week, search, filters]);
+  // The "add a lesson" panel
+  const [cell, setCell] = useState<Cell | null>(null);
+  const [pick, setPick] = useState(''); // id of a section_teachers row
+  const [effectiveFrom, setEffectiveFrom] = useState(todayIso());
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
 
-  const isEmpty = filteredWeek.length === 0;
-
-  /* --------------------------------- Handlers ------------------------------- */
-
-  const runAction = (id: string, fallback?: string) => push(actionToasts[id] ?? fallback ?? 'Action completed');
-
-  const openModal = useCallback((modal: TimetableModalId, slot: TimetableSlot | null = null) => {
-    setModalSlot(slot);
-    setActiveModal(modal);
+  /* ------------------------------- first load ------------------------------- */
+  const loadBase = useCallback(async () => {
+    setError('');
+    try {
+      const [classes, allSections, periods] = await Promise.all([
+        listClassOptions(),
+        listAllSections(),
+        listTimeSlots(),
+      ]);
+      setClassOptions(classes);
+      setSections(allSections);
+      setSlots(periods);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not load the timetable setup.');
+    } finally {
+      setBooting(false);
+    }
   }, []);
-  const closeModal = () => setActiveModal(null);
 
-  const resetFilters = () => {
-    setFilters({});
-    setSearch('');
-    push(actionToasts.clear_filters);
-  };
+  useEffect(() => {
+    void loadBase();
+  }, [loadBase]);
 
-  const refresh = () => {
-    setRefreshing(true);
-    window.setTimeout(() => {
-      setRefreshing(false);
-      push(actionToasts.refresh);
-    }, REFRESH_MS);
-  };
+  const classLabel = classOptions.find((c) => c.value === classId)?.label ?? '';
 
-  const handleSlotAction = (item: SlotMenuItem, slot: TimetableSlot) => {
-    if (item.id === 'delete') {
-      setWeek((current) =>
-        current.map((day) => ({ ...day, slots: day.slots.filter((entry) => entry.id !== slot.id) })),
-      );
-      runAction('delete');
+  const sectionsOfClass = useMemo(
+    () =>
+      sections.filter(
+        (s) =>
+          (s.classId !== undefined && String(s.classId) === classId) ||
+          (s.className !== undefined && classLabel !== '' && s.className === classLabel),
+      ),
+    [sections, classId, classLabel],
+  );
+
+  const sectionLabel = sectionsOfClass.find((s) => String(s.id) === sectionId)?.name ?? '';
+
+  /* ------------------------- load the chosen section ------------------------ */
+  const loadSection = useCallback(async (id: string) => {
+    if (!id) {
+      setAssigned([]);
+      setEntries([]);
       return;
     }
-    if (item.modal) openModal(item.modal, slot);
+    setLoading(true);
+    setError('');
+    try {
+      const [teachers, lessons] = await Promise.all([
+        listSectionTeachers(id, ACADEMIC_YEAR_ID),
+        listEntries(id, ACADEMIC_YEAR_ID),
+      ]);
+      setAssigned(teachers);
+      setEntries(lessons);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not load this timetable.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSection(sectionId);
+  }, [sectionId, loadSection]);
+
+  const onClassChange = (value: string) => {
+    setClassId(value);
+    setSectionId('');
+    setAssigned([]);
+    setEntries([]);
   };
 
-  const savePeriod = (id: string, patch: { subject: string; teacher: string; room: string }) =>
-    setWeek((current) =>
-      current.map((day) => ({
-        ...day,
-        slots: day.slots.map((slot) =>
-          slot.id === id
-            ? {
-                ...slot,
-                subject: patch.subject,
-                room: patch.room,
-                teacher: { ...slot.teacher, name: patch.teacher },
-              }
-            : slot,
-        ),
-      })),
-    );
+  // Pick the first section automatically once a class is chosen.
+  useEffect(() => {
+    if (classId && !sectionId && sectionsOfClass.length > 0) setSectionId(String(sectionsOfClass[0].id));
+  }, [classId, sectionId, sectionsOfClass]);
+
+  /* ------------------------------- the periods ------------------------------ */
+  const createStandardPeriods = async () => {
+    setCreatingSlots(true);
+    setError('');
+    try {
+      for (let i = 0; i < STANDARD_PERIODS.length; i++) {
+        await createTimeSlot({ ...STANDARD_PERIODS[i], sequence: i + 1 });
+      }
+      setSlots(await listTimeSlots());
+      push('The school day has been set up.');
+    } catch (e) {
+      setSlots(await listTimeSlots().catch(() => []));
+      setError(e instanceof Error ? e.message : 'Could not create the periods.');
+    } finally {
+      setCreatingSlots(false);
+    }
+  };
+
+  /* -------------------------------- the grid -------------------------------- */
+  const sortedSlots = useMemo(
+    () => [...slots].filter((s) => s.isActive).sort((a, b) => a.sequence - b.sequence),
+    [slots],
+  );
+
+  const byCell = useMemo(() => {
+    const map = new Map<string, TimetableEntry>();
+    for (const entry of entries) map.set(`${entry.dayOfWeek}:${entry.timeSlotId}`, entry);
+    return map;
+  }, [entries]);
+
+  const lessonCount = entries.length;
+
+  /* ------------------------------- add / remove ------------------------------ */
+  const openCell = (next: Cell) => {
+    setCell(next);
+    setPick('');
+    setFormError('');
+    setEffectiveFrom(todayIso());
+  };
+
+  const saveLesson = async () => {
+    if (!cell) return;
+    const choice = assigned.find((a) => String(a.id) === pick);
+    if (!choice) {
+      setFormError('Choose a subject and teacher.');
+      return;
+    }
+    setSaving(true);
+    setFormError('');
+    try {
+      await createEntry({
+        sectionId,
+        subjectId: choice.subjectId,
+        teacherId: choice.teacherId,
+        timeSlotId: cell.slot.id,
+        dayOfWeek: cell.day,
+        academicYearId: ACADEMIC_YEAR_ID,
+        effectiveFrom,
+      });
+      setCell(null);
+      await loadSection(sectionId);
+      push('Lesson added.');
+    } catch (e) {
+      setFormError(e instanceof Error ? e.message : 'Could not add the lesson.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeLesson = async (entry: TimetableEntry) => {
+    if (!window.confirm(`Remove ${entry.subjectName} from this period?`)) return;
+    try {
+      await deleteEntry(entry.id);
+      await loadSection(sectionId);
+      push('Lesson removed.');
+    } catch (e) {
+      push(e instanceof Error ? e.message : 'Could not remove the lesson.');
+    }
+  };
+
+  /* --------------------------------- render --------------------------------- */
+  const noSlots = !booting && sortedSlots.length === 0;
 
   return (
     <>
@@ -166,178 +256,249 @@ const ClassTimetable = () => {
                 </ol>
               </nav>
             </div>
-            <div className="d-flex my-xl-auto right-content align-items-center flex-wrap">
-              <button
-                type="button"
-                className="btn btn-outline-light bg-white me-2 mb-2 d-inline-flex align-items-center"
-                onClick={() => setPanelOpen(true)}
-              >
-                <i className="ti ti-layout-sidebar-right-expand me-1" />
-                Info Panel
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary mb-2 d-inline-flex align-items-center"
-                onClick={() => openModal('addTimeTable')}
-              >
-                <i className="ti ti-square-rounded-plus me-1" />
-                Generate Timetable
-              </button>
-            </div>
           </div>
-          {/* /Page Header */}
 
-          {loading ? <TimetableSkeleton /> : null}
+          {error ? (
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          ) : null}
 
-          {!loading ? (
-            <div id="ctt_workspace">
-              <TimetableToolbar
-                search={search}
-                onSearch={setSearch}
-                filters={filters}
-                onFilter={(key, value) => setFilters((current) => ({ ...current, [key]: value }))}
-                onResetFilters={resetFilters}
-                onApplyFilters={() => runAction('apply_filters')}
-                savedView={savedView}
-                onSavedView={(id) => {
-                  setSavedView(id);
-                  const label = savedViews.find((item) => item.id === id)?.label;
-                  push(`Showing “${label ?? 'Full Week'}”.`, 'info');
-                }}
-                layout={layout}
-                onLayout={setLayout}
-                openMenu={openMenu}
-                onOpenMenu={setOpenMenu}
-                onImport={() => openModal('addTimeTable')}
-                onExport={runAction}
-                onPrint={() => window.print()}
-                onRefresh={refresh}
-                fullscreen={fullscreen}
-                onToggleFullscreen={() => {
-                  const next = !fullscreen;
-                  setFullscreen(next);
-                  push(next ? 'Entered fullscreen — press Esc to exit.' : 'Exited fullscreen.', 'info');
-                }}
-                onGenerate={() => openModal('addTimeTable')}
-                onSaveView={() => runAction('save_view')}
-              />
+          {booting ? (
+            <div className="card">
+              <div className="card-body text-center text-muted py-5">Loading…</div>
+            </div>
+          ) : null}
 
-              {/* Academic Header */}
-              <div className="card card-hover mb-3">
+          {/* No periods yet: set the school day up once */}
+          {noSlots ? (
+            <div className="card">
+              <div className="card-body text-center py-5">
+                <h5 className="mb-2">Set up the school day</h5>
+                <p className="text-muted mb-3">
+                  Periods have not been created yet. Create a standard day (7 periods, two short breaks and a lunch,
+                  09:00 to 16:00). You can change the times later.
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  disabled={creatingSlots}
+                  onClick={() => void createStandardPeriods()}
+                >
+                  {creatingSlots ? 'Creating…' : 'Create standard periods'}
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {!booting && !noSlots ? (
+            <>
+              {/* Class + section */}
+              <div className="card mb-3">
                 <div className="card-body">
-                  <div className="d-xl-flex align-items-center justify-content-between">
-                    <div className="d-flex align-items-center mb-3 mb-xl-0 flex-wrap gap-2">
-                      <span className="avatar avatar-lg bg-primary-transparent text-primary rounded me-3 flex-shrink-0">
-                        <i className="ti ti-table fs-24" />
-                      </span>
-                      <div>
-                        <h4 className="mb-1">{classProfile.title}</h4>
-                        <div className="d-flex align-items-center flex-wrap gap-2">
-                          <span className="badge badge-soft-primary">{classProfile.year}</span>
-                          <span className="fs-13 text-muted d-inline-flex align-items-center">
-                            <i className="ti ti-user me-1" />
-                            Class Teacher:{' '}
-                            <span className="text-dark fw-medium ms-1">{classProfile.classTeacher}</span>
-                          </span>
-                        </div>
-                      </div>
+                  <div className="row g-3 align-items-end">
+                    <div className="col-md-4">
+                      <label className="form-label" htmlFor="tt-class">
+                        Class
+                      </label>
+                      <select
+                        id="tt-class"
+                        className="form-select"
+                        value={classId}
+                        onChange={(event) => onClassChange(event.target.value)}
+                      >
+                        <option value="">Select a class</option>
+                        {classOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    <div className="d-flex align-items-center flex-wrap gap-4">
-                      {statFacts.map((fact) => (
-                        <div className="stat-fact" key={fact.label}>
-                          <span className={`stat-fact-icon ${fact.iconClass}`}>
-                            <i className={fact.icon} />
-                          </span>
-                          <div>
-                            <div className="stat-fact-value">{fact.value}</div>
-                            <div className="stat-fact-label">{fact.label}</div>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="col-md-4">
+                      <label className="form-label" htmlFor="tt-section">
+                        Section
+                      </label>
+                      <select
+                        id="tt-section"
+                        className="form-select"
+                        value={sectionId}
+                        disabled={!classId}
+                        onChange={(event) => setSectionId(event.target.value)}
+                      >
+                        <option value="">{classId ? 'Select a section' : 'Choose a class first'}</option>
+                        {sectionsOfClass.map((section) => (
+                          <option key={String(section.id)} value={String(section.id)}>
+                            {section.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-md-4 text-md-end">
+                      {sectionId ? (
+                        <span className="badge badge-soft-primary">
+                          {classLabel} — Section {sectionLabel} · {lessonCount} lessons
+                        </span>
+                      ) : null}
                     </div>
                   </div>
+                  {classId && sectionsOfClass.length === 0 ? (
+                    <p className="text-muted mb-0 mt-3">
+                      This class has no section yet. Add a teacher to this class (Teachers → Edit → Classes &
+                      Subjects) and a default section &quot;A&quot; is created automatically.
+                    </p>
+                  ) : null}
                 </div>
               </div>
-              {/* /Academic Header */}
 
-              {/* Timetable Grid */}
-              {!isEmpty ? (
-                <div className={`card${fullscreen ? ' card-fullscreen' : ''}`} id="ctt_card">
+              {/* The weekly grid */}
+              {sectionId ? (
+                <div className="card">
                   <div className="card-body">
-                    <div
-                      className={`timetable-grid${layout === 'list' ? ' timetable-list' : ''}`}
-                      id="ctt_grid"
-                      ref={gridRef}
-                    >
-                      {filteredWeek.map((day) => (
-                        <div className="timetable-day" key={day.id}>
-                          <div className="timetable-day-head">
-                            <span>
-                              <i className="ti ti-calendar-week me-1" />
-                              {day.label}
-                            </span>
-                            <span className="timetable-day-count">{day.slots.length} periods</span>
-                          </div>
-                          {day.slots.map((slot) => (
-                            <TimetableSlotCard
-                              key={slot.id}
-                              slot={slot}
-                              menuOpen={slotMenuOpen === slot.id}
-                              onOpenMenu={setSlotMenuOpen}
-                              onAction={handleSlotAction}
-                            />
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-              {/* /Timetable Grid */}
+                    {assigned.length === 0 && !loading ? (
+                      <div className="alert alert-warning">
+                        No teachers are assigned to this section yet. Open a teacher&apos;s Edit page and add this class
+                        and a subject under <b>Classes &amp; Subjects</b>, then come back here.{' '}
+                        <Link to={routes.teacherGrid}>Go to teachers</Link>
+                      </div>
+                    ) : null}
 
-              {/* Empty State */}
-              {isEmpty ? (
-                <div className="card mb-0" id="ctt_empty">
-                  <div className="card-body text-center py-5">
-                    <div className="empty-state-art">
-                      <i className="ti ti-calendar-off" />
+                    <div className="table-responsive">
+                      <table className="table table-bordered align-middle mb-0">
+                        <thead>
+                          <tr>
+                            <th style={{ width: 150 }}>Period</th>
+                            {DAYS.map((day) => (
+                              <th key={day.n}>{day.label}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sortedSlots.map((slot) =>
+                            slot.isBreak ? (
+                              <tr key={String(slot.id)} className="table-light">
+                                <td>
+                                  <b>{slot.name}</b>
+                                  <div className="fs-12 text-muted">
+                                    {hhmm(slot.startsAt)} - {hhmm(slot.endsAt)}
+                                  </div>
+                                </td>
+                                <td colSpan={DAYS.length} className="text-center text-muted">
+                                  {slot.name}
+                                </td>
+                              </tr>
+                            ) : (
+                              <tr key={String(slot.id)}>
+                                <td>
+                                  <b>{slot.name}</b>
+                                  <div className="fs-12 text-muted">
+                                    {hhmm(slot.startsAt)} - {hhmm(slot.endsAt)}
+                                  </div>
+                                </td>
+                                {DAYS.map((day) => {
+                                  const entry = byCell.get(`${day.n}:${slot.id}`);
+                                  return (
+                                    <td key={day.n} style={{ minWidth: 150 }}>
+                                      {entry ? (
+                                        <div className="d-flex align-items-start justify-content-between gap-1">
+                                          <div>
+                                            <span className="badge badge-soft-info mb-1">{entry.subjectName}</span>
+                                            <div className="fs-12 text-muted">{entry.teacherName ?? '—'}</div>
+                                          </div>
+                                          <button
+                                            type="button"
+                                            className="btn btn-link btn-sm text-danger p-0"
+                                            aria-label={`Remove ${entry.subjectName}`}
+                                            onClick={() => void removeLesson(entry)}
+                                          >
+                                            <i className="ti ti-x" />
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          className="btn btn-sm btn-outline-light bg-white w-100"
+                                          disabled={loading || assigned.length === 0}
+                                          onClick={() => openCell({ day: day.n, dayLabel: day.label, slot })}
+                                        >
+                                          <i className="ti ti-plus me-1" />
+                                          Add
+                                        </button>
+                                      )}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ),
+                          )}
+                        </tbody>
+                      </table>
                     </div>
-                    <h5 className="mb-1">No Timetable Available</h5>
-                    <p className="text-muted mb-3">
-                      This class does not have a timetable yet. Generate one to schedule subjects, teachers and
-                      rooms across the week.
-                    </p>
-                    <button
-                      type="button"
-                      className="btn btn-primary d-inline-flex align-items-center mx-auto"
-                      onClick={() => openModal('addTimeTable')}
-                    >
-                      <i className="ti ti-square-rounded-plus me-1" />
-                      Generate Timetable
-                    </button>
                   </div>
                 </div>
               ) : null}
-              {/* /Empty State */}
-            </div>
+            </>
           ) : null}
         </div>
       </div>
 
-      <SchedulePanel
-        open={panelOpen}
-        onClose={() => setPanelOpen(false)}
-        onSaveNote={(note) => push(note.trim() ? 'Note saved' : 'Add a note before saving')}
-      />
+      {/* Add a lesson */}
+      {cell ? (
+        <Offcanvas open onClose={() => setCell(null)} title="Add lesson" labelledById="tt_add_label">
+          <p className="text-muted">
+            {classLabel} — Section {sectionLabel}
+            <br />
+            {cell.dayLabel}, {cell.slot.name} ({hhmm(cell.slot.startsAt)} - {hhmm(cell.slot.endsAt)})
+          </p>
 
-      <TimetableModals
-        active={activeModal}
-        slot={modalSlot}
-        onClose={closeModal}
-        onToast={push}
-        onSavePeriod={savePeriod}
-        onEditFromDetails={() => setActiveModal('editPeriod')}
-      />
+          {formError ? (
+            <div className="alert alert-danger" role="alert">
+              {formError}
+            </div>
+          ) : null}
+
+          <div className="mb-3">
+            <label className="form-label" htmlFor="tt-pick">
+              Subject — Teacher
+            </label>
+            <select id="tt-pick" className="form-select" value={pick} onChange={(event) => setPick(event.target.value)}>
+              <option value="">Select</option>
+              {assigned.map((a) => (
+                <option key={String(a.id)} value={String(a.id)}>
+                  {a.subjectName} — {a.teacherName ?? 'Teacher'}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label" htmlFor="tt-from">
+              Starts from
+            </label>
+            <input
+              id="tt-from"
+              type="date"
+              className="form-control"
+              value={effectiveFrom}
+              onChange={(event) => setEffectiveFrom(event.target.value)}
+            />
+          </div>
+
+          <div className="d-flex gap-2">
+            <button type="button" className="btn btn-light flex-fill" onClick={() => setCell(null)}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary flex-fill"
+              disabled={saving}
+              onClick={() => void saveLesson()}
+            >
+              {saving ? 'Saving…' : 'Add lesson'}
+            </button>
+          </div>
+        </Offcanvas>
+      ) : null}
 
       <ToastStack toasts={toasts} onDismiss={dismiss} id="cttToasts" />
     </>

@@ -13,7 +13,7 @@ import {
 import ImageWithBasePath from "../imageWithBasePath";
 import { all_routes } from "@/routes/all_routes";
 import { useAuth } from "@hooks/useAuth";
-import { roleLabel } from "@features/auth/roleHome";
+import { roleHomeRoute, roleLabel } from "@features/auth/roleHome";
 import {
   academicYears,
   addNewActions,
@@ -31,10 +31,13 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  // Students get a trimmed header: no quick-create (+), no apps grid,
+  // Students and teachers get a trimmed header: no quick-create (+), no apps grid,
   // and no admin links in the profile menu. Every other role is unchanged.
-  const isStudent = user?.role === "student";
+  const isStudent = user?.role === "student" || user?.role === "teacher";
   const hideForStudent = isStudent ? " d-none" : "";
+
+  // The logo goes to this person's own dashboard.
+  const homeRoute = user ? roleHomeRoute(user.role) : routes.adminDashboard;
 
   const handleLogout = async () => {
     await logout();
@@ -83,13 +86,13 @@ const Header = () => {
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
         >
-          <Link to={routes.adminDashboard} className="logo logo-normal">
+          <Link to={homeRoute} className="logo logo-normal">
             <ImageWithBasePath src="assets/img/karkaii-logo-sm.png" alt="Logo" />
           </Link>
-          <Link to={routes.adminDashboard} className="logo-small">
+          <Link to={homeRoute} className="logo-small">
             <ImageWithBasePath src="assets/img/favicon.png" alt="Logo" />
           </Link>
-          <Link to={routes.adminDashboard} className="dark-logo">
+          <Link to={homeRoute} className="dark-logo">
             <ImageWithBasePath src="assets/img/karkaii-logo-sm.png" alt="Logo" />
           </Link>
           <Link id="toggle_btn" to="#" onClick={handleToggleMiniSidebar}>
@@ -234,7 +237,7 @@ const Header = () => {
                 </div>
               </div>
 
-              {/* Add New (hidden for students) */}
+              {/* Add New (hidden for students and teachers) */}
               <div className={`pe-1${hideForStudent}`}>
                 <div className="dropdown">
                   <Link
@@ -400,7 +403,7 @@ const Header = () => {
                 </div>
               </div>
 
-              {/* Apps Launcher (hidden for students) */}
+              {/* Apps Launcher (hidden for students and teachers) */}
               <div className={`pe-1 mui-hide-sm${hideForStudent}`}>
                 <div className="dropdown">
                   <Link

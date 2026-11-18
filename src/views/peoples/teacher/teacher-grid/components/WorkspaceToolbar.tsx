@@ -36,6 +36,8 @@ export interface WorkspaceToolbarProps {
   onClearChip: (id: string) => void;
   matchCount: number;
   totalCount: number;
+  /** Real options for the Class / Subject / Status selects. */
+  filterOptions?: Record<string, string[]>;
 }
 
 const WorkspaceToolbar = ({
@@ -61,6 +63,7 @@ const WorkspaceToolbar = ({
   onClearChip,
   matchCount,
   totalCount,
+  filterOptions,
 }: WorkspaceToolbarProps) => {
   const barRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -206,7 +209,7 @@ const WorkspaceToolbar = ({
                     onChange={(event) => onFilter(field.id, event.target.value)}
                   >
                     <option value="">All</option>
-                    {field.options.map((option) => (
+                    {(filterOptions?.[field.id] ?? field.options).map((option) => (
                       <option key={option}>{option}</option>
                     ))}
                   </select>
