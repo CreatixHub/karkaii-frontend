@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import ToastStack from '@components/ui/ToastStack';
 import { all_routes } from '@/routes/all_routes';
 import { useReveal } from '@hooks/useReveal';
@@ -38,10 +38,13 @@ import {
 } from './data/studentProfileActions';
 import {
   CERTIFICATE_TEXT,
-  PROFILE_TEXT,
   REPORT_CARD_TEXT,
+  profileState,
+  profileText,
   recordLinks,
+  studentSummary,
 } from './data/studentProfile.data';
+import { applyStudent, loadStudentProfile } from './data/studentProfile.live';
 
 const routes = all_routes;
 
@@ -50,12 +53,12 @@ const receiptText = (label: string, amount: number, txn: string) =>
   `KARKAII ACADEMY - PAYMENT RECEIPT
 ====================================
 Receipt No : ${txn}
-Student    : Janet Daniel (AD1256589) - Class III-A
+Student    : ${studentSummary.name} (${studentSummary.admissionNo}) - Class ${studentSummary.classLabel}
 Paid For   : ${label}
 Amount     : $${amount.toLocaleString()}
 Method     : Card ****4521
 Status     : PAID - Confirmed
-Payer      : Robert Daniel (Parent)
+Payer      : ${studentSummary.guardianName} (Guardian)
 ====================================
 System-generated receipt.
 `;
@@ -70,7 +73,38 @@ const StudentDetails = () => {
   });
   const [moreOpen, setMoreOpen] = useState(false);
 
-  const { loading, revealed } = useReveal();
+  const [searchParams] = useSearchParams();
+  const studentId = searchParams.get('id');
+  const [load, setLoad] = useState<'loading' | 'ready' | 'error'>(studentId ? 'loading' : 'ready');
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    if (!studentId) {
+      profileState.live = false;
+      setLoad('ready');
+      return undefined;
+    }
+    let cancelled = false;
+    setLoad('loading');
+    setLoadError('');
+    loadStudentProfile(studentId)
+      .then(({ student, admission }) => {
+        if (cancelled) return;
+        applyStudent(student, admission);
+        setLoad('ready');
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setLoadError(error instanceof Error ? error.message : 'Could not load this student');
+        setLoad('error');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [studentId]);
+
+  const { loading: revealing, revealed } = useReveal();
+  const loading = revealing || load === 'loading';
   const { toasts, push, dismiss } = useToasts();
 
   const openModal = useCallback((modal: ProfileModalId) => setActiveModal(modal), []);
@@ -81,7 +115,7 @@ const StudentDetails = () => {
     (name: string) => {
       downloadTextFile(
         `${name.replace(/[^a-z0-9]+/gi, '-')}.txt`,
-        `KARKAII ACADEMY\n${name}\nStudent: Janet Daniel (AD1256589)\n`,
+        `KARKAII ACADEMY\n${name}\nStudent: ${studentSummary.name} (${studentSummary.admissionNo})\n`,
       );
       push(`Downloading ${name}…`, 'success');
     },
@@ -124,13 +158,26 @@ const StudentDetails = () => {
           window.open(WHATSAPP_URL, '_blank', 'noopener');
           return;
         case 'download':
-          downloadTextFile('Janet-Daniel-AD1256589.txt', PROFILE_TEXT);
+          downloadTextFile(
+            `${studentSummary.name.replace(/\s+/g, '-')}-${studentSummary.admissionNo}.txt`,
+            profileText(),
+          );
           return;
         case 'certificate':
-          downloadTextFile('Certificate-Janet-Daniel.txt', CERTIFICATE_TEXT);
+          downloadTextFile(
+            `Certificate-${studentSummary.name.replace(/\s+/g, '-')}.txt`,
+            profileState.live
+              ? `KARKAII ACADEMY\nCertificate of Achievement\nAwarded to ${studentSummary.name} (${studentSummary.admissionNo}).\n`
+              : CERTIFICATE_TEXT,
+          );
           return;
         case 'download_report':
-          downloadTextFile('Report-Card-Janet-Daniel-TermII.txt', REPORT_CARD_TEXT);
+          downloadTextFile(
+            `Report-Card-${studentSummary.name.replace(/\s+/g, '-')}.txt`,
+            profileState.live
+              ? `KARKAII ACADEMY\nReport Card\nStudent: ${studentSummary.name} (${studentSummary.admissionNo})\n\nNo exam results recorded yet.\n`
+              : REPORT_CARD_TEXT,
+          );
           return;
         case 'transfer':
         case 'suspend':
@@ -244,7 +291,10 @@ const StudentDetails = () => {
 
             <div className="student-profile">
               <div className="profile-actions my-auto">
-                <Link to={routes.editStudent} className="profile-button profile-button-primary">
+                <Link
+                  to={studentId ? `${routes.editStudent}?id=${studentId}` : routes.editStudent}
+                  className="profile-button profile-button-primary"
+                >
                   <i className="ti ti-edit" />
                   Edit Student
                 </Link>
@@ -383,7 +433,23 @@ const StudentDetails = () => {
           <div className={`student-profile${loading ? '' : ' loaded'}`} id="studentProfile">
             {loading ? <ProfileSkeleton /> : null}
 
-            {!loading ? (
+            {!loading && load === 'error' ? (
+              <div className="alert alert-danger d-flex align-items-center justify-content-between">
+                <span>{loadError}</span>
+                <Link to={routes.studentGrid} className="btn btn-sm btn-outline-danger">
+                  Back to students
+                </Link>
+              </div>
+            ) : null}
+
+            {!loading && load === 'ready' && !studentId ? (
+              <div className="alert alert-info">
+                This is a sample profile. Open a student from the{' '}
+                <Link to={routes.studentGrid}>Student Grid</Link> to see real data.
+              </div>
+            ) : null}
+
+            {!loading && load === 'ready' ? (
               <div className="profile-live">
                 <ProfileHero revealed={revealed} onAction={handleAction} />
                 <ExecutiveOverview revealed={revealed} />
@@ -396,7 +462,16 @@ const StudentDetails = () => {
                       <div className="card-header">
                         <ProfileTabs active={pane} onChange={setPane} />
                       </div>
-                      <div className="card-body">{renderPane()}</div>
+                      <div className="card-body">
+                        {profileState.live && pane !== 'overview' ? (
+                          <div className="alert alert-light border mb-3" style={{ fontSize: 13 }}>
+                            <i className="ti ti-info-circle me-1" />
+                            This tab still shows sample data — attendance, fees, exams and similar
+                            records are not connected to the backend yet.
+                          </div>
+                        ) : null}
+                        {renderPane()}
+                      </div>
                     </div>
                   </div>
                 </div>

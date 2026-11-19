@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { toApiError } from '@services/api/errors';
 import { all_routes } from '@/routes/all_routes';
 import FormField from './components/FormField';
 import FormSection from './components/FormSection';
@@ -18,6 +19,12 @@ import {
   siblingFields,
   transportFields,
 } from './data/studentForm.data';
+import {
+  buildStudentPatch,
+  loadStudentFormValues,
+  saveStudent,
+  unsavedFieldNames,
+} from './data/studentForm.live';
 
 const routes = all_routes;
 
@@ -51,9 +58,42 @@ const PhotoUpload = () => (
 const StudentForm = ({ mode = 'add' }: StudentFormProps) => {
   const isEdit = mode === 'edit';
 
+  const [searchParams] = useSearchParams();
+  const studentId = isEdit ? searchParams.get('id') : null;
+
+  // With an id the form is filled from the backend; without one the old sample is shown.
   const [values, setValues] = useState<Record<string, string>>(() =>
-    isEdit ? { ...EDIT_DEFAULTS } : {},
+    isEdit && !studentId ? { ...EDIT_DEFAULTS } : {},
   );
+  const [loadState, setLoadState] = useState<'idle' | 'loading' | 'error'>(
+    studentId ? 'loading' : 'idle',
+  );
+  const [loadError, setLoadError] = useState('');
+  const [original, setOriginal] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!studentId) return undefined;
+    let cancelled = false;
+    setLoadState('loading');
+    loadStudentFormValues(studentId)
+      .then((loaded) => {
+        if (cancelled) return;
+        setValues(loaded);
+        setOriginal(loaded);
+        setLoadState('idle');
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setLoadError(error instanceof Error ? error.message : 'Could not load this student');
+        setLoadState('error');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [studentId]);
   const [siblingRows, setSiblingRows] = useState([0]);
   const [hasSibling, setHasSibling] = useState(true);
   const [guardianType, setGuardianType] = useState('parents');
@@ -61,6 +101,40 @@ const StudentForm = ({ mode = 'add' }: StudentFormProps) => {
 
   const setValue = (id: string, value: string) =>
     setValues((current) => ({ ...current, [id]: value }));
+
+  const handleSubmit = async () => {
+    if (!isEdit || !studentId || saving) return;
+    setSaveError('');
+    let patch: Record<string, unknown>;
+    try {
+      patch = buildStudentPatch(original, values);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Please check the form');
+      return;
+    }
+    if (Object.keys(patch).length === 0) {
+      const blocked = unsavedFieldNames(original, values);
+      setSaveError(
+        blocked.length
+          ? `These fields cannot be saved yet: ${blocked.join(', ')}.`
+          : 'No changes to save.',
+      );
+      return;
+    }
+    setSaving(true);
+    try {
+      await saveStudent(studentId, patch);
+      navigate(`${routes.studentDetail}?id=${studentId}`);
+    } catch (raw) {
+      const apiError = toApiError(raw) as { message?: string; fieldErrors?: Record<string, string> };
+      const fields = apiError.fieldErrors
+        ? Object.entries(apiError.fieldErrors).map(([name, message]) => `${name}: ${message}`).join(' · ')
+        : '';
+      setSaveError([apiError.message || 'Could not save the student', fields].filter(Boolean).join(' — '));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const field = (spec: Parameters<typeof FormField>[0]['field']) => (
     <FormField key={spec.id} field={spec} value={values[spec.id] ?? ''} onChange={setValue} />
@@ -70,7 +144,10 @@ const StudentForm = ({ mode = 'add' }: StudentFormProps) => {
     <form
       action="#"
       id={isEdit ? undefined : 'add_student_form'}
-      onSubmit={(event) => event.preventDefault()}
+      onSubmit={(event) => {
+        event.preventDefault();
+        void handleSubmit();
+      }}
     >
       {/* Personal Information */}
       <FormSection
@@ -409,8 +486,8 @@ const StudentForm = ({ mode = 'add' }: StudentFormProps) => {
           <Link to={routes.studentGrid} className="btn btn-light me-3">
             Cancel
           </Link>
-          <button type="submit" className="btn btn-primary">
-            Save Changes
+          <button type="submit" className="btn btn-primary" disabled={saving}>
+            {saving ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
       ) : (
@@ -488,9 +565,23 @@ const StudentForm = ({ mode = 'add' }: StudentFormProps) => {
         </div>
         {/* /Page Header */}
 
+        {isEdit && loadState === 'loading' ? (
+          <div className="alert alert-light border">Loading student…</div>
+        ) : null}
+        {isEdit && saveError ? <div className="alert alert-danger">{saveError}</div> : null}
+        {isEdit && loadState === 'error' ? (
+          <div className="alert alert-danger">{loadError}</div>
+        ) : null}
+        {isEdit && !studentId ? (
+          <div className="alert alert-info">
+            This is a sample student. Open a student from the{' '}
+            <Link to={routes.studentGrid}>Student Grid</Link> and choose Edit Student to edit real data.
+          </div>
+        ) : null}
+
         <div className="row">
           {isEdit ? (
-            <div className="col-md-12">{form}</div>
+            <div className="col-md-12">{loadState === 'loading' ? null : form}</div>
           ) : (
             <>
               {/* Section Navigation */}

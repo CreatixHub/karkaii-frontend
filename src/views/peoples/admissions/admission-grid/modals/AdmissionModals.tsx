@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DateField from '@components/ui/DateField';
 import Modal from '@components/ui/Modal';
 import CommonSelect from '@core/common/commonSelect';
@@ -7,6 +7,7 @@ import { useForm } from '@hooks/useForm';
 import { required } from '@utils/validation';
 import { buildAdmissionPayload, createAdmission, listClasses } from '@services/admissions/admissions.api';
 import type { ClassOption } from '@services/admissions/admissions.api';
+import { uploadImage } from '@services/files/files.api';
 import type { AdmissionModalId, AdmissionRow } from '../data/admissions.data';
 
 const toOptions = (values: string[]) => values.map((value) => ({ value, label: value }));
@@ -46,6 +47,40 @@ const AdmissionModals = ({
       .catch(() => onToast('Could not load classes from the server'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
+
+  /* Applicant photo: chosen here, uploaded when the application is created. */
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const photoRef = useRef<File | null>(null);
+  photoRef.current = photo;
+
+  useEffect(() => {
+    if (!photo) {
+      setPhotoUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(photo);
+    setPhotoUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [photo]);
+
+  const choosePhoto = (file: File | null) => {
+    setPhotoError(null);
+    if (!file) {
+      setPhoto(null);
+      return;
+    }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setPhotoError('Photo must be a JPG, PNG or WebP image.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError('Photo must be 5 MB or smaller.');
+      return;
+    }
+    setPhoto(file);
+  };
 
   /* ------------------------------ New Admission ------------------------------ */
   const newAdmissionForm = useForm<
@@ -115,12 +150,24 @@ const AdmissionModals = ({
         classes,
       );
       if (!payload) throw new Error(error ?? 'Please complete the form');
-      await createAdmission(payload);
+      let photoFileId: string | undefined;
+      if (photoRef.current) {
+        const uploaded: unknown = await uploadImage(photoRef.current, 'admission_photo');
+        const rawId =
+          uploaded && typeof uploaded === 'object' ? (uploaded as Record<string, unknown>).id : uploaded;
+        if (rawId === undefined || rawId === null || rawId === '') {
+          throw new Error('Photo upload failed. Please try again.');
+        }
+        photoFileId = String(rawId);
+      }
+      await createAdmission(photoFileId ? { ...payload, photoFileId } : payload);
       return 'Application created successfully';
     },
     onSuccess: (message) => {
       onToast(message);
       newAdmissionForm.reset();
+      setPhoto(null);
+      setPhotoError(null);
       onClose();
       onCreated?.();
     },
@@ -250,6 +297,42 @@ const AdmissionModals = ({
           </div>
         )}
         <h5 className="mb-3 fs-15">Applicant Details</h5>
+        <div className="d-flex align-items-center mb-3">
+          <div
+            className="d-flex align-items-center justify-content-center border rounded-circle overflow-hidden bg-light flex-shrink-0 me-3"
+            style={{ width: 72, height: 72 }}
+          >
+            {photoUrl ? (
+              <img src={photoUrl} alt="Applicant" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <i className="ti ti-photo fs-24 text-muted" />
+            )}
+          </div>
+          <div>
+            <label className="form-label mb-1" htmlFor="applicant-photo">
+              Student Photo
+            </label>
+            <input
+              type="file"
+              className="form-control form-control-sm"
+              id="applicant-photo"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => {
+                choosePhoto(event.target.files?.[0] ?? null);
+                event.target.value = '';
+              }}
+            />
+            <div className="fs-12 text-muted mt-1">
+              JPG, PNG or WebP, up to 5 MB.
+              {photo && (
+                <button type="button" className="btn btn-link btn-sm p-0 ms-2" onClick={() => choosePhoto(null)}>
+                  Remove
+                </button>
+              )}
+            </div>
+            {photoError && <div className="text-danger fs-12">{photoError}</div>}
+          </div>
+        </div>
         <div className="row">
           <div className="col-12 col-lg-6">
             <div className="mb-3">

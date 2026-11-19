@@ -1,36 +1,36 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ToastStack from '@components/ui/ToastStack';
 import { all_routes } from '@/routes/all_routes';
 import { useToasts } from '@hooks/useToasts';
+import { apiClient } from '@services/api/client';
+import { endpoints } from '@services/api/endpoints';
+import { toApiError } from '@services/api/errors';
 import StudentCardItem from './components/StudentCardItem';
 import StudentPreviewPanel from './components/StudentPreviewPanel';
 import WorkspaceToolbar from './components/WorkspaceToolbar';
 import type { ToolbarMenu } from './components/WorkspaceToolbar';
 import StudentModals from './modals/StudentModals';
-import type { StudentCard } from './data/students.data';
-import { statCards, students } from './data/students.data';
+import type { StatCard, StudentCard } from './data/students.data';
+import { VIEW_TO_STATUS } from './data/studentMapper';
+import { useStudentRoster } from './hooks/useStudentRoster';
+import { useStudentCounts } from './hooks/useStudentCounts';
 import type { SortKey, StudentModalId } from './data/studentsWorkspace.data';
 import { academicYears, advancedFilters, quickFilters, savedViews } from './data/studentsWorkspace.data';
 
 const routes = all_routes;
 
-/** "Class III · A · Red House" → { level: "III", section: "A" }. */
-const parseMeta = (student: StudentCard) => {
-  const [level = '', section = ''] = student.meta.split(' · ');
-  return { level: level.replace(/^Class\s+/, ''), section };
-};
+const fmt = (n: number) => n.toLocaleString('en-IN');
 
 const hasBadge = (student: StudentCard, label: string) =>
   student.badges.some((badge) => badge.label === label);
 
 const facetValue = (student: StudentCard, facet: string): string => {
-  const { level, section } = parseMeta(student);
   switch (facet) {
     case 'class':
-      return level;
+      return student.className ?? '';
     case 'section':
-      return section;
+      return student.section ?? '';
     case 'gender':
       return student.gender;
     case 'status':
@@ -48,23 +48,17 @@ const facetValue = (student: StudentCard, facet: string): string => {
   }
 };
 
-const CLASS_ORDER = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
-
 const compareBy = (sort: SortKey) => (a: StudentCard, b: StudentCard) => {
   switch (sort) {
     case 'status':
       return a.status.label.localeCompare(b.status.label) || a.name.localeCompare(b.name);
-    case 'class': {
-      const left = parseMeta(a);
-      const right = parseMeta(b);
+    case 'class':
       return (
-        CLASS_ORDER.indexOf(left.level) - CLASS_ORDER.indexOf(right.level) ||
-        left.section.localeCompare(right.section) ||
+        (a.gradeLevel ?? 999) - (b.gradeLevel ?? 999) ||
+        (a.className ?? '').localeCompare(b.className ?? '') ||
         a.name.localeCompare(b.name)
       );
-    }
-    // The roster carries no dates, but admission numbers run in intake order,
-    // so they stand in for "date of join" and "recently added".
+    // Admission numbers run in intake order, so they stand in for "date of join" and "recently added".
     case 'join':
       return a.admissionNo.localeCompare(b.admissionNo);
     case 'recent':
@@ -75,7 +69,17 @@ const compareBy = (sort: SortKey) => (a: StudentCard, b: StudentCard) => {
   }
 };
 
-const PAGE_SIZE = students.length;
+/** "Class III", "Class 5", "V" ... -> 3, 5, 5 so classes sort in school order. */
+const ROMAN: Record<string, number> = {
+  I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6, VII: 7, VIII: 8, IX: 9, X: 10, XI: 11, XII: 12,
+};
+const classRank = (student: StudentCard): number => {
+  if (typeof student.gradeLevel === 'number') return student.gradeLevel;
+  const token = (student.className ?? '').trim().split(/\s+/).pop()?.toUpperCase() ?? '';
+  if (!token) return 9999;
+  if (/^\d+$/.test(token)) return Number(token);
+  return ROMAN[token] ?? 5000;
+};
 
 const StudentGrid = () => {
   const [search, setSearch] = useState('');
@@ -93,12 +97,77 @@ const StudentGrid = () => {
   const [activeModal, setActiveModal] = useState<StudentModalId | null>(null);
   const [modalStudent, setModalStudent] = useState<StudentCard | null>(null);
 
-  const [roster, setRoster] = useState<StudentCard[]>(students);
-  const [loading, setLoading] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [exportOpen, setExportOpen] = useState(false);
 
   const { toasts, push, dismiss } = useToasts();
+
+  /* ------------------------------- Live data -------------------------------- */
+
+  // The toolbar's saved view / quick filter is applied by the server.
+  const statusLabel = quickFilter ?? (view !== 'all' ? view : null);
+  const serverStatus = statusLabel ? VIEW_TO_STATUS[statusLabel] : undefined;
+
+  const {
+    students: roster,
+    total,
+    loading,
+    loadingMore,
+    error,
+    hasMore,
+    loadMore,
+    refetch,
+    removeLocal,
+  } = useStudentRoster({ search, status: serverStatus });
+
+  // Whole-school counts (all statuses) for the stat cards and the toolbar badges.
+  const { counts: byStatus, refetch: refetchStrength } = useStudentCounts();
+  const totalAll = Object.values(byStatus).reduce((sum, n) => sum + n, 0);
+
+  const statCards: StatCard[] = useMemo(
+    () => [
+      { id: 'total', variant: 'stats-primary', icon: 'ti ti-users', value: fmt(totalAll), label: 'Total Students', subtitle: 'All records', badge: '' },
+      { id: 'active', variant: 'stats-success', icon: 'ti ti-user-check', value: fmt(byStatus.active ?? 0), label: 'Active', subtitle: 'Currently enrolled', badge: '' },
+      { id: 'inactive', variant: 'stats-danger', icon: 'ti ti-user-off', value: fmt(byStatus.inactive ?? 0), label: 'Inactive', subtitle: 'Not attending', badge: '' },
+      {
+        id: 'left',
+        variant: 'stats-info',
+        icon: 'ti ti-transfer',
+        value: fmt((byStatus.alumni ?? 0) + (byStatus.transferred_out ?? 0)),
+        label: 'Alumni / Transferred',
+        subtitle: 'Left the school',
+        badge: '',
+      },
+    ],
+    [byStatus, totalAll],
+  );
+
+  const countFor = useCallback(
+    (id: string) => (id === 'all' ? totalAll : byStatus[VIEW_TO_STATUS[id] ?? ''] ?? 0),
+    [byStatus, totalAll],
+  );
+
+  const viewCounts = useMemo(
+    () =>
+      savedViews.reduce<Record<string, number>>((acc, item) => {
+        acc[item.id] = countFor(item.id);
+        return acc;
+      }, {}),
+    [countFor],
+  );
+
+  const quickCounts = useMemo(
+    () =>
+      quickFilters.reduce<Record<string, number>>((acc, item) => {
+        acc[item.id] = countFor(item.id);
+        return acc;
+      }, {}),
+    [countFor],
+  );
+
+  const classOptions = useMemo(
+    () => Array.from(new Set(roster.map((item) => item.className).filter(Boolean))) as string[],
+    [roster],
+  );
 
   /* --------------------------------- Filtering ------------------------------- */
 
@@ -108,20 +177,11 @@ const StudentGrid = () => {
     return roster
       .filter((student) => {
         if (term) {
-          const haystack = [
-            student.name,
-            student.admissionNo,
-            student.meta,
-            student.roll,
-            student.parent.name,
-          ]
+          const haystack = [student.name, student.admissionNo, student.meta, student.parent.name]
             .join(' ')
             .toLowerCase();
           if (!haystack.includes(term)) return false;
         }
-
-        if (view !== 'all' && student.status.label !== view) return false;
-        if (quickFilter && student.status.label !== quickFilter) return false;
 
         return advancedFilters.every((field) => {
           const wanted = filters[field.id];
@@ -129,33 +189,22 @@ const StudentGrid = () => {
         });
       })
       .sort(compareBy(sort));
-  }, [roster, search, view, quickFilter, filters, sort]);
+  }, [roster, search, filters, sort]);
 
-  const shown = filtered.slice(0, visibleCount);
+  /* ----------------------------- Group by class ------------------------------ */
 
-  const countBy = useCallback(
-    (status: string) => roster.filter((student) => student.status.label === status).length,
-    [roster],
-  );
-
-  // The template hardcoded these badges; they are derived from the roster here.
-  const viewCounts = useMemo(
-    () =>
-      savedViews.reduce<Record<string, number>>((acc, item) => {
-        acc[item.id] = item.id === 'all' ? roster.length : countBy(item.id);
-        return acc;
-      }, {}),
-    [roster, countBy],
-  );
-
-  const quickCounts = useMemo(
-    () =>
-      quickFilters.reduce<Record<string, number>>((acc, item) => {
-        acc[item.id] = countBy(item.id);
-        return acc;
-      }, {}),
-    [quickFilters.length, countBy],
-  );
+  const classGroups = useMemo(() => {
+    const map = new Map<string, { label: string; rank: number; items: StudentCard[] }>();
+    for (const student of filtered) {
+      const label = student.className?.trim() || 'No class assigned';
+      const group = map.get(label);
+      if (group) group.items.push(student);
+      else map.set(label, { label, rank: student.className ? classRank(student) : 99999, items: [student] });
+    }
+    return Array.from(map.values()).sort(
+      (a, b) => a.rank - b.rank || a.label.localeCompare(b.label),
+    );
+  }, [filtered]);
 
   /* ----------------------------- Toolbar plumbing ---------------------------- */
 
@@ -190,16 +239,11 @@ const StudentGrid = () => {
     else setFilters((current) => ({ ...current, [id]: '' }));
   }, []);
 
-  // The template's refresh button had no script; here it replays the skeleton.
   const refresh = useCallback(() => {
-    setLoading(true);
-    const timer = window.setTimeout(() => {
-      setRoster(students);
-      setLoading(false);
-      push('Student list refreshed');
-    }, 600);
-    return () => window.clearTimeout(timer);
-  }, [push]);
+    refetch();
+    refetchStrength();
+    push('Student list refreshed');
+  }, [refetch, refetchStrength, push]);
 
   const toggleFullscreen = useCallback(() => {
     if (document.fullscreenElement) document.exitFullscreen();
@@ -233,13 +277,20 @@ const StudentGrid = () => {
     setActiveModal(modal);
   }, []);
 
-  const confirmDelete = useCallback(() => {
+  // Deletes on the server first, so a student never "disappears" here and comes back on refresh.
+  const confirmDelete = useCallback(async () => {
     const doomed = modalStudent ? [modalStudent.id] : selected;
-    setRoster((current) => current.filter((student) => !doomed.includes(student.id)));
-    setSelected((current) => current.filter((id) => !doomed.includes(id)));
     setActiveModal(null);
-    push(doomed.length > 1 ? `${doomed.length} students deleted` : 'Student deleted');
-  }, [modalStudent, selected, push]);
+    try {
+      await Promise.all(doomed.map((id) => apiClient.delete<void>(endpoints.students.remove(id))));
+      removeLocal(doomed);
+      setSelected((current) => current.filter((id) => !doomed.includes(id)));
+      refetchStrength();
+      push(doomed.length > 1 ? `${doomed.length} students deleted` : 'Student deleted');
+    } catch (raw) {
+      push(toApiError(raw).message || 'Could not delete the student');
+    }
+  }, [modalStudent, selected, removeLocal, refetchStrength, push]);
 
   return (
     <>
@@ -354,7 +405,7 @@ const StudentGrid = () => {
                       <i className="ti ti-point" />
                       {card.subtitle}
                     </span>
-                    <span className="stats-badge">{card.badge}</span>
+                    {card.badge ? <span className="stats-badge">{card.badge}</span> : null}
                   </div>
                 </div>
               </div>
@@ -387,11 +438,27 @@ const StudentGrid = () => {
             chips={chips}
             onClearChip={clearChip}
             matchCount={filtered.length}
-            totalCount={roster.length}
+            totalCount={total}
+            classOptions={classOptions}
           />
           {/* /Workspace Toolbar */}
 
           <div className="row g-4">
+            {/* Error state */}
+            {error ? (
+              <div className="col-12">
+                <div
+                  className="alert alert-danger d-flex align-items-center justify-content-between mb-0"
+                  role="alert"
+                >
+                  <span>Could not load students: {error}</span>
+                  <button type="button" className="btn btn-sm btn-light" onClick={refetch}>
+                    Retry
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
             {/* Loading state — global skeleton loader */}
             {loading ? (
               <div className="skeleton-loader col-12" id="students_loading">
@@ -420,31 +487,46 @@ const StudentGrid = () => {
 
             {/* Student Cards */}
             {!loading
-              ? shown.map((student) => (
-                  <StudentCardItem
-                    key={student.id}
-                    student={student}
-                    selected={selected.includes(student.id)}
-                    onToggleSelect={toggleSelect}
-                    menuOpen={cardMenu === student.id}
-                    onToggleMenu={setCardMenu}
-                    onOpenModal={(modal) => openModalFor(student, modal)}
-                    onPreview={setPreview}
-                  />
+              ? classGroups.map((group) => (
+                  <Fragment key={group.label}>
+                    <div className="col-12">
+                      <div className="d-flex align-items-center gap-2 pb-2 border-bottom">
+                        <span className="avatar avatar-sm bg-primary-transparent text-primary flex-shrink-0">
+                          <i className="ti ti-school" />
+                        </span>
+                        <h5 className="mb-0 fs-16 fw-semibold">{group.label}</h5>
+                        <span className="badge badge-soft-primary">
+                          {group.items.length} {group.items.length === 1 ? 'student' : 'students'}
+                        </span>
+                      </div>
+                    </div>
+                    {group.items.map((student) => (
+                      <StudentCardItem
+                        key={student.id}
+                        student={student}
+                        selected={selected.includes(student.id)}
+                        onToggleSelect={toggleSelect}
+                        menuOpen={cardMenu === student.id}
+                        onToggleMenu={setCardMenu}
+                        onOpenModal={(modal) => openModalFor(student, modal)}
+                        onPreview={setPreview}
+                      />
+                    ))}
+                  </Fragment>
                 ))
               : null}
 
             {/* Empty state — global workspace component */}
-            {!loading && filtered.length === 0 ? (
+            {!loading && !error && filtered.length === 0 ? (
               <div className="col-12">
                 <div className="workspace-empty-state show" id="students_empty">
                   <span className="workspace-empty-art">
                     <i className="ti ti-users-group" />
                   </span>
-                  <h5 className="mb-1">No students match these filters</h5>
+                  <h5 className="mb-1">No students found</h5>
                   <p className="text-muted mb-3">
-                    Try widening the class, section or status filters, or clear them to see the full
-                    directory.
+                    No students match these filters yet. Try widening the filters, or clear them to
+                    see the full directory.
                   </p>
                   <button type="button" className="btn btn-light" onClick={resetFilters}>
                     <i className="ti ti-filter-off me-1" />
@@ -454,16 +536,19 @@ const StudentGrid = () => {
               </div>
             ) : null}
 
-            <div className="col-md-12 text-center">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-              >
-                <i className="ti ti-loader-3 me-2" />
-                Load More
-              </button>
-            </div>
+            {hasMore && !loading ? (
+              <div className="col-md-12 text-center">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                >
+                  <i className="ti ti-loader-3 me-2" />
+                  {loadingMore ? 'Loading…' : `Load More (${roster.length} of ${total})`}
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

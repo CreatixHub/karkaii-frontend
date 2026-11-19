@@ -44,6 +44,7 @@ export interface WorkspaceToolbarProps {
   onClearChip: (id: string) => void;
   matchCount: number;
   totalCount: number;
+  classOptions: string[];
 }
 
 const WorkspaceToolbar = ({

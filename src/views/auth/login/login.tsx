@@ -19,7 +19,7 @@ const Login = () => {
   // Set by the register hook after a successful sign-up (`navigate(login, { state: { registered: true } })`).
   const justRegistered = Boolean((location.state as { registered?: boolean } | null)?.registered);
   // True once the person pressed "Sign In" on THIS page. From then on useLogin decides where they go
-  // (the dashboard of the role they picked), so the "already signed in" shortcut below must stay out of the way.
+  // (the dashboard of their role), so the "already signed in" shortcut below must stay out of the way.
   const signInPressed = useRef(false);
 
   const togglePasswordVisibility = () => {
@@ -71,28 +71,6 @@ const Login = () => {
                             Registered successfully! Please sign in to continue.
                           </div>
                         )}
-                        <div className="mb-3">
-                          <label className="form-label">Sign in as</label>
-                          <select
-                            name="role"
-                            className="form-select"
-                            value={form.values.role}
-                            onChange={form.handleChange}
-                          >
-                            <option value="">My main role (automatic)</option>
-                            <option value="admin">Admin</option>
-                            <option value="teacher">Teacher</option>
-                            <option value="student">Student</option>
-                            <option value="parent">Parent</option>
-                            <option value="accountant">Accountant</option>
-                            <option value="receptionist">Receptionist</option>
-                            <option value="librarian">Librarian</option>
-                            <option value="warden">Warden</option>
-                            <option value="transport_manager">Transport manager</option>
-                            <option value="nurse">Nurse</option>
-                            <option value="security">Security</option>
-                          </select>
-                        </div>
                         <div className="mb-3 ">
                           <label className="form-label">Email or Phone Number</label>
                           <div className="input-icon mb-3 position-relative">

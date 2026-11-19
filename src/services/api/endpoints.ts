@@ -26,6 +26,10 @@ export const endpoints = {
     list: '/classes',
   },
 
+  reports: {
+    schoolStrength: '/reports/school-strength',
+  },
+
   admissions: {
     list: '/admissions',
     create: '/admissions',

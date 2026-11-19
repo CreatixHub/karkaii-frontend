@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import Offcanvas from '@components/ui/Offcanvas';
-import ImageWithBasePath from '@core/common/imageWithBasePath';
+import AuthImage from '@components/ui/AuthImage';
 import { all_routes } from '@/routes/all_routes';
 import type { StudentCard } from '../data/students.data';
 
@@ -46,7 +46,7 @@ const StudentPreviewPanel = ({ student, onClose }: StudentPreviewPanelProps) => 
         {/* identity */}
         <div className="d-flex align-items-center gap-2 mb-3">
           <span className="avatar avatar-xl flex-shrink-0">
-            <ImageWithBasePath
+            <AuthImage
               src={student.avatar}
               className="img-fluid rounded-circle flex-shrink-0"
               alt={student.name}
@@ -72,11 +72,11 @@ const StudentPreviewPanel = ({ student, onClose }: StudentPreviewPanelProps) => 
 
         {/* quick actions */}
         <div className="d-flex flex-wrap gap-2 mb-4">
-          <Link to={routes.studentDetail} className="btn btn-primary btn-sm">
+          <Link to={student ? `${routes.studentDetail}?id=${student.id}` : routes.studentDetail} className="btn btn-primary btn-sm">
             <i className="ti ti-eye me-1" />
             View Profile
           </Link>
-          <Link to={routes.editStudent} className="btn btn-light btn-sm">
+          <Link to={student ? `${routes.editStudent}?id=${student.id}` : routes.editStudent} className="btn btn-light btn-sm">
             <i className="ti ti-edit-circle me-1" />
             Edit
           </Link>

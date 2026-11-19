@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import ToastStack from '@components/ui/ToastStack';
 import { all_routes } from '@/routes/all_routes';
 import { useToasts } from '@hooks/useToasts';
+import { toApiError } from '@services/api/errors';
+import { buildAdmissionPayload, createAdmission, listClasses } from '@services/admissions/admissions.api';
+import type { ClassOption } from '@services/admissions/admissions.api';
+import { checkImage, uploadImage } from '@services/files/files.api';
 import ReviewStep from './components/ReviewStep';
 import WizardField from './components/WizardField';
 import WizardNav from './components/WizardNav';
@@ -21,6 +25,77 @@ import {
 
 const routes = all_routes;
 
+/** Photo chooser with a live preview. The file is uploaded when the application is submitted. */
+const PhotoPicker = ({
+  file,
+  onPick,
+  onError,
+}: {
+  file: File | null;
+  onPick: (file: File | null) => void;
+  onError: (message: string) => void;
+}) => {
+  const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!file) {
+      setPreview(null);
+      return undefined;
+    }
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  return (
+    <div className="col-12 col-lg-4">
+      <div className="mb-3">
+        <label className="form-label" htmlFor="admission-photo">
+          Photo
+        </label>
+        <div className="d-flex align-items-center gap-3">
+          <span
+            className="d-inline-flex align-items-center justify-content-center border rounded overflow-hidden flex-shrink-0 bg-light"
+            style={{ width: 72, height: 72 }}
+          >
+            {preview ? (
+              <img src={preview} alt="Student" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <i className="ti ti-photo fs-24 text-muted" />
+            )}
+          </span>
+          <div className="flex-fill">
+            <input
+              id="admission-photo"
+              type="file"
+              className="form-control"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => {
+                const picked = event.target.files?.[0] ?? null;
+                if (!picked) return;
+                const problem = checkImage(picked);
+                if (problem) {
+                  onError(problem);
+                  event.target.value = '';
+                  return;
+                }
+                onPick(picked);
+              }}
+            />
+            {file ? (
+              <button type="button" className="btn btn-link btn-sm text-danger p-0 mt-1" onClick={() => onPick(null)}>
+                Remove photo
+              </button>
+            ) : (
+              <small className="text-muted">JPG, PNG or WebP · max 5 MB</small>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AddAdmission = () => {
   const navigate = useNavigate();
   const { toasts, push, dismiss } = useToasts();
@@ -28,18 +103,60 @@ const AddAdmission = () => {
   const [step, setStep] = useState(0);
   const [values, setValues] = useState<Record<string, string>>({});
   const [confirmed, setConfirmed] = useState(false);
+  const [classes, setClasses] = useState<ClassOption[]>([]);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // The Class Applied dropdown lists the school's real classes.
+  useEffect(() => {
+    let cancelled = false;
+    listClasses()
+      .then((rows) => {
+        if (!cancelled) setClasses(rows);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const setValue = (id: string, value: string) => setValues((current) => ({ ...current, [id]: value }));
 
-  const field = (spec: Parameters<typeof WizardField>[0]['field']) => (
-    <WizardField key={spec.id} field={spec} value={values[spec.id] ?? ''} onChange={setValue} />
-  );
+  const field = (spec: Parameters<typeof WizardField>[0]['field']) => {
+    if (spec.id === 'photo') {
+      return <PhotoPicker key="photo" file={photo} onPick={setPhoto} onError={(message) => push(message, 'danger')} />;
+    }
+    const live =
+      spec.id === 'class-applied' && classes.length > 0
+        ? { ...spec, options: ['Select', ...classes.map((item) => item.name)] }
+        : spec;
+    return <WizardField key={spec.id} field={live} value={values[spec.id] ?? ''} onChange={setValue} />;
+  };
 
   const goTo = (index: number) => setStep(Math.max(0, Math.min(wizardSteps.length - 1, index)));
 
-  const submit = () => {
-    push('Admission application submitted successfully');
-    navigate(routes.admissions);
+  const submit = async () => {
+    if (submitting) return;
+    const { payload, error } = buildAdmissionPayload(values, classes);
+    if (!payload) {
+      push(error ?? 'Please check the form', 'danger');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      if (photo) {
+        const uploaded = await uploadImage(photo, 'admission_photo');
+        payload.photoFileId = String(uploaded.id);
+      }
+      await createAdmission(payload);
+      push('Admission application submitted successfully');
+      navigate(routes.admissions);
+    } catch (raw) {
+      push(toApiError(raw).message || 'Could not submit the application', 'danger');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -272,9 +389,14 @@ const AddAdmission = () => {
                               </button>
                             </li>
                             <li className="float-end">
-                              <button type="button" className="btn btn-primary" onClick={submit}>
+                              <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={() => void submit()}
+                                disabled={submitting}
+                              >
                                 <i className="ti ti-check me-1" />
-                                Submit Application
+                                {submitting ? 'Submitting…' : 'Submit Application'}
                               </button>
                             </li>
                           </ul>

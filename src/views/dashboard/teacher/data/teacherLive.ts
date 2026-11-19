@@ -91,7 +91,7 @@ export function buildClasses(assignments: MyAssignment[], timetable: MyTimetable
       ...template,
       id: String(a.id),
       grade: `${a.className} - ${a.sectionName}`,
-      subject: a.subject.name,
+      subject: a.subject.name ?? '—',
       homeroom: false,
       stats: [
         { value: String(periods), label: 'Periods / Week' },
