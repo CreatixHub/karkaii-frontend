@@ -37,6 +37,11 @@ export interface StudentCard {
   age: string;
   parent: { name: string; info: string };
   badges: { label: string; icon: string; className: string }[];
+  /** Real-data fields (populated by studentMapper.ts); absent on the static template cards. */
+  className?: string;
+  section?: string;
+  gradeLevel?: number;
+  joined?: string;
 }
 
 export const students: StudentCard[] = [

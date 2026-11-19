@@ -96,7 +96,7 @@ const StudentProfileModals = ({
   active,
   onClose,
   onToast,
-  onAction,
+  onAction: _onAction,
   confirm,
   onConfirm,
   payment,
