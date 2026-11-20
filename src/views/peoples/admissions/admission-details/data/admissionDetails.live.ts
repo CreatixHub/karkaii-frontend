@@ -74,6 +74,7 @@ export interface ApiAdmissionDetail {
   source: string;
   className?: string | null;
   assignedToStaffName?: string | null;
+  photoFileId?: string | number | null;
   history?: ApiHistory[];
 }
 
@@ -153,6 +154,8 @@ export function applyAdmission(a: ApiAdmissionDetail): void {
 
   Object.assign(profile, {
     name: fullName,
+    // "file:<id>" is an uploaded photo (AuthImage downloads it); otherwise keep the placeholder picture.
+    avatar: a.photoFileId ? `file:${a.photoFileId}` : profile.avatar,
     admissionNo: a.applicationNo,
     status: st,
     classApplied: dash(a.className),

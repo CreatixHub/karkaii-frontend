@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { all_routes } from '@/routes/all_routes';
-import ImageWithBasePath from '@core/common/imageWithBasePath';
+import AuthImage from '@components/ui/AuthImage';
 import { moreActions, profile } from '../data/admissionDetails.data';
 
 const routes = all_routes;
@@ -20,7 +20,7 @@ const ProfileHero = ({ moreOpen, onToggleMore, onMoreAction, onReject, onApprove
       <div className="d-xl-flex align-items-start justify-content-between">
         <div className="d-sm-flex align-items-center">
           <span className="avatar avatar-xxl rounded flex-shrink-0 me-sm-3 mb-3 mb-sm-0">
-            <ImageWithBasePath src={profile.avatar} className="img-fluid rounded" alt={profile.name} />
+            <AuthImage src={profile.avatar} className="img-fluid rounded" alt={profile.name} />
           </span>
           <div>
             <div className="d-flex align-items-center flex-wrap gap-2 mb-2">
