@@ -223,6 +223,38 @@ export const SidebarData = [
           },
         ],
       },
+      {
+        label: "Exams",
+        icon: "ti ti-clipboard-list",
+        submenu: true,
+        submenuItems: [
+          {
+            label: "Exams",
+            submenu: false,
+            link: routes.exam,
+          },
+          {
+            label: "Exam Types",
+            submenu: false,
+            link: routes.examTypes,
+          },
+          {
+            label: "Schedule Exam",
+            submenu: false,
+            link: routes.examSchedule,
+          },
+          {
+            label: "Exam Attendance",
+            submenu: false,
+            link: routes.examAttendance,
+          },
+          {
+            label: "Exam Results",
+            submenu: false,
+            link: routes.examResult,
+          },
+        ],
+      },
     ],
   },
   {
