@@ -22,6 +22,10 @@ export const endpoints = {
     create: '/organizations',
   },
 
+  academicYears: {
+    current: '/academic-years/current',
+  },
+
   classes: {
     list: '/classes',
   },

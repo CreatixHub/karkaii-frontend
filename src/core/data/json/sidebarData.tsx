@@ -109,6 +109,11 @@ export const SidebarData = [
             submenu: false,
             link: routes.teachersRoutine,
           },
+          {
+            label: "Workload",
+            submenu: false,
+            link: routes.teacherWorkload,
+          },
         ],
       },
       {
@@ -205,6 +210,12 @@ export const SidebarData = [
             link: routes.teacherTimeTable,
           },
         ],
+      },
+      {
+        label: "Timetable Planner",
+        icon: "ti ti-calendar-cog",
+        submenu: false,
+        link: routes.timetablePlanner,
       },
       {
         label: "Learning",

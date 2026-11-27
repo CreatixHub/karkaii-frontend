@@ -16,4 +16,7 @@ export type { UseFormOptions, UseFormResult } from './useForm';
 
 export { useAuth } from './useAuth';
 
+export { useAcademicYear } from './useAcademicYear';
+export type { UseAcademicYearResult } from './useAcademicYear';
+
 export { useBootstrapTooltips } from './useBootstrapTooltips';

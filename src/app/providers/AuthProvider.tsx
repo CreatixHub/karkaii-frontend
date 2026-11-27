@@ -22,6 +22,7 @@ import type { UserRole } from '@constants/app.constants';
 import { apiClient } from '@services/api/client';
 import type { ApiError } from '@services/api/errors';
 import { toApiError } from '@services/api/errors';
+import { resetAcademicYearCache } from '@services/academic/years.api';
 import { authService } from '@services/auth/auth.service';
 import { tokenStorage } from '@services/auth/token-storage';
 import type { AuthSession, AuthUser, LoginCredentials, SignupCredentials } from '@services/auth/auth.types';
@@ -95,6 +96,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   /** Clears local session state. Also used as the 401 handler. */
   const clearSession = useCallback(() => {
     tokenStorage.clear();
+    resetAcademicYearCache(); // the next sign-in may be another school
     if (!mountedRef.current) return;
     setUser(null);
     setStatus('unauthenticated');
@@ -185,6 +187,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         const persist = credentials.rememberMe ?? true;
 
         tokenStorage.clear(); // never mix a previous account's leftovers with this session
+        resetAcademicYearCache();
         tokenStorage.setTokens(session.accessToken, session.refreshToken, persist);
         tokenStorage.setUser(session.user, persist);
         if (!persist) tokenStorage.markEphemeralSession();
@@ -216,6 +219,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         // 1. Create the account. The returned session has no school yet (role/permissions are empty).
         const account = await authService.signup(credentials);
         tokenStorage.clear();
+        resetAcademicYearCache();
         tokenStorage.setTokens(account.accessToken, account.refreshToken, true);
         tokenStorage.setUser(account.user, true);
 

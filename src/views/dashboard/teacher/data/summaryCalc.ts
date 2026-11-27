@@ -98,7 +98,7 @@ export function buildTodaysLessons(timetable: MyTimetableEntry[], now: Date): Le
 
   return rows.map(({ entry, times }) => {
     const subjectName =
-      (pick(entry.subject, ['name', 'subjectName', 'code']) as string | undefined) ?? 'Lesson';
+      (pick(entry.subject ?? {}, ['name', 'subjectName', 'code']) as string | undefined) ?? entry.title ?? 'Lesson';
     const grade = [entry.className, entry.sectionName].filter(Boolean).join(' - ') || '—';
 
     const lesson: Lesson = {

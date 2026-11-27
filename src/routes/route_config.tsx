@@ -2,6 +2,7 @@ import { Navigate, Route } from "react-router";
 import { all_routes } from "./all_routes";
 import React from "react";
 import DashboardGuard from "../components/routing/DashboardGuard";
+import RoleGuard from "../components/routing/RoleGuard";
 
 // Lazily loaded page components.
 const Accordion = React.lazy(() => import("../views/uiInterface/base-ui/accordion"));
@@ -137,6 +138,7 @@ const ClassSection = React.lazy(() => import("../views/academic/class-section"))
 const ClassSubject = React.lazy(() => import("../views/academic/class-subject"));
 const ClassSyllabus = React.lazy(() => import("../views/academic/class-syllabus"));
 const ClassTimetable = React.lazy(() => import("../views/academic/class-timetable"));
+const TimetablePlanner = React.lazy(() => import("../views/academic/timetable-planner"));
 const Classes = React.lazy(() => import("../views/academic/classes"));
 const ClipBoard = React.lazy(() => import("../views/uiInterface/advanced-ui/clipboard"));
 const Collapse = React.lazy(() => import("../views/uiInterface/base-ui/collapse.tsx"));
@@ -369,6 +371,7 @@ const TeacherDashboard = React.lazy(() => import("../views/dashboard/teacher/Tea
 const TeacherDayWise = React.lazy(() => import("../views/report/attendance-report/teacherDayWise"));
 const TeacherDetails = React.lazy(() => import("../views/peoples/teacher/teacher-details"));
 const TeacherForm = React.lazy(() => import("../views/peoples/teacher/teacherForm"));
+const TeacherWorkload = React.lazy(() => import("../views/peoples/teacher/teacher-workload"));
 const TeacherGrid = React.lazy(() => import("../views/peoples/teacher/teacher-grid"));
 const TeacherLeave = React.lazy(() => import("../views/peoples/teacher/teacher-details/teacherLeave"));
 const TeacherLibrary = React.lazy(() => import("../views/peoples/teacher/teacher-details/teacherLibrary"));
@@ -798,6 +801,15 @@ export const publicRoutes = [
   {
     path: routes.classTimetable,
     element: <ClassTimetable />,
+    route: Route,
+  },
+  {
+    path: routes.timetablePlanner,
+    element: (
+      <RoleGuard roles="admin" permission="timetable.edit" fallback={<Navigate to={routes.adminDashboard} replace />}>
+        <TimetablePlanner />
+      </RoleGuard>
+    ),
     route: Route,
   },
   {
@@ -1973,6 +1985,25 @@ export const publicRoutes = [
   {
     path: routes.teacherGrid,
     element: <TeacherGrid />,
+    route: Route,
+  },
+  {
+    path: routes.teacherWorkload,
+    element: (
+      <RoleGuard
+        roles="admin"
+        permission="timetable.edit"
+        fallback={
+          <div className="page-wrapper">
+            <div className="content">
+              <p role="alert">You need permission to manage timetables to view teacher workload.</p>
+            </div>
+          </div>
+        }
+      >
+        <TeacherWorkload />
+      </RoleGuard>
+    ),
     route: Route,
   },
   {

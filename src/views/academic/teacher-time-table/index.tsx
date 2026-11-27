@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { all_routes } from '@/routes/all_routes';
-import { ACADEMIC_YEAR_ID } from '@services/admissions/admissions.api';
+import { useAcademicYear } from '@hooks/useAcademicYear';
 import {
   getMyAssignments,
   getMyStaff,
-  getMyTimetable,
+  getMyTimetableSchedule,
   getStaffRecord,
   listStaffAssignments,
 } from '@services/staff/staff.api';
@@ -13,6 +14,8 @@ import type { MyAssignment, MyTimetableEntry } from '@services/staff/staff.api';
 import { listTeachers } from '@services/staff/staff.list';
 import type { StaffListItem } from '@services/staff/staff.list';
 import { listTeacherLessons } from '@services/timetable/teacher.lessons';
+import { schoolWeekday } from '@services/timetable/timetable.api';
+import './mobile-schedule.css';
 
 const routes = all_routes;
 
@@ -23,6 +26,7 @@ const DAYS = [
   { n: 4, name: 'Thursday' },
   { n: 5, name: 'Friday' },
   { n: 6, name: 'Saturday' },
+  { n: 7, name: 'Sunday' },
 ];
 
 const TONES = ['primary', 'info', 'success', 'warning', 'danger', 'secondary'];
@@ -35,6 +39,9 @@ interface Period {
   end: number;
   subject: string;
   grade: string;
+  classNames: string[];
+  roomCodes: string[];
+  sharedSlot?: string;
 }
 
 interface Profile {
@@ -91,18 +98,204 @@ function fromMine(entry: MyTimetableEntry): Period | null {
     day: entry.dayOfWeek,
     start,
     end,
-    subject: (pick(entry.subject, ['name', 'subjectName', 'code']) as string | undefined) ?? 'Lesson',
+    subject: (pick(entry.subject, ['name', 'subjectName', 'code']) as string | undefined) ?? entry.title ?? 'Lesson',
     grade: gradeOf(entry.className, entry.sectionName),
+    classNames: [entry.className],
+    roomCodes: roomCodesOf(entry.classroom?.code, entry.classroomCodes),
+    sharedSlot: entry.source === 'planner' && entry.timeSlot.id != null
+      ? sharedSlotKey(entry.dayOfWeek, String(entry.timeSlot.id), entry.subjectId, entry.title)
+      : undefined,
   };
 }
 
 const uniq = (items: string[]) => [...new Set(items.filter(Boolean))];
+
+const roomCodesOf = (primary: string | null | undefined, others: string[] = []) =>
+  uniq([primary ?? '', ...others]);
+
+function sharedSlotKey(day: number, slot: string, subjectId: string | number | null, title: string | null) {
+  return JSON.stringify([day, slot, subjectId === null ? null : String(subjectId), subjectId === null ? title : null]);
+}
+
+function combineSharedPeriods(periods: Period[]): Period[] {
+  const groups = new Map<string, { period: Period; grades: Set<string>; classes: Set<string>; rooms: Set<string> }>();
+  for (const period of periods) {
+    const key = period.sharedSlot ?? period.id;
+    const group = groups.get(key);
+    if (group) {
+      group.grades.add(period.grade);
+      period.classNames.forEach((name) => group.classes.add(name));
+      period.roomCodes.forEach((code) => group.rooms.add(code));
+    } else {
+      groups.set(key, { period, grades: new Set([period.grade]), classes: new Set(period.classNames), rooms: new Set(period.roomCodes) });
+    }
+  }
+  return Array.from(groups.values(), ({ period, grades, classes, rooms }) => ({
+    ...period, grade: [...grades].join(', '), classNames: [...classes], roomCodes: [...rooms],
+  }));
+}
+
+type ScheduleDay = (typeof DAYS)[number];
+
+function MobileDay({ day, today, lessons }: { day: ScheduleDay; today: number | null; lessons: Period[] }) {
+  return (
+    <>
+      <div className="teacher-mobile-day-heading">
+        <h4>{day.name}</h4>
+        {day.n === today && <span className="teacher-mobile-today">Today</span>}
+        <span className="teacher-mobile-period-count">{lessons.length} {lessons.length === 1 ? 'period' : 'periods'}</span>
+      </div>
+      {lessons.length === 0 ? (
+        <p className="teacher-mobile-empty">No lessons scheduled</p>
+      ) : (
+        <ul className="teacher-mobile-lessons">
+          {lessons.map((lesson) => (
+            <li className="teacher-mobile-lesson" key={lesson.id}>
+              <span className="teacher-mobile-lesson-time">{hhmm(lesson.start)} – {hhmm(lesson.end)}</span>
+              <div className="teacher-mobile-lesson-info">
+                <strong>{lesson.subject}</strong>
+                <span>{lesson.grade}</span>
+                {lesson.roomCodes.length > 0 && <span>Room: {lesson.roomCodes.join(', ')}</span>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+interface MobileScheduleProps {
+  profile: Profile;
+  byDay: Map<number, Period[]>;
+  today: number | null;
+  subjectNames: string[];
+  classNames: string[];
+  weeklyMinutes: number;
+  totalLessons: number;
+}
+
+function MobileSchedule({ profile, byDay, today, subjectNames, classNames, weeklyMinutes, totalLessons }: MobileScheduleProps) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [showWeek, setShowWeek] = useState(false);
+  const id = useId();
+  const tabs = DAYS.filter(({ n }) => n <= 5 || n === today || (byDay.get(n)?.length ?? 0) > 0);
+
+  const activeDay = tabs.some(({ n }) => n === selected) ? selected : today ?? 1;
+
+  function handleTabKeys(event: KeyboardEvent<HTMLDivElement>) {
+    const index = tabs.findIndex(({ n }) => n === activeDay);
+    let nextIndex: number;
+    switch (event.key) {
+      case 'ArrowLeft':
+        nextIndex = (index - 1 + tabs.length) % tabs.length;
+        break;
+      case 'ArrowRight':
+        nextIndex = (index + 1) % tabs.length;
+        break;
+      case 'Home':
+        nextIndex = 0;
+        break;
+      case 'End':
+        nextIndex = tabs.length - 1;
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+    setSelected(tabs[nextIndex].n);
+    event.currentTarget.querySelectorAll<HTMLButtonElement>('button')[nextIndex]?.focus();
+  }
+
+  return (
+    <div className="teacher-mobile-schedule d-md-none">
+      <div className="teacher-mobile-schedule-header">
+        <h4 className="teacher-mobile-name">{profile.name}</h4>
+        <button
+          type="button"
+          className="teacher-mobile-action teacher-mobile-week-toggle"
+          aria-expanded={showWeek}
+          aria-controls={id + '-week'}
+          onClick={() => setShowWeek((value) => !value)}
+        >
+          <i className={showWeek ? 'ti ti-calendar-event' : 'ti ti-calendar-week'} aria-hidden="true" />
+          {showWeek ? 'Day view' : 'Full week'}
+        </button>
+        <details className="teacher-mobile-profile">
+          <summary className="teacher-mobile-action">
+            <i className="ti ti-user" aria-hidden="true" />
+            Profile
+            <i className="ti ti-chevron-down teacher-mobile-profile-chevron" aria-hidden="true" />
+          </summary>
+          <div className="teacher-mobile-profile-content">
+            <dl>
+              <dt>Employee no.</dt><dd>{profile.code || '—'}</dd>
+              <dt>Qualification</dt><dd>{profile.qualification || '—'}</dd>
+              <dt>Subjects</dt><dd>{subjectNames.join(', ') || '—'}</dd>
+              <dt>Classes</dt><dd>{classNames.join(', ') || '—'}</dd>
+              <dt>Weekly teaching</dt><dd>{totalLessons} periods · {duration(weeklyMinutes)}</dd>
+            </dl>
+            <div className="d-flex flex-wrap gap-2">
+              {profile.phone && <a className="teacher-mobile-action" href={'tel:' + profile.phone}>Call</a>}
+              <Link className="teacher-mobile-action" to={routes.teacherDetails + '?id=' + profile.id}>View profile</Link>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div id={id + '-week'} className="teacher-mobile-week" hidden={!showWeek}>
+        {showWeek && tabs.map((weekDay) => (
+          <section className="teacher-mobile-day" key={weekDay.n}>
+            <MobileDay day={weekDay} today={today} lessons={byDay.get(weekDay.n) ?? []} />
+          </section>
+        ))}
+      </div>
+
+      {!showWeek && (
+        <>
+          <div className="teacher-mobile-tabs" role="tablist" aria-label="Timetable days" onKeyDown={handleTabKeys}>
+            {tabs.map((tab) => (
+              <button
+                key={tab.n}
+                type="button"
+                role="tab"
+                id={id + '-tab-' + tab.n}
+                aria-label={tab.name}
+                aria-selected={activeDay === tab.n}
+                aria-current={today === tab.n ? 'date' : undefined}
+                aria-controls={id + '-day-' + tab.n}
+                tabIndex={activeDay === tab.n ? 0 : -1}
+                onClick={() => setSelected(tab.n)}
+              >
+                {tab.name.slice(0, 3)}
+              </button>
+            ))}
+          </div>
+          {tabs.map((tab) => (
+            <section
+              className="teacher-mobile-day"
+              key={tab.n}
+              role="tabpanel"
+              tabIndex={0}
+              id={id + '-day-' + tab.n}
+              aria-labelledby={id + '-tab-' + tab.n}
+              hidden={activeDay !== tab.n}
+            >
+              {activeDay === tab.n && <MobileDay day={tab} today={today} lessons={byDay.get(tab.n) ?? []} />}
+            </section>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
 
 /* ---------------------------------- page ---------------------------------- */
 
 const TeacherTimeTable = () => {
   const [searchParams] = useSearchParams();
   const idParam = searchParams.get('id') ?? '';
+  const { yearId, error: yearError } = useAcademicYear();
 
   const [mode, setMode] = useState<Mode>(idParam ? 'admin' : 'detect');
   const [teacherId, setTeacherId] = useState(idParam);
@@ -111,12 +304,16 @@ const TeacherTimeTable = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [assignments, setAssignments] = useState<MyAssignment[]>([]);
   const [periods, setPeriods] = useState<Period[]>([]);
+  const [today, setToday] = useState<number | null>(null);
 
   const [state, setState] = useState<Load>('loading');
   const [error, setError] = useState('');
   const [tick, setTick] = useState(0); // bumps to reload
 
   const reload = useCallback(() => setTick((n) => n + 1), []);
+  // The year only matters in admin mode; in teacher mode it must not re-run the data load when it arrives.
+  const adminYearId = mode === 'admin' ? yearId : null;
+  const adminYearError = mode === 'admin' ? yearError : '';
 
   /* ----- detect whether this is a teacher (own timetable) or an admin ----- */
   useEffect(() => {
@@ -157,6 +354,16 @@ const TeacherTimeTable = () => {
       setState('ready');
       return;
     }
+    // Only the admin view is scoped to the academic year: wait for it before asking for lessons.
+    if (mode === 'admin' && !adminYearId) {
+      if (adminYearError) {
+        setError(adminYearError);
+        setState('error');
+      } else {
+        setState('loading');
+      }
+      return;
+    }
 
     let cancelled = false;
     setState('loading');
@@ -167,7 +374,7 @@ const TeacherTimeTable = () => {
         if (mode === 'mine') {
           const [staff, mine, assigned] = await Promise.all([
             getMyStaff(),
-            getMyTimetable(),
+            getMyTimetableSchedule(),
             getMyAssignments().catch(() => [] as MyAssignment[]),
           ]);
           if (cancelled) return;
@@ -180,12 +387,14 @@ const TeacherTimeTable = () => {
             status: null,
           });
           setAssignments(assigned);
-          setPeriods(mine.map(fromMine).filter((p): p is Period => p !== null));
+          setPeriods(combineSharedPeriods(mine.data.map(fromMine).filter((p): p is Period => p !== null)));
+          setToday(schoolWeekday(typeof mine.meta?.today === 'string' ? mine.meta.today : null));
         } else {
+          if (!adminYearId) return; // unreachable: the admin view waits for the year above
           const [record, lessons, assigned] = await Promise.all([
             getStaffRecord(teacherId),
-            listTeacherLessons(teacherId, ACADEMIC_YEAR_ID),
-            listStaffAssignments(teacherId).catch(() => [] as MyAssignment[]),
+            listTeacherLessons(teacherId, adminYearId),
+            listStaffAssignments(teacherId, adminYearId).catch(() => [] as MyAssignment[]),
           ]);
           if (cancelled) return;
           setProfile({
@@ -197,8 +406,8 @@ const TeacherTimeTable = () => {
             status: record.status,
           });
           setAssignments(assigned);
-          setPeriods(
-            lessons
+          setPeriods(combineSharedPeriods(
+            lessons.entries
               .map((row): Period | null => {
                 const start = toMin(row.startsAt);
                 const end = toMin(row.endsAt);
@@ -208,12 +417,18 @@ const TeacherTimeTable = () => {
                   day: row.dayOfWeek,
                   start,
                   end,
-                  subject: row.subjectName,
+                  subject: row.subjectName ?? row.title ?? 'Lesson',
                   grade: gradeOf(row.className, row.sectionName),
+                  classNames: [row.className],
+                  roomCodes: roomCodesOf(row.classroomCode, row.classroomCodes),
+                  sharedSlot: row.source === 'planner'
+                    ? sharedSlotKey(row.dayOfWeek, String(row.timeSlotId), row.subjectId, row.title)
+                    : undefined,
                 };
               })
               .filter((p): p is Period => p !== null),
-          );
+          ));
+          setToday(schoolWeekday(lessons.today));
         }
         setState('ready');
       } catch (e) {
@@ -226,7 +441,7 @@ const TeacherTimeTable = () => {
     return () => {
       cancelled = true;
     };
-  }, [mode, teacherId, tick]);
+  }, [mode, teacherId, tick, adminYearId, adminYearError]);
 
   /* -------------------------------- derived -------------------------------- */
   const byDay = useMemo(() => {
@@ -238,10 +453,11 @@ const TeacherTimeTable = () => {
   }, [periods]);
 
   const weeklyMinutes = periods.reduce((sum, p) => sum + (p.end - p.start), 0);
-  const subjectNames = uniq(assignments.map((a) => String(a.subject?.name ?? '')));
-  const classNames = uniq(assignments.map((a) => a.className));
+  const subjectNames = uniq([...assignments.map((a) => String(a.subject?.name ?? '')), ...periods.map((p) => p.subject)]);
+  const classNames = uniq([...assignments.map((a) => a.className), ...periods.flatMap((p) => p.classNames)]);
   const noLessons = state === 'ready' && periods.length === 0;
-  const today = new Date().getDay() === 0 ? 7 : new Date().getDay();
+  const desktopCard = mode === 'mine' ? ' d-none d-md-block' : '';
+  const desktopDays = DAYS.filter(({ n }) => n <= 6 || (byDay.get(n)?.length ?? 0) > 0);
 
   return (
     <div className="page-wrapper">
@@ -329,9 +545,21 @@ const TeacherTimeTable = () => {
           </div>
         ) : null}
 
+        {mode === 'mine' && state === 'ready' && profile ? (
+          <MobileSchedule
+            profile={profile}
+            byDay={byDay}
+            today={today}
+            subjectNames={subjectNames}
+            classNames={classNames}
+            weeklyMinutes={weeklyMinutes}
+            totalLessons={periods.length}
+          />
+        ) : null}
+
         {/* Teacher header */}
         {state === 'ready' && profile ? (
-          <div className="card card-hover mb-3">
+          <div className={'card card-hover mb-3' + desktopCard}>
             <div className="card-body">
               <div className="d-xl-flex align-items-center justify-content-between">
                 <div className="d-sm-flex align-items-center mb-3 mb-xl-0">
@@ -434,10 +662,10 @@ const TeacherTimeTable = () => {
 
         {/* Weekly grid */}
         {state === 'ready' && profile && !noLessons ? (
-          <div className="card mb-0">
+          <div className={'card mb-0' + desktopCard}>
             <div className="card-body">
               <div className="timetable-grid">
-                {DAYS.map((day) => {
+                {desktopDays.map((day) => {
                   const lessons = byDay.get(day.n) ?? [];
                   return (
                     <div className="timetable-day" key={day.n}>
@@ -471,6 +699,12 @@ const TeacherTimeTable = () => {
                                 <i className="ti ti-users me-1" />
                                 {lesson.grade}
                               </span>
+                              {lesson.roomCodes.length > 0 && (
+                                <span className="timetable-slot-meta">
+                                  <i className="ti ti-map-pin me-1" aria-hidden="true" />
+                                  Room: {lesson.roomCodes.join(', ')}
+                                </span>
+                              )}
                               <span className="timetable-slot-meta">
                                 <i className="ti ti-hourglass me-1" />
                                 {lesson.end - lesson.start} min
@@ -489,7 +723,7 @@ const TeacherTimeTable = () => {
 
         {/* No lessons yet */}
         {noLessons && profile ? (
-          <div className="card mb-0">
+          <div className={'card mb-0' + desktopCard}>
             <div className="card-body text-center py-5">
               <div className="empty-state-art">
                 <i className="ti ti-calendar-off" />

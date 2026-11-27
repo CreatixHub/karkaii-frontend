@@ -31,6 +31,7 @@ const TYPE_TONE: Record<SubjectType, string> = {
   language: 'badge-soft-primary',
   elective: 'badge-soft-warning',
   co_curricular: 'badge-soft-info',
+  practical: 'badge-soft-success',
 };
 
 const typeLabel = (type: string) => SUBJECT_TYPES.find((t) => t.value === type)?.label ?? type;

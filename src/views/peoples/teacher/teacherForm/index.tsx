@@ -6,7 +6,8 @@ import CommonSelect from '@core/common/commonSelect';
 import { useToasts } from '@hooks/useToasts';
 import { all_routes } from '@/routes/all_routes';
 import { ApiError } from '@services/api/errors';
-import { ACADEMIC_YEAR_ID, toIsoDate } from '@services/admissions/admissions.api';
+import { getCurrentAcademicYearId } from '@services/academic/years.api';
+import { toIsoDate } from '@services/admissions/admissions.api';
 import {
   addTeacherAssignments,
   createTeacher,
@@ -23,11 +24,15 @@ import type {
   MyAssignment,
   SelectOption,
   StaffRecord,
+  TeachingProfilePayload,
   UpdateTeacherPayload,
 } from '@services/staff/staff.api';
 import FormField from './components/FormField';
 import FormSection from './components/FormSection';
+import TeachingProfileFields from './components/TeachingProfileFields';
 import QuickSetup from './QuickSetup';
+import { EMPTY_PROFILE, profileFromStaff, readProfile, updatedProfile } from './teachingProfile';
+import type { ProfileValues } from './teachingProfile';
 import {
   BASE_DEFAULTS,
   documentUploads,
@@ -39,6 +44,12 @@ const routes = all_routes;
 
 export interface TeacherFormProps {
   mode?: 'add' | 'edit';
+}
+
+interface OriginalTeacher {
+  status: string;
+  employmentType: string;
+  profile: ProfileValues;
 }
 
 interface AssignmentRow {
@@ -117,6 +128,7 @@ function validateRows(rows: AssignmentRow[]): { filled?: AssignmentRow[]; error?
 function buildPayload(
   values: Record<string, string>,
   rows: AssignmentRow[],
+  profile: TeachingProfilePayload,
 ): { payload?: CreateTeacherPayload; error?: string } {
   const firstName = clean(values['first-name']);
   if (!firstName) return { error: 'First name is required.' };
@@ -171,7 +183,7 @@ function buildPayload(
     bankBranch: clean(values['branch-name']),
     bankIfsc: ifsc,
     createLogin: true,
-    academicYearId: filled.length > 0 ? ACADEMIC_YEAR_ID : undefined,
+    ...profile,
     assignments: filled.length > 0 ? filled : undefined,
   };
 
@@ -213,7 +225,8 @@ function valuesFromStaff(s: StaffRecord): Record<string, string> {
 // ---- EDIT: form values -> PATCH body ------------------------------------------------
 function buildUpdatePayload(
   values: Record<string, string>,
-  original: { status: string; employmentType: string },
+  original: OriginalTeacher,
+  profile: TeachingProfilePayload,
 ): { payload?: UpdateTeacherPayload; error?: string } {
   const firstName = clean(values['first-name']);
   if (!firstName) return { error: 'First name is required.' };
@@ -254,6 +267,7 @@ function buildUpdatePayload(
     bankName: clean(values['bank-name']) ?? null,
     bankBranch: clean(values['branch-name']) ?? null,
     bankIfsc: ifsc,
+    ...updatedProfile(profile, original.profile),
   };
 
   // Sensitive values are only sent when a new one was typed.
@@ -305,10 +319,12 @@ const TeacherForm = ({ mode = 'add' }: TeacherFormProps) => {
 
   // Edit: the saved teacher
   const [loadState, setLoadState] = useState<LoadState>(isEdit ? 'loading' : 'ready');
-  const [original, setOriginal] = useState<{ status: string; employmentType: string }>({
+  const [original, setOriginal] = useState<OriginalTeacher>({
     status: 'active',
     employmentType: 'full_time',
+    profile: EMPTY_PROFILE,
   });
+  const [profile, setProfile] = useState(EMPTY_PROFILE);
   const [hasSensitive, setHasSensitive] = useState(false);
   const [existing, setExisting] = useState<MyAssignment[]>([]);
 
@@ -337,7 +353,7 @@ const TeacherForm = ({ mode = 'add' }: TeacherFormProps) => {
   const reloadExisting = useCallback(async () => {
     if (!teacherId) return;
     try {
-      setExisting(await listStaffAssignments(teacherId));
+      setExisting(await listStaffAssignments(teacherId, await getCurrentAcademicYearId()));
     } catch {
       setExisting([]);
     }
@@ -356,11 +372,16 @@ const TeacherForm = ({ mode = 'add' }: TeacherFormProps) => {
       try {
         const [record, assignments] = await Promise.all([
           getStaffRecord(teacherId),
-          listStaffAssignments(teacherId).catch(() => [] as MyAssignment[]),
+          // the current year only: removing also acts on the current year, so the list has to match it
+          getCurrentAcademicYearId()
+            .then((yearId) => listStaffAssignments(teacherId, yearId))
+            .catch(() => [] as MyAssignment[]),
         ]);
         if (cancelled) return;
         setValues(valuesFromStaff(record));
-        setOriginal({ status: record.status, employmentType: record.employmentType });
+        const savedProfile = profileFromStaff(record);
+        setOriginal({ status: record.status, employmentType: record.employmentType, profile: savedProfile });
+        setProfile(savedProfile);
         setHasSensitive(Boolean(record.hasPan || record.hasNationalId || record.hasBankAccount));
         setExisting(assignments);
         setLoadState('ready');
@@ -397,7 +418,7 @@ const TeacherForm = ({ mode = 'add' }: TeacherFormProps) => {
     if (!window.confirm(`Remove ${group.label} from this teacher?`)) return;
     setError('');
     try {
-      await removeTeacherAssignment(teacherId, group.classId, group.subjectId);
+      await removeTeacherAssignment(teacherId, group.classId, group.subjectId, await getCurrentAcademicYearId());
       await reloadExisting();
       push('Removed.');
     } catch (e) {
@@ -430,10 +451,12 @@ const TeacherForm = ({ mode = 'add' }: TeacherFormProps) => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
+    const teaching = readProfile(profile);
+    if ('error' in teaching) return fail(teaching.error);
 
     // ----------------------------- EDIT -----------------------------
     if (isEdit) {
-      const built = buildUpdatePayload(values, original);
+      const built = buildUpdatePayload(values, original, teaching.payload);
       if (!built.payload) return fail(built.error ?? 'Please check the form.');
 
       const checked = validateRows(rows);
@@ -449,7 +472,7 @@ const TeacherForm = ({ mode = 'add' }: TeacherFormProps) => {
         await updateTeacher(teacherId, built.payload);
         if (fresh.length > 0) {
           try {
-            await addTeacherAssignments(teacherId, ACADEMIC_YEAR_ID, fresh);
+            await addTeacherAssignments(teacherId, await getCurrentAcademicYearId(), fresh);
           } catch (e) {
             await reloadExisting();
             setRows([{ classId: '', subjectId: '' }]);
@@ -471,11 +494,13 @@ const TeacherForm = ({ mode = 'add' }: TeacherFormProps) => {
     }
 
     // ----------------------------- ADD -----------------------------
-    const { payload, error: problem } = buildPayload(values, rows);
+    const { payload, error: problem } = buildPayload(values, rows, teaching.payload);
     if (!payload) return fail(problem ?? 'Please check the form.');
 
     setSaving(true);
     try {
+      // Classes and subjects are saved for the school's current academic year.
+      if (payload.assignments) payload.academicYearId = await getCurrentAcademicYearId();
       const result = await createTeacher(payload);
       setCreated(result);
       push('Teacher added successfully.');
@@ -648,6 +673,10 @@ const TeacherForm = ({ mode = 'add' }: TeacherFormProps) => {
                       </div>
                     </FormSection>
                   ))}
+
+                  <FormSection icon="ti ti-book" title="Teaching Profile" bodyClass="card-body">
+                    <TeachingProfileFields value={profile} onChange={setProfile} subjectOptions={subjectOptions} />
+                  </FormSection>
 
                   {/* Classes & Subjects */}
                   <FormSection icon="ti ti-school" title="Classes & Subjects">

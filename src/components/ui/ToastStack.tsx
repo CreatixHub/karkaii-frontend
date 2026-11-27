@@ -16,12 +16,13 @@ const ToastStack = ({ toasts, onDismiss, id }: ToastStackProps) => {
         <div
           key={toast.id}
           className={`toast show align-items-center text-bg-${toast.variant} border-0 mb-2`}
+          style={{ maxWidth: 'min(460px, 92vw)' }}
           role="alert"
           aria-live="assertive"
           aria-atomic="true"
         >
           <div className="d-flex">
-            <div className="toast-body">{toast.message}</div>
+            <div className="toast-body" style={{ whiteSpace: 'pre-line' }}>{toast.message}</div>
             <button
               type="button"
               className="btn-close btn-close-white me-2 m-auto"
