@@ -19,7 +19,7 @@ export interface Toast {
 
 export interface UseToastsResult {
   toasts: Toast[];
-  push: (message: string, variant?: ToastVariant) => void;
+  push: (message: string, variant?: ToastVariant, durationMs?: number) => void;
   dismiss: (id: number) => void;
 }
 
@@ -42,11 +42,11 @@ export function useToasts(autoDismissMs = 3500): UseToastsResult {
   }, []);
 
   const push = useCallback(
-    (message: string, variant: ToastVariant = 'success') => {
+    (message: string, variant: ToastVariant = 'success', durationMs?: number) => {
       const id = nextId.current++;
       setToasts((current) => [...current, { id, message, variant }]);
 
-      const timer = window.setTimeout(() => dismiss(id), autoDismissMs);
+      const timer = window.setTimeout(() => dismiss(id), durationMs ?? autoDismissMs);
       timers.current.push(timer);
     },
     [autoDismissMs, dismiss],

@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { createSubjectQuick, type SubjectKind } from '@services/staff/staff.api';
 
-const KINDS: { value: SubjectKind; label: string }[] = [
-  { value: 'core', label: 'Core' },
-  { value: 'language', label: 'Language' },
-  { value: 'elective', label: 'Elective' },
-  { value: 'co_curricular', label: 'Co-curricular' },
-];
+import { SUBJECT_TYPES } from '@services/subjects/subjects.api';
 
 // "Mathematics" -> "MATH" (can be edited; must be 2-20 letters/digits)
 const makeCode = (name: string) => name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase();
@@ -80,7 +75,7 @@ const QuickSetup = ({ onDone }: Props) => {
         <div className="col-md-2">
           <label className="form-label">Type</label>
           <select className="form-select" value={kind} onChange={(e) => setKind(e.target.value as SubjectKind)}>
-            {KINDS.map((k) => (
+            {SUBJECT_TYPES.map((k) => (
               <option key={k.value} value={k.value}>
                 {k.label}
               </option>

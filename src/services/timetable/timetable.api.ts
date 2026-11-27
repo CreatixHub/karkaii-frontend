@@ -7,6 +7,8 @@ export interface TimeSlot {
   id: Id;
   name: string;
   sequence: number;
+  dayType: string;
+  days: number[]; // 1 (Mon) - 7 (Sun)
   startsAt: string; // "09:00:00"
   endsAt: string;
   isBreak: boolean;
@@ -36,13 +38,17 @@ export interface SectionTeacherRow {
 export interface TimetableEntry {
   id: Id;
   sectionId: Id;
-  subjectId: Id;
-  subjectName: string;
-  teacherId: Id;
+  subjectId: Id | null;
+  subjectName: string | null;
+  title: string | null;
+  source: 'manual' | 'planner';
+  teacherId: Id | null;
   teacherName: string | null;
   timeSlotId: Id;
   dayOfWeek: number; // 1 (Mon) - 7 (Sun)
   classroomCode: string | null;
+  classroomIds: Id[];
+  classroomCodes: string[];
   status: string;
 }
 
@@ -97,12 +103,33 @@ export async function listSectionTeachers(sectionId: Id, academicYearId: Id): Pr
   );
 }
 
-export async function listEntries(sectionId: Id, academicYearId: Id): Promise<TimetableEntry[]> {
-  return toList<TimetableEntry>(
-    await apiClient.get<unknown>('/timetable', {
-      query: { sectionId: String(sectionId), academicYearId: String(academicYearId), status: 'active', limit: 500 },
-    }),
-  );
+export async function listEntries(sectionId: Id, academicYearId: Id) {
+  const schedule = await listEffectiveTimetable<TimetableEntry>({ sectionId, academicYearId });
+  return { entries: schedule.entries, today: schedule.today, plannerManaged: schedule.plannerManaged };
+}
+
+export async function listEffectiveTimetable<T>(query: { sectionId?: Id; teacherId?: Id; academicYearId: Id }) {
+  const filters = {
+    ...query,
+    status: 'active',
+    onDate: 'today',
+    limit: 500,
+  };
+  const { data, meta } = await apiClient.getEnvelope<T[]>('/timetable', { query: filters });
+  const today = typeof meta?.today === 'string' ? meta.today : null;
+  const pages = typeof meta?.pages === 'number' ? meta.pages : 1;
+  const entries = [...data];
+  for (let page = 2; page <= pages; page++) {
+    const next = await apiClient.get<T[]>('/timetable', { query: { ...filters, onDate: today ?? 'today', page } });
+    entries.push(...next);
+  }
+  return { entries, today, plannerManaged: meta?.plannerManaged === true };
+}
+
+export function schoolWeekday(isoDate: string | null): number | null {
+  if (!isoDate) return null;
+  const day = new Date(isoDate + 'T00:00:00Z').getUTCDay();
+  return Number.isNaN(day) ? null : day || 7;
 }
 
 export async function createEntry(input: {
@@ -111,7 +138,7 @@ export async function createEntry(input: {
   teacherId: Id;
   timeSlotId: Id;
   dayOfWeek: number;
-  academicYearId: number;
+  academicYearId: string | number;
   effectiveFrom: string; // YYYY-MM-DD
 }): Promise<void> {
   try {

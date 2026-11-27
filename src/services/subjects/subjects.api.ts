@@ -6,6 +6,7 @@ export const SUBJECT_TYPES = [
   { value: 'language', label: 'Language' },
   { value: 'elective', label: 'Elective' },
   { value: 'co_curricular', label: 'Co-curricular' },
+  { value: 'practical', label: 'Practicals' },
 ] as const;
 
 export type SubjectType = (typeof SUBJECT_TYPES)[number]['value'];

@@ -1,9 +1,22 @@
 import { apiClient } from '@services/api/client';
 import { ApiError } from '@services/api/errors';
 import { listClasses } from '@services/admissions/admissions.api';
+import type { SubjectType } from '@services/subjects/subjects.api';
+
+export interface TeachingProfilePayload {
+  primarySubjectId: string | null;
+  additionalSubjectIds: string[];
+  maxPeriodsPerWeek: number | null;
+}
+
+interface StaffTeachingProfile {
+  primarySubjectId?: string | number | null;
+  additionalSubjectIds?: (string | number)[];
+  maxPeriodsPerWeek?: number | null;
+}
 
 /** POST /api/staff body for a teacher. Only fields the backend accepts (it rejects unknown ones). */
-export interface CreateTeacherPayload {
+export interface CreateTeacherPayload extends Partial<TeachingProfilePayload> {
   employeeNo?: string;
   staffType: 'teaching';
   employmentType: 'full_time' | 'part_time' | 'contract' | 'visiting';
@@ -30,11 +43,11 @@ export interface CreateTeacherPayload {
   bankIfsc?: string;
   createLogin: boolean;
   /** Which classes + subjects this teacher takes (saved for every section of the class). Needs academicYearId. */
-  academicYearId?: number;
+  academicYearId?: string | number;
   assignments?: { classId: string; subjectId: string }[];
 }
 
-export interface CreatedStaff {
+export interface CreatedStaff extends StaffTeachingProfile {
   id: string | number;
   employeeNo: string;
   fullName: string | null;
@@ -75,9 +88,14 @@ export interface MyTimetableEntry {
   sectionId: string | number;
   sectionName: string;
   className: string;
-  subject: Record<string, unknown>;
+  subjectId: string | number | null;
+  subject: Record<string, unknown> | null;
+  title: string | null;
+  source: 'manual' | 'planner';
   timeSlot: Record<string, unknown>;
   classroomId: string | number | null;
+  classroom?: { code: string | null } | null;
+  classroomCodes?: string[];
 }
 
 export interface MyHomework {
@@ -158,12 +176,13 @@ export const getMyStaff = (): Promise<MyStaff> => apiClient.get<MyStaff>('/staff
 export const getMySections = (): Promise<MySection[]> => apiClient.get<MySection[]>('/staff/me/sections');
 export const getMyTimetable = (): Promise<MyTimetableEntry[]> =>
   apiClient.get<MyTimetableEntry[]>('/staff/me/timetable');
+export const getMyTimetableSchedule = () => apiClient.getEnvelope<MyTimetableEntry[]>('/staff/me/timetable');
 export const getMyHomework = (): Promise<MyHomework[]> => apiClient.get<MyHomework[]>('/staff/me/homework');
 export const getMyAssignments = (): Promise<MyAssignment[]> =>
   apiClient.get<MyAssignment[]>('/staff/me/assignments');
 
 // ---- Quick setup: add a subject from the Add Teacher form -------------------------------
-export type SubjectKind = 'core' | 'elective' | 'co_curricular' | 'language';
+export type SubjectKind = SubjectType;
 
 export async function createSubjectQuick(input: { code: string; name: string; subjectType: SubjectKind }) {
   try {
@@ -175,7 +194,7 @@ export async function createSubjectQuick(input: { code: string; name: string; su
 
 // ---- Edit Teacher ------------------------------------------------------------------------
 /** GET /api/staff/:id. The PAN, national id and bank account number are never returned. */
-export interface StaffRecord {
+export interface StaffRecord extends StaffTeachingProfile {
   id: string | number;
   employeeNo: string;
   status: string;
@@ -204,13 +223,15 @@ export interface StaffRecord {
 }
 
 /** PATCH body: only the keys being changed; null clears an optional field. */
-export type UpdateTeacherPayload = Record<string, string | number | null>;
+export interface UpdateTeacherPayload extends Partial<TeachingProfilePayload> {
+  [field: string]: string | number | string[] | null | undefined;
+}
 
 export const getStaffRecord = (id: string | number): Promise<StaffRecord> =>
   apiClient.get<StaffRecord>(`/staff/${id}`);
 
-export const listStaffAssignments = (id: string | number): Promise<MyAssignment[]> =>
-  apiClient.get<MyAssignment[]>(`/staff/${id}/assignments`);
+export const listStaffAssignments = (id: string | number, academicYearId?: string | number): Promise<MyAssignment[]> =>
+  apiClient.get<MyAssignment[]>(`/staff/${id}/assignments`, { query: { academicYearId } });
 
 export async function updateTeacher(id: string | number, payload: UpdateTeacherPayload): Promise<StaffRecord> {
   try {
@@ -222,7 +243,7 @@ export async function updateTeacher(id: string | number, payload: UpdateTeacherP
 
 export async function addTeacherAssignments(
   id: string | number,
-  academicYearId: number,
+  academicYearId: string | number,
   assignments: { classId: string; subjectId: string }[],
 ): Promise<void> {
   try {
@@ -236,9 +257,10 @@ export async function removeTeacherAssignment(
   id: string | number,
   classId: string | number,
   subjectId: string | number,
+  academicYearId?: string | number,
 ): Promise<void> {
   try {
-    await apiClient.delete(`/staff/${id}/assignments/${classId}/${subjectId}`);
+    await apiClient.delete(`/staff/${id}/assignments/${classId}/${subjectId}`, { query: { academicYearId } });
   } catch (error) {
     throw friendly(error, 'Could not remove that class and subject');
   }

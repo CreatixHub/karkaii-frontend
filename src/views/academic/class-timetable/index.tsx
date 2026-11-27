@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Offcanvas from '@components/ui/Offcanvas';
+import RoleGuard from '@components/routing/RoleGuard';
 import ToastStack from '@components/ui/ToastStack';
 import { all_routes } from '@/routes/all_routes';
+import { useAcademicYear } from '@hooks/useAcademicYear';
 import { useToasts } from '@hooks/useToasts';
-import { ACADEMIC_YEAR_ID } from '@services/admissions/admissions.api';
 import { listClassOptions } from '@services/staff/staff.api';
 import type { SelectOption } from '@services/staff/staff.api';
 import {
@@ -17,17 +18,9 @@ import {
   listTimeSlots,
 } from '@services/timetable/timetable.api';
 import type { SectionRow, SectionTeacherRow, TimeSlot, TimetableEntry } from '@services/timetable/timetable.api';
+import TimetableWeek from './components/TimetableWeek';
 
 const routes = all_routes;
-
-const DAYS = [
-  { n: 1, label: 'Monday' },
-  { n: 2, label: 'Tuesday' },
-  { n: 3, label: 'Wednesday' },
-  { n: 4, label: 'Thursday' },
-  { n: 5, label: 'Friday' },
-  { n: 6, label: 'Saturday' },
-];
 
 // The school day to start from: seven periods, two short breaks and a lunch.
 const STANDARD_PERIODS = [
@@ -44,7 +37,6 @@ const STANDARD_PERIODS = [
 ];
 
 const hhmm = (t: string) => t.slice(0, 5);
-const todayIso = () => new Date().toISOString().slice(0, 10);
 
 interface Cell {
   day: number;
@@ -54,6 +46,7 @@ interface Cell {
 
 const ClassTimetable = () => {
   const { toasts, push, dismiss } = useToasts();
+  const { yearId, loading: yearLoading, error: yearError } = useAcademicYear();
 
   const [classOptions, setClassOptions] = useState<SelectOption[]>([]);
   const [sections, setSections] = useState<SectionRow[]>([]);
@@ -61,19 +54,27 @@ const ClassTimetable = () => {
   const [sectionId, setSectionId] = useState('');
 
   const [slots, setSlots] = useState<TimeSlot[]>([]);
-  const [assigned, setAssigned] = useState<SectionTeacherRow[]>([]);
-  const [entries, setEntries] = useState<TimetableEntry[]>([]);
+  const [schedule, setSchedule] = useState<(Awaited<ReturnType<typeof listEntries>> & {
+    sectionId: string;
+    yearId: string | number;
+    assigned: SectionTeacherRow[];
+  }) | null>(null);
+  const [revision, setRevision] = useState(0);
 
   const [booting, setBooting] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const selected = schedule?.sectionId === sectionId && schedule.yearId === yearId ? schedule : null;
+  const busy = loading || yearLoading;
+  const assigned = selected?.assigned ?? [];
+  const plannerManaged = selected?.plannerManaged === true;
 
   const [creatingSlots, setCreatingSlots] = useState(false);
 
   // The "add a lesson" panel
   const [cell, setCell] = useState<Cell | null>(null);
   const [pick, setPick] = useState(''); // id of a section_teachers row
-  const [effectiveFrom, setEffectiveFrom] = useState(todayIso());
+  const [effectiveFrom, setEffectiveFrom] = useState('');
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -115,37 +116,33 @@ const ClassTimetable = () => {
   const sectionLabel = sectionsOfClass.find((s) => String(s.id) === sectionId)?.name ?? '';
 
   /* ------------------------- load the chosen section ------------------------ */
-  const loadSection = useCallback(async (id: string) => {
-    if (!id) {
-      setAssigned([]);
-      setEntries([]);
-      return;
-    }
+  useEffect(() => {
+    if (!sectionId || !yearId) return;
+    let cancelled = false;
     setLoading(true);
     setError('');
-    try {
-      const [teachers, lessons] = await Promise.all([
-        listSectionTeachers(id, ACADEMIC_YEAR_ID),
-        listEntries(id, ACADEMIC_YEAR_ID),
-      ]);
-      setAssigned(teachers);
-      setEntries(lessons);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not load this timetable.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadSection(sectionId);
-  }, [sectionId, loadSection]);
+    Promise.all([listSectionTeachers(sectionId, yearId), listEntries(sectionId, yearId)])
+      .then(([teachers, lessons]) => {
+        if (!cancelled) setSchedule({ ...lessons, sectionId, yearId, assigned: teachers });
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setSchedule(null);
+        setError(e instanceof Error ? e.message : 'Could not load this timetable.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sectionId, yearId, revision]);
 
   const onClassChange = (value: string) => {
     setClassId(value);
     setSectionId('');
-    setAssigned([]);
-    setEntries([]);
+    setError('');
+    setCell(null);
   };
 
   // Pick the first section automatically once a class is chosen.
@@ -171,31 +168,24 @@ const ClassTimetable = () => {
     }
   };
 
-  /* -------------------------------- the grid -------------------------------- */
-  const sortedSlots = useMemo(
-    () => [...slots].filter((s) => s.isActive).sort((a, b) => a.sequence - b.sequence),
-    [slots],
-  );
-
-  const byCell = useMemo(() => {
-    const map = new Map<string, TimetableEntry>();
-    for (const entry of entries) map.set(`${entry.dayOfWeek}:${entry.timeSlotId}`, entry);
-    return map;
-  }, [entries]);
-
-  const lessonCount = entries.length;
+  const activeSlots = slots.filter((slot) => slot.isActive);
+  const periodCount = new Set(selected?.entries.map((entry) => `${entry.dayOfWeek}:${entry.timeSlotId}`)).size;
 
   /* ------------------------------- add / remove ------------------------------ */
   const openCell = (next: Cell) => {
     setCell(next);
     setPick('');
     setFormError('');
-    setEffectiveFrom(todayIso());
+    setEffectiveFrom(selected?.today ?? '');
   };
 
   const saveLesson = async () => {
-    if (!cell) return;
+    if (!cell || !yearId || !selected || plannerManaged || busy) return;
     const choice = assigned.find((a) => String(a.id) === pick);
+    if (!effectiveFrom) {
+      setFormError('Choose a start date.');
+      return;
+    }
     if (!choice) {
       setFormError('Choose a subject and teacher.');
       return;
@@ -209,12 +199,14 @@ const ClassTimetable = () => {
         teacherId: choice.teacherId,
         timeSlotId: cell.slot.id,
         dayOfWeek: cell.day,
-        academicYearId: ACADEMIC_YEAR_ID,
+        academicYearId: yearId,
         effectiveFrom,
       });
       setCell(null);
-      await loadSection(sectionId);
-      push('Lesson added.');
+      setRevision((value) => value + 1);
+      // The grid shows what is in effect today, so a lesson that starts later is not visible yet.
+      const today = selected.today;
+      push(today && effectiveFrom > today ? `Lesson added. It will appear in the timetable from ${effectiveFrom}.` : 'Lesson added.');
     } catch (e) {
       setFormError(e instanceof Error ? e.message : 'Could not add the lesson.');
     } finally {
@@ -226,7 +218,7 @@ const ClassTimetable = () => {
     if (!window.confirm(`Remove ${entry.subjectName} from this period?`)) return;
     try {
       await deleteEntry(entry.id);
-      await loadSection(sectionId);
+      setRevision((value) => value + 1);
       push('Lesson removed.');
     } catch (e) {
       push(e instanceof Error ? e.message : 'Could not remove the lesson.');
@@ -234,7 +226,7 @@ const ClassTimetable = () => {
   };
 
   /* --------------------------------- render --------------------------------- */
-  const noSlots = !booting && sortedSlots.length === 0;
+  const noSlots = !booting && activeSlots.length === 0;
 
   return (
     <>
@@ -258,9 +250,9 @@ const ClassTimetable = () => {
             </div>
           </div>
 
-          {error ? (
+          {error || yearError ? (
             <div className="alert alert-danger" role="alert">
-              {error}
+              {error || yearError}
             </div>
           ) : null}
 
@@ -324,7 +316,10 @@ const ClassTimetable = () => {
                         className="form-select"
                         value={sectionId}
                         disabled={!classId}
-                        onChange={(event) => setSectionId(event.target.value)}
+                        onChange={(event) => {
+                          setSectionId(event.target.value);
+                          setCell(null);
+                        }}
                       >
                         <option value="">{classId ? 'Select a section' : 'Choose a class first'}</option>
                         {sectionsOfClass.map((section) => (
@@ -337,7 +332,7 @@ const ClassTimetable = () => {
                     <div className="col-md-4 text-md-end">
                       {sectionId ? (
                         <span className="badge badge-soft-primary">
-                          {classLabel} — Section {sectionLabel} · {lessonCount} lessons
+                          {classLabel} — Section {sectionLabel} · {periodCount} periods
                         </span>
                       ) : null}
                     </div>
@@ -355,7 +350,7 @@ const ClassTimetable = () => {
               {sectionId ? (
                 <div className="card">
                   <div className="card-body">
-                    {assigned.length === 0 && !loading ? (
+                    {selected && !plannerManaged && assigned.length === 0 && !busy ? (
                       <div className="alert alert-warning">
                         No teachers are assigned to this section yet. Open a teacher&apos;s Edit page and add this class
                         and a subject under <b>Classes &amp; Subjects</b>, then come back here.{' '}
@@ -363,77 +358,26 @@ const ClassTimetable = () => {
                       </div>
                     ) : null}
 
-                    <div className="table-responsive">
-                      <table className="table table-bordered align-middle mb-0">
-                        <thead>
-                          <tr>
-                            <th style={{ width: 150 }}>Period</th>
-                            {DAYS.map((day) => (
-                              <th key={day.n}>{day.label}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sortedSlots.map((slot) =>
-                            slot.isBreak ? (
-                              <tr key={String(slot.id)} className="table-light">
-                                <td>
-                                  <b>{slot.name}</b>
-                                  <div className="fs-12 text-muted">
-                                    {hhmm(slot.startsAt)} - {hhmm(slot.endsAt)}
-                                  </div>
-                                </td>
-                                <td colSpan={DAYS.length} className="text-center text-muted">
-                                  {slot.name}
-                                </td>
-                              </tr>
-                            ) : (
-                              <tr key={String(slot.id)}>
-                                <td>
-                                  <b>{slot.name}</b>
-                                  <div className="fs-12 text-muted">
-                                    {hhmm(slot.startsAt)} - {hhmm(slot.endsAt)}
-                                  </div>
-                                </td>
-                                {DAYS.map((day) => {
-                                  const entry = byCell.get(`${day.n}:${slot.id}`);
-                                  return (
-                                    <td key={day.n} style={{ minWidth: 150 }}>
-                                      {entry ? (
-                                        <div className="d-flex align-items-start justify-content-between gap-1">
-                                          <div>
-                                            <span className="badge badge-soft-info mb-1">{entry.subjectName}</span>
-                                            <div className="fs-12 text-muted">{entry.teacherName ?? '—'}</div>
-                                          </div>
-                                          <button
-                                            type="button"
-                                            className="btn btn-link btn-sm text-danger p-0"
-                                            aria-label={`Remove ${entry.subjectName}`}
-                                            onClick={() => void removeLesson(entry)}
-                                          >
-                                            <i className="ti ti-x" />
-                                          </button>
-                                        </div>
-                                      ) : (
-                                        <button
-                                          type="button"
-                                          className="btn btn-sm btn-outline-light bg-white w-100"
-                                          disabled={loading || assigned.length === 0}
-                                          onClick={() => openCell({ day: day.n, dayLabel: day.label, slot })}
-                                        >
-                                          <i className="ti ti-plus me-1" />
-                                          Add
-                                        </button>
-                                      )}
-                                    </td>
-                                  );
-                                })}
-                              </tr>
-                            ),
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
+                    {plannerManaged ? (
+                      <div className="alert alert-info">
+                        Managed by the timetable planner.{' '}
+                        <RoleGuard roles="admin" permission="timetable.edit">
+                          <Link to={routes.timetablePlanner}>Open Timetable Planner</Link>
+                        </RoleGuard>
+                      </div>
+                    ) : null}
+                    {selected ? (
+                      <TimetableWeek
+                        slots={activeSlots}
+                        entries={selected.entries}
+                        plannerManaged={plannerManaged}
+                        canAdd={!busy && assigned.length > 0}
+                        onAdd={openCell}
+                        onRemove={(entry) => void removeLesson(entry)}
+                      />
+                    ) : busy || !error ? (
+                      <p className="text-muted mb-0" role="status">Loading timetable…</p>
+                    ) : null}
                   </div>
                 </div>
               ) : null}
@@ -443,7 +387,7 @@ const ClassTimetable = () => {
       </div>
 
       {/* Add a lesson */}
-      {cell ? (
+      {cell && selected && !plannerManaged ? (
         <Offcanvas open onClose={() => setCell(null)} title="Add lesson" labelledById="tt_add_label">
           <p className="text-muted">
             {classLabel} — Section {sectionLabel}

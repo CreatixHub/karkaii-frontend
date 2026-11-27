@@ -1,11 +1,6 @@
+import { getCurrentAcademicYearId } from '@services/academic/years.api';
 import { apiClient } from '@services/api/client';
 import { endpoints } from '@services/api/endpoints';
-
-/**
- * TEMPORARY: the backend has no academic_years table yet, so every table just stores a number.
- * Replace this with a real year id when the academic years module exists.
- */
-export const ACADEMIC_YEAR_ID = 1;
 
 export interface ClassOption {
   id: string;
@@ -13,7 +8,7 @@ export interface ClassOption {
 }
 
 export interface CreateAdmissionPayload {
-  academicYearId: number;
+  academicYearId: string | number;
   classId: string;
   firstName: string;
   lastName: string;
@@ -32,6 +27,9 @@ export interface CreateAdmissionPayload {
   source: 'walk_in' | 'website' | 'referral' | 'agent' | 'event' | 'other';
 }
 
+/** What the form produces: the academic year is added by `createAdmission` (it is the school's current year). */
+export type AdmissionFormPayload = Omit<CreateAdmissionPayload, 'academicYearId'>;
+
 export interface AcceptResult {
   id: string;
   status: string;
@@ -43,8 +41,12 @@ export function listClasses(): Promise<ClassOption[]> {
   return apiClient.get<ClassOption[]>(endpoints.classes.list, { query: { limit: 100 } });
 }
 
-export function createAdmission(payload: CreateAdmissionPayload) {
-  return apiClient.post<{ id: string; applicationNo: string }>(endpoints.admissions.create, payload);
+export async function createAdmission(payload: AdmissionFormPayload) {
+  const academicYearId = await getCurrentAcademicYearId();
+  return apiClient.post<{ id: string; applicationNo: string }>(endpoints.admissions.create, {
+    ...payload,
+    academicYearId,
+  });
 }
 
 export function acceptAdmission(id: string) {
@@ -60,7 +62,7 @@ export function toIsoDate(input: string): string {
   return '';
 }
 
-const SOURCE_MAP: Record<string, CreateAdmissionPayload['source']> = {
+const SOURCE_MAP: Record<string, AdmissionFormPayload['source']> = {
   'Walk-in': 'walk_in',
   Online: 'website',
   Website: 'website',
@@ -72,7 +74,7 @@ const SOURCE_MAP: Record<string, CreateAdmissionPayload['source']> = {
 export function buildAdmissionPayload(
   v: Record<string, string>,
   classes: ClassOption[],
-): { payload?: CreateAdmissionPayload; error?: string } {
+): { payload?: AdmissionFormPayload; error?: string } {
   const missing: string[] = [];
   const get = (id: string) => (v[id] ?? '').trim();
   const clean = (s: string) => (s && s !== 'Select' ? s : undefined);
@@ -90,7 +92,6 @@ export function buildAdmissionPayload(
 
   return {
     payload: {
-      academicYearId: ACADEMIC_YEAR_ID,
       classId: cls!.id,
       firstName: get('first-name'),
       lastName: get('last-name'),

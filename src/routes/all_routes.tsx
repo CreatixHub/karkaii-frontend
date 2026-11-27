@@ -41,6 +41,7 @@ export const all_routes = {
   studentGrid:              "/students",
   teacherDetails:           "/teacher-details",
   teacherGrid:              "/teachers",
+  teacherWorkload:          "/teacher-workload",
   manageusers:              "/users",
 
   // ---- Academic ----
@@ -52,6 +53,7 @@ export const all_routes = {
   classSubject:         "/class-subject",
   classSyllabus:        "/class-syllabus",
   classTimetable:       "/class-time-table",
+  timetablePlanner:    "/timetable-planner",
   classes:              "/classes",
   classRoom:            "/classrooms",
   curriculum:           "/curriculum",
